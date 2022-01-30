@@ -1,0 +1,164 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidylog)
+```
+
+Blake, K. R., Bastian, B., O’Dean, S. M., & Denson, T. F. (2017). High estradiol and low progesterone are associated with high assertiveness in women. Psychoneuroendocrinology, 75, 91–99. http://www.sciencedirect.com/science/article/pii/S0306453016302190
+
+Ninety-eight women (Mage=22.19years,SD=4.43;Wave1n=60;Wave2n=38)
+
+
+Using a within-subject design, we estimated ovulation for 98 women using urinary luteinizing hormone (LH) tests. We then assessed measures of assertiveness and sexual availability at fertile and non-fertile time points. For a subgroup of the sample for which hormone measures were available (n = 60), we further examined whether estradiol and progesterone at each time point were associated with assertiveness and sexual availability. 
+
+To maximize the likelihood of detecting surges in LH, we fol- lowed the standardized LH testing procedure in Blake et al. (2016b). All participants used commercially available urinary LH tests (Blue Cross Bio-Medical Co. LTD, CE/FDA Registered) and tested until a positive surge was detected. Wave 1 participants tested until a positive result was reported (a maximum of 10days) and Wave 2 tested for 11 continuous days, even if a surge was reported ear- lier. We instructed participants to test between 1000 h and 2000 h and report the result to the research team via SMS or email. The repeated design of the study required that all participants attended one fertile and one non-fertile laboratory session. Hence, all participants included here detected a LH surge and thus had ovulatory cycles. Participants who did not record a surge in LH were not eligible for inclusion in the study (see Blake et al., 2016b for full details of the sampling procedure).
+
+
+
+Progesterone and estradiol samples were stored at −20◦C and analyzed by a professional reference laboratory in Dresden, Germany. After thawing, samples were centrifuged at 3000 rpm for five minutes, which resulted in a clear supernatant of low viscosity. Salivary progesterone and estradiol concentrations were measured using commercially available chemiluminescence-immuno-assays with high sensitivity (IBL International, Hamburg, Germany). Intra- and inter-assay coefficients of variations for both hormones were below 12%.
+
+## Import
+
+```{r}
+blake <- rio::import("https://osf.io/wsmxr/download", format = "sav")
+blake_long <- rio::import("https://osf.io/2d7xp/download", format = "sav") %>% left_join(rio::import("data/blake/Saliva long - for Ruben.sav"), by = c("SUBJECT" = "Subject", "Fertility" = "fertility"))
+n_distinct(blake$Subject)
+n_distinct(blake_long$SUBJECT)
+length(intersect(blake_long$SUBJECT, blake$Subject))
+
+
+pss2date <- function(x) as.Date(x/86400, origin = "1582-10-14")
+blake <- blake %>% 
+  mutate(date_fertile_session = pss2date(Date_F),
+         date_nonfertile_session = pss2date(Date_NF),
+         date_first = if_else(date_fertile_session < date_nonfertile_session,
+                              date_fertile_session, date_nonfertile_session))
+
+qplot(blake$date_nonfertile_session, blake$date_fertile_session) + geom_abline()
+
+blake_long <- blake_long %>% left_join(blake %>% mutate(partner = if_else(RelStat == "single", 0, 1)) %>%  select(SUBJECT = Subject, LengthRep, date_fertile_session, date_nonfertile_session, date_first, age = Age, partner))
+
+blake_long <- blake_long %>% 
+  mutate(date = if_else(Fertility == 1, date_fertile_session, date_nonfertile_session),
+         day_rel_to_start = as.numeric(date - date_first),
+         bc_day = Day - LengthRep - 1,
+         bc_day = if_else(bc_day < 0, bc_day, NA_real_)) %>% 
+  group_by(SUBJECT) %>% 
+  mutate(date_lh_peak = na.omit(date + DaysAfterPeak),
+         lh_day = as.numeric(date - date_lh_peak),
+         cycle_no = if_else(rep(lh_day[1] < lh_day[2] &
+                            Day[1] < Day[2], 2), 1, Session + 1))
+
+qplot(Day, data = blake_long) + facet_wrap(~ Fertility)
+qplot(lh_day, data = blake_long,binwidth = 1) + facet_wrap(~ Fertility)
+table(is.na(blake_long$lh_day))
+
+# blake_long %>% select(SUBJECT, Session, Fertility, cycle_no, date, day_rel_to_start, date_lh_peak, lh_day, bc_day, Day, DaysAfterPeak, Estra, Progw) %>% arrange(SUBJECT, Session) %>% filter(SUBJECT <= 10) %>% View
+
+# columns with mean are the person average or sth similar. Estra and Progw are winsorized, I now have Estra and Prog as raw values
+# mean(blake_long$Zmean_estraLG,na.rm=T)
+# mean(blake_long$ZEstrawLG,na.rm=T)
+# mean(exp(blake_long$mean_estraLG),na.rm=T)
+# mean(blake_long$Estraw,na.rm=T)
+# mean(blake_long$meanE,na.rm=T)
+# cor.test(blake_long$Estraw,blake_long$meanE)
+# cor.test(blake_long$Estraw,exp(blake_long$EstrawLG))
+# cor.test(exp(blake_long$mean_estraLG),blake_long$meanE)
+# cor.test(exp(blake_long$mean_estraLG),blake_long$meanE)
+# blake_long %>% select(contains("stra"), meanE) %>% cor(use='p')
+
+qplot(blake_long$Estra)
+qplot(blake_long$Prog)
+
+blake_long %>% ungroup() %>% 
+  filter(Fertility == 0, Day <= 15) %>% 
+  summarise(mean(Day), sd(Day), n(), pct = n()/60)
+blake_long %>% ungroup() %>% 
+  filter(Fertility == 0, Day > 15) %>% 
+  summarise(mean(Day), sd(Day), n(), pct = n()/60)
+# Forty-seven percent of non-fertile sessions occurred in the early follicular phase (mean cycle day = 4.02, SD = 2.54) and the remain- der occurred in the late luteal phase (mean cycle day=26.06, SD=3.45). 
+
+# Most participants completed both fertile and non- fertile sessions in the same menstrual cycle (63.5%), the remainder attended sessions occurring 1, 2, or 3 cycles apart. 
+1-table(blake_long$cycle_no)[2]/60
+
+# Once a positive LH surge was detected, 85.4% of participants attended their fertile session within one day, the remaining 14.6% attended this session within two days. 
+prop.table(table(blake_long$DaysAfterPeak <= 1))
+
+
+ggplot(blake_long, aes(Day, lh_day)) + geom_smooth(method = 'lm') + geom_point() + ylim(-15, 15)
+ggplot(blake_long, aes(bc_day, lh_day)) + geom_smooth(method = 'lm') + geom_point() + ylim(-15, 15)
+ggplot(blake_long, aes(Day, log(Estra))) + geom_smooth() + geom_point()
+ggplot(blake_long, aes(Day, log(Prog))) + geom_smooth() + geom_point()
+ggplot(blake_long, aes(Day, log(Estra/Prog))) + geom_smooth() + geom_point()
+ggplot(blake_long, aes(bc_day, log(Estra))) + geom_smooth() + geom_point()
+ggplot(blake_long, aes(bc_day, log(Prog))) + geom_smooth() + geom_point()
+ggplot(blake_long, aes(bc_day, log(Estra/Prog))) + geom_smooth() + geom_point()
+ggplot(blake_long, aes(lh_day, log(Estra))) + geom_smooth() + geom_point() + xlim(-15, 15)
+ggplot(blake_long, aes(lh_day, log(Prog))) + geom_smooth() + geom_point() + xlim(-15, 15)
+ggplot(blake_long, aes(lh_day, log(Estra/Prog))) + geom_smooth() + geom_point() + xlim(-15, 15)
+
+# codebook::label_browser_static(blake)
+# codebook::label_browser_static(blake_long)
+
+# blake_long %>% select(SUBJECT, Fertility, FertilityNF, DOPno2, Day, DaysAfterPeak, Session, Estra, Progw) %>% arrange(SUBJECT, Session) %>% filter(SUBJECT < 10)
+# blake_long %>% select(SUBJECT, Fertility, FertilityNF, DOPno2, Day, DaysAfterPeak, Session, Estra, Progw) %>% arrange(SUBJECT, Session) %>% filter(SUBJECT == 10)
+
+table(blake_long$bc_day >= -1)
+blake_long <- blake_long %>% 
+  select(id = SUBJECT, cycle = cycle_no, bc_day, fc_day = Day, lh_day, estradiol = Estra, progesterone = Prog, cycle_length = LengthRep, age, partner) %>% 
+  mutate(
+    fc_day = fc_day - 1) %>% as_tibble()
+
+range(blake_long$fc_day, na.rm = T)
+range(blake_long$bc_day, na.rm = T)
+range(blake_long$lh_day, na.rm = T)
+
+blake_long <- blake_long %>% 
+  mutate(estradiol_cens = if_else(estradiol <= 2.1, "left", "none"),
+    estradiol = if_else(estradiol_cens == "left", 2.1, estradiol)
+  ) %>% 
+  mutate(
+    progesterone_cens = if_else(progesterone <= 8.9, "left", "none"),
+    progesterone = if_else(progesterone_cens == "left", 8.9, progesterone)
+  )
+
+xtabs(~ is.na(estradiol) + is.na(progesterone), blake_long)
+
+saveRDS(blake_long, "blake2017.rds")
+```
+
+
+## Summarize
+```{r}
+source("0_summary_functions.R")
+```
+
+```{r}
+blake <- blake_long
+df <- blake %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = progesterone, hormone_cens = progesterone_cens, cycle_length, age, partner)
+
+summarise_hormone(df = df, Dataset = "Blake 2017", Hormone = "Progesterone", Method = "Salivary immunoassay (IBL)", 
+                  Citation = "Blake, K. R., Bastian, B., O’Dean, S. M., & Denson, T. F. (2017). High estradiol and low progesterone are associated with high assertiveness in women. Psychoneuroendocrinology, 75, 91–99. http://www.sciencedirect.com/science/article/pii/S0306453016302190", 
+      LOD = 8.9,
+      CV_intra = "<12",
+      CV_inter = "<12",
+      Procedure = "Progesterone and estradiol samples were stored at −20◦C and analyzed by a professional reference laboratory in Dresden, Germany. After thawing, samples were centrifuged at 3000 rpm for five minutes, which resulted in a clear supernatant of low viscosity. Salivary progesterone and estradiol concentrations were measured using commercially available chemiluminescence-immuno-assays with high sensitivity (IBL International, Hamburg, Germany). Intra- and inter-assay coefficients of variations for both hormones were below 12%. ",
+      Scheduling = "Fertile and non-fertile phase. 'The repeated design of the study required that all participants attended one fertile and one non-fertile laboratory session. Hence, all participants included here detected a LH surge and thus had ovulatory cycles. Forty-seven percent of non-fertile sessions occurred in the early follicular phase (mean cycle day = 4.02, SD = 2.54) and the remain- der occurred in the late luteal phase (mean cycle day=26.06, SD=3.45). Most participants completed both fertile and non- fertile sessions in the same menstrual cycle (63.5%), the remainder attended sessions occurring 1, 2, or 3 cycles apart. Once a positive LH surge was detected, 85.4% of participants attended their fertile session within one day, the remaining 14.6% attended this session within two days. Following a surge in LH, ovulation is expected to occur approximately 24–48 h later (Direito et al., 2013).2'",
+        LH_test = "To maximize the likelihood of detecting surges in LH, we fol- lowed the standardized LH testing procedure in Blake et al. (2016b). All participants used commercially available urinary LH tests (Blue Cross Bio-Medical Co. LTD, CE/FDA Registered) and tested until a positive surge was detected. Wave 1 participants tested until a positive result was reported (a maximum of 10days) and Wave 2 tested for 11 continuous days, even if a surge was reported ear- lier. We instructed participants to test between 1000 h and 2000 h and report the result to the research team via SMS or email. The repeated design of the study required that all participants attended one fertile and one non-fertile laboratory session. Hence, all participants included here detected a LH surge and thus had ovulatory cycles. Participants who did not record a surge in LH were not eligible for inclusion in the study (see Blake et al., 2016b for full details of the sampling procedure).")
+
+df <- blake %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = estradiol, hormone_cens = estradiol_cens, cycle_length, age, partner)
+
+summarise_hormone(df = df, Dataset = "Blake 2017", Hormone = "Estradiol", Method = "Salivary immunoassay (IBL)",       
+      Citation = "Blake, K. R., Bastian, B., O’Dean, S. M., & Denson, T. F. (2017). High estradiol and low progesterone are associated with high assertiveness in women. Psychoneuroendocrinology, 75, 91–99. http://www.sciencedirect.com/science/article/pii/S0306453016302190", 
+      LOD = 2.1,
+      CV_intra = "<12",
+      CV_inter = "<12",
+      Procedure = "Progesterone and estradiol samples were stored at −20◦C and analyzed by a professional reference laboratory in Dresden, Germany. After thawing, samples were centrifuged at 3000 rpm for five minutes, which resulted in a clear supernatant of low viscosity. Salivary progesterone and estradiol concentrations were measured using commercially available chemiluminescence-immuno-assays with high sensitivity (IBL International, Hamburg, Germany). Intra- and inter-assay coefficients of variations for both hormones were below 12%. ",
+      Scheduling = "Fertile and non-fertile phase. 'The repeated design of the study required that all participants attended one fertile and one non-fertile laboratory session. Hence, all participants included here detected a LH surge and thus had ovulatory cycles. Forty-seven percent of non-fertile sessions occurred in the early follicular phase (mean cycle day = 4.02, SD = 2.54) and the remain- der occurred in the late luteal phase (mean cycle day=26.06, SD=3.45). Most participants completed both fertile and non- fertile sessions in the same menstrual cycle (63.5%), the remainder attended sessions occurring 1, 2, or 3 cycles apart. Once a positive LH surge was detected, 85.4% of participants attended their fertile session within one day, the remaining 14.6% attended this session within two days. Following a surge in LH, ovulation is expected to occur approximately 24–48 h later (Direito et al., 2013).2'",
+        LH_test = "To maximize the likelihood of detecting surges in LH, we fol- lowed the standardized LH testing procedure in Blake et al. (2016b). All participants used commercially available urinary LH tests (Blue Cross Bio-Medical Co. LTD, CE/FDA Registered) and tested until a positive surge was detected. Wave 1 participants tested until a positive result was reported (a maximum of 10days) and Wave 2 tested for 11 continuous days, even if a surge was reported ear- lier. We instructed participants to test between 1000 h and 2000 h and report the result to the research team via SMS or email. The repeated design of the study required that all participants attended one fertile and one non-fertile laboratory session. Hence, all participants included here detected a LH surge and thus had ovulatory cycles. Participants who did not record a surge in LH were not eligible for inclusion in the study (see Blake et al., 2016b for full details of the sampling procedure).")
+
+df <- blake %>% select(id, cycle, bc_day, fc_day, lh_day, estradiol, progesterone, cycle_length) %>% mutate(hormone_cens = "none")
+
+summarise_hormones(df = df, Dataset = "Blake 2017", Method = "Salivary immunoassay (IBL)")
+```
+

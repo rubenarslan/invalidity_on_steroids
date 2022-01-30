@@ -1,0 +1,168 @@
+---
+title: "Göttingen Lab Study 2"
+date: "10/02/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+```{r}
+gol <- rio::import("https://osf.io/69jrk/download", format = "csv")
+gol_otherhormones <- rio::import("data/gol2/Hormonwerte.xlsx") %>% as_tibble()
+names(gol_otherhormones) <- names(gol_otherhormones) %>% str_replace_all("\\s+", " ")
+gol_dates <- rio::import("data/gol2/DatenZyklus2_Ruben.xlsx") %>% 
+  as_tibble()
+
+mons <- gol_dates %>% select(Person, Date_session, Date_next_menstrual_onset, Date_last_menstrual_onset)
+mons <- bind_rows(mons %>% select(Person, Date_session, Menstrual_onset = Date_next_menstrual_onset), 
+                  mons %>% select(Person, Date_session, Menstrual_onset = Date_last_menstrual_onset)) %>% 
+  mutate(Date_session = lubridate::dmy(Date_session), 
+         Menstrual_onset = as.Date(Menstrual_onset)) %>% 
+  distinct() %>% drop_na()
+
+menstrual_days = mons %>% distinct(Person, Date_session) %>% 
+  arrange(Person, Date_session) %>%
+  # step 2 expand into time-series for participant
+  full_join(mons %>% mutate(Date_session = Menstrual_onset) %>% distinct(), by = c("Person", "Date_session")) %>%
+  mutate(origin = if_else(Date_session != Menstrual_onset, "lab", "onset", "lab")) %>% 
+  group_by(Person) %>% 
+  complete(Person, Date_session = full_seq(Date_session, period = 1)) %>% 
+  mutate(origin = if_else(is.na(origin), "interpolated", origin))
+
+
+menstrual_days = menstrual_days %>%
+  arrange(Person, Date_session) %>% 
+  group_by(Person) %>% 
+  mutate(
+    # carry the last observation (the last observed menstrual onset) backward/forward (within person), but we don't do this if we'd bridge more than 40 days this way
+    # first we carry it backward (because reporting is retrospective)
+    next_menstrual_onset = rcamisc::repeat_last(Menstrual_onset, forward = FALSE),
+    # then we carry it forward
+    last_menstrual_onset = rcamisc::repeat_last(Menstrual_onset),
+    # in the next cycle, count to the next onset, not the last
+    next_menstrual_onset = if_else(next_menstrual_onset == last_menstrual_onset,
+                                   lead(next_menstrual_onset),
+                                   next_menstrual_onset),
+    # calculate the diff to current date
+    menstrual_onset_days_until = as.numeric(Date_session - next_menstrual_onset),
+    menstrual_onset_days_since = as.numeric(Date_session - last_menstrual_onset)
+    ) %>% 
+  group_by(Person) %>% 
+  mutate(cycle = as.numeric(factor(last_menstrual_onset))) %>% 
+  ungroup()
+
+menstrual_days %>% group_by(Person) %>% filter(origin == "lab") %>% summarise(cycles = n_distinct(last_menstrual_onset)) %>% summarise(mean(cycles))
+
+# menstrual_days %>% filter(cycle == 5)
+# menstrual_days %>% filter(Person == 486) %>% filter(origin == "lab") %>% View
+
+gol_dates <- gol_dates %>% 
+  mutate(
+    Date_session = lubridate::dmy(Date_session),
+    lh_day = as.numeric(Date_session - as.Date(Date_LH_surge))) %>% 
+  left_join(menstrual_days, by = c("Person", "Date_session")) %>% 
+  mutate(cycle_length = as.numeric(next_menstrual_onset-last_menstrual_onset)) %>% 
+  mutate(bc_day = menstrual_onset_days_until,
+         fc_day = menstrual_onset_days_since)
+
+
+gol <- gol %>% left_join(gol_dates, by = c("Person", "Session"))
+
+# gol %>% filter(bc_day > -1) %>% select(bc_day, Date_session, Date_LH_surge, Date_next_menstrual_onset, Date_last_menstrual_onset) %>% View
+
+gol <- gol %>% left_join(gol_otherhormones, by = c("Person", "Session" = "SessionNr"))
+
+gol %>% 
+  mutate(logE = log(`estradiol pg/ml`), logP =  log(`progesterone pg/ml`), logE_P = logE-logP) %>% 
+  group_by(Person) %>% 
+  ungroup() %>% 
+  select(conception_risk, logE, logP, logE_P, estradiol = `estradiol pg/ml`, progesterone = `progesterone pg/ml`, E_P) %>% cor(use = "pairwise") %>% round(2)
+
+range(gol$lh_day, na.rm = T)
+range(gol$bc_day, na.rm = T)
+range(gol$fc_day, na.rm = T)
+sum(!is.na(gol$`estradiol pg/ml`))
+sum(!is.na(gol$`progesterone pg/ml`))
+
+ggplot(gol, aes(lh_day, log(progesterone))) + geom_smooth() + xlim(-15,15) + geom_point(alpha = 0.1)
+ggplot(gol, aes(lh_day, log(estradiol))) + geom_smooth() + xlim(-15,15) + geom_point(alpha = 0.1)
+ggplot(gol, aes(bc_day, log(progesterone))) + geom_smooth() + xlim(-29,0) + geom_point(alpha = 0.1)
+ggplot(gol, aes(bc_day, log(estradiol))) + geom_smooth() + xlim(-29,0) + geom_point(alpha = 0.1)
+ggplot(gol, aes(lh_day, log(`testosterone pg/ml`))) + geom_smooth() + xlim(-15,15) + geom_point(alpha = 0.1)
+ggplot(gol, aes(lh_day, log(`DHEAs pg/ml`))) + geom_smooth() + xlim(-15,15) + geom_point(alpha = 0.1)
+ggplot(gol, aes(lh_day, log(`corticosterone pg/ml`))) + geom_smooth() + xlim(-15,15) + geom_point(alpha = 0.1)
+ggplot(gol, aes(lh_day, log(`cortisone ng/ml`))) + geom_smooth() + xlim(-15,15) + geom_point(alpha = 0.1)
+ggplot(gol, aes(lh_day, log(`cortisol nmol/L`))) + geom_smooth() + xlim(-15,15) + geom_point(alpha = 0.1)
+ggplot(gol, aes(bc_day, log(`testosterone pg/ml`))) + geom_smooth() + xlim(-30,0) + geom_point(alpha = 0.1)
+ggplot(gol, aes(bc_day, log(`DHEAs pg/ml`))) + geom_smooth() + xlim(-30,0) + geom_point(alpha = 0.1)
+ggplot(gol, aes(bc_day, log(`corticosterone pg/ml`))) + geom_smooth() + xlim(-30,0) + geom_point(alpha = 0.1)
+ggplot(gol, aes(bc_day, log(`cortisone ng/ml`))) + geom_smooth() + xlim(-30,0) + geom_point(alpha = 0.1)
+ggplot(gol, aes(bc_day, log(`cortisol nmol/L`))) + geom_smooth() + xlim(-30,0) + geom_point(alpha = 0.1)
+
+performance::icc(lme4::lmer(`testosterone pg/ml` ~ (1|Person), gol))
+
+# between-subject mean cors
+gol %>% select(Person, contains("/")) %>% group_by(Person) %>% summarise_all(~ mean(., na.rm = T)) %>% select(-Person) %>%  cor(use='p') %>% round(2)
+
+# within-sub diff cors
+gol %>% select(Person, contains("/")) %>% group_by(Person) %>% mutate_all(~ . - mean(., na.rm = T)) %>% ungroup() %>% select(-Person) %>%  cor(use='p') %>% round(2)
+
+gol <- gol %>% rename(id = Person) %>% select(id, cycle, cycle_length, bc_day, fc_day, lh_day, estradiol, progesterone, everything()) %>% as_tibble()
+
+gol <- gol %>% 
+  mutate(estradiol_cens = if_else(estradiol <= 2.1, "left", "none"),
+    estradiol = if_else(estradiol_cens == "left", 2.1, estradiol)
+  ) %>% 
+  mutate(
+    progesterone_cens = if_else(progesterone <= 0, "left", "none"),
+    progesterone = if_else(progesterone_cens == "left", 0, progesterone)
+  )
+
+gol <- gol %>% mutate(partner = recode(relationship_status, `-1` = 0L))
+saveRDS(gol, "gol2.rds")
+```
+
+## Summarize
+```{r}
+source("0_summary_functions.R")
+```
+
+
+```{r}
+gol2 <- rio::import("gol2.rds")
+df <- gol2 %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = progesterone, cycle_length, hormone_cens = progesterone_cens, age, partner)
+
+summarise_hormone(df = df, Dataset = "GOL2", 
+                  Hormone = "Progesterone", 
+                  Method = "Salivary liquid chromatography–mass spectrometry",
+                  Citation = "Stern, J., Kordsmeyer, T. L., & Penke, L. (2021). A longitudinal evaluation of ovulatory cycle shifts in women’s mate attraction and preferences. Hormones and Behavior, 128, 104916. https://doi.org/10.1016/j.yhbeh.2020.104916",
+                  LOQ = 5,
+                  CV_intra = 10.8,
+                  CV_inter = 9.7,
+                  Procedure = "For hormone assays, we collected four saliva samples from each participant (one per testing session). Contamination of saliva samples was minimized by asking participants to abstain from eating, drinking (except plain water), smoking, chewing gum, or brushing teeth for at least one hour before each session. The samples were stored at − 80 ◦C directly after collection until shipment on dry ice to the Kirschbaum Lab at Technical University of Dresden, Germany (one freeze-thaw cycle), where progesterone was assessed via liquid chromatography mass spectrometry (LCMS, Gao et al., 2015). Liquid to liquid extraction was carried out by adding 20 μL internal stan- dard and 1 mL ethyl acetate to 400 μL saliva in a 2 mL polypropylene tube. The resulting mixture was subsequently rotated for 1 min on the vortex and then centrifuged for 10 min at 12000 r/min with centrifuge (Hettich, MIKRO 22 R). The ethyl acetate layer was transported to a new glass tube and evaporated to dryness under nitrogen. The residue was resuspended in 120 μL methanol/ water in a ratio of 50:50 (v/v), 50 μL of which was injected into the LC-MS/MS system. The LC-MS/MS system consisted of Shimadzu HPLC system, and AB Sciex Triple Quad 6500+ System equipped with the electrospray ionization (ESI) source. See Gao et al. (2015) for more details.",
+                  Scheduling = "peri-ovulatory (2x), mid-luteal und premenstrual 'Sessions two to five were computer-based testing sessions and took place across different phases of the ovulatory cycle, scheduled based on backward counting and the observed LH test surge. Suitable testing days were computed with the help of an Excel sheet created for that purpose (see open material). All participants completed two sessions in their expected fertile phase (mid to late follicular phase, approx. 5–6 days before ovulation) and two sessions in their expected luteal phase (one session in the mid luteal phase, one session in the premenstrual phase). Scheduling was validated via LH test results and via following up to the day of the next menstrual onset. Details can be found in the supple- mentary material. The starting session for each participant depended on their current cycle phase at the introductory session and their personal schedule. Of all participants who finished all sessions, 134 participants started with the first session in their fertile phase, and 123 started in the luteal phase.'", 
+                  LH_test = "highly sensitive (10mIU) LH urine ovulation test strips from MedNet GmbH. Participants started LH-testing after menstruation (around reverse cycle day 21) and continued until a rise of LH (positive tests) was observed and a minimum of two days after the tests were negative again (as suggested by Roney, 2018b). Participants were provided with a minimum of ten LH tests each and provided daily pictures of the tests to the investigators for confir- mation. LH results were used to allow flexible scheduling in case LH test results differed from the scheduling based on counting (see supplementary material for details).")
+
+df <- gol2 %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = estradiol, hormone_cens = estradiol_cens, cycle_length, age, partner)
+
+summarise_hormone(df = df, Dataset = "GOL2", 
+                  Hormone = "Estradiol", 
+                  Method = "Salivary immunoassay (IBL)",
+                  Citation = "Stern, J., Kordsmeyer, T. L., & Penke, L. (2021). A longitudinal evaluation of ovulatory cycle shifts in women’s mate attraction and preferences. Hormones and Behavior, 128, 104916. https://doi.org/10.1016/j.yhbeh.2020.104916",
+                  LOD = 2.1,
+                  LOQ = 2.1,
+                  CV_intra = 8.8,
+                  CV_inter = 11.3,
+                  Procedure = "For hormone assays, we collected four saliva samples from each participant (one per testing session). Contamination of saliva samples was minimized by asking participants to abstain from eating, drinking (except plain water), smoking, chewing gum, or brushing teeth for at least one hour before each session. The samples were stored at − 80 ◦C directly after collection until shipment on dry ice to the Kirschbaum Lab at Technical University of Dresden, Germany (one freeze-thaw cycle). The samples were reanalyzed for estradiol using the highly sensitive 17β-estradiol enzyme immunoassay kit (IBL International, Hamburg, Germany). Samples were analyzed in singlets, however, the lab reported that their procedure yields CVs < 11%.",
+                  Scheduling = "peri-ovulatory (2x), mid-luteal und premenstrual 'Sessions two to five were computer-based testing sessions and took place across different phases of the ovulatory cycle, scheduled based on backward counting and the observed LH test surge. Suitable testing days were computed with the help of an Excel sheet created for that purpose (see open material). All participants completed two sessions in their expected fertile phase (mid to late follicular phase, approx. 5–6 days before ovulation) and two sessions in their expected luteal phase (one session in the mid luteal phase, one session in the premenstrual phase). Scheduling was validated via LH test results and via following up to the day of the next menstrual onset. Details can be found in the supple- mentary material. The starting session for each participant depended on their current cycle phase at the introductory session and their personal schedule. Of all participants who finished all sessions, 134 participants started with the first session in their fertile phase, and 123 started in the luteal phase.'", 
+                  LH_test = "highly sensitive (10mIU) LH urine ovulation test strips from MedNet GmbH. Participants started LH-testing after menstruation (around reverse cycle day 21) and continued until a rise of LH (positive tests) was observed and a minimum of two days after the tests were negative again (as suggested by Roney, 2018b). Participants were provided with a minimum of ten LH tests each and provided daily pictures of the tests to the investigators for confir- mation. LH results were used to allow flexible scheduling in case LH test results differed from the scheduling based on counting (see supplementary material for details).")
+
+df <- gol2 %>% select(id, cycle, bc_day, fc_day, lh_day, estradiol, progesterone, cycle_length)
+
+summarise_hormones(df = df, Dataset = "GOL2")
+```
+

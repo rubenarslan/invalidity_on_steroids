@@ -1,0 +1,103 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidylog)
+```
+
+```{r}
+roney <- rio::import("data/roney/raw estradiol data.new.sav")
+
+ggplot(roney, aes(cycle_day, log(estrogen))) + geom_smooth() + geom_point()
+ggplot(roney, aes(cycle_day, log(Progesterone))) + geom_smooth() + geom_point()
+ggplot(roney, aes(cycle_day, log(estrogen/Progesterone))) + geom_smooth() + geom_point()
+
+
+roney <- roney %>% 
+  mutate(cycle_nr = if_else(carryover == 1, cycle + carryover, cycle, cycle))
+table(roney$cycle_nr)
+
+roney %>% group_by(subject, cycle_nr) %>% summarise(length = max(cycle_day)) %>% xtabs(~ length + cycle_nr, .)
+
+roney <- roney %>% 
+  group_by(subject, cycle_nr) %>% 
+  mutate(
+    max_cycle_day = max(cycle_day),
+    max_cycle_day = if_else(max_cycle_day < 20, NA_real_, max_cycle_day),
+    max_cycle_day = if_else(carryover == 1, NA_real_, max_cycle_day, max_cycle_day),
+    bc_day = cycle_day- max_cycle_day - 1)
+table(roney$bc_day)
+
+# convert from ng/ml to pg/ml
+roney <- roney %>% mutate(Progesterone = 1000 * Progesterone)
+
+
+ggplot(roney, aes(bc_day, log(estrogen))) + geom_smooth() + geom_point()
+ggplot(roney, aes(bc_day, log(Progesterone))) + geom_smooth() + geom_point()
+ggplot(roney, aes(bc_day, log(estrogen/Progesterone))) + geom_smooth() + geom_point()
+
+
+
+roney <- roney %>% select(id = subject, cycle = cycle_nr, bc_day, fc_day = cycle_day, estradiol = estrogen, progesterone = Progesterone, cycle_length = max_cycle_day) %>% mutate(lh_day = NA_real_) %>% as_tibble()
+roney <- roney %>% mutate(fc_day = fc_day - 1) # start at zero
+
+xtabs(~ is.na(estradiol) + is.na(progesterone), roney)
+
+roney <- roney %>% 
+  mutate(
+    estradiol_cens = if_else(estradiol <= 0.1, "left", "none"),
+    estradiol = if_else(estradiol_cens == "left", 0.1, estradiol)
+  ) %>% 
+  mutate(
+    progesterone_cens = if_else(progesterone <= 9.14 | (is.na(progesterone) & !is.na(estradiol)), "left", "none"),
+    progesterone = if_else(progesterone_cens == "left", 9.14, progesterone)
+  )
+table(roney$estradiol_cens)
+table(roney$progesterone_cens)
+
+saveRDS(roney, "roney.rds")
+
+ggplot(roney, aes(bc_day, log(estradiol))) + geom_smooth() + geom_point() + theme_bw()
+ggplot(roney, aes(bc_day, estradiol)) + geom_smooth() + geom_point()+ theme_bw()
+ggplot(roney %>% filter(estradiol < median(estradiol, na.rm = T) + IQR(estradiol, na.rm = T) * 3), aes(bc_day, estradiol)) + geom_smooth() + geom_point()+ theme_bw()
+
+range(roney$bc_day, na.rm =T)
+range(roney$fc_day, na.rm =T)
+```
+
+
+## Summarize
+```{r}
+source("0_summary_functions.R")
+```
+
+```{r}
+df <- roney %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = progesterone, hormone_cens = progesterone_cens, cycle_length)
+
+summarise_hormone(df = df, Dataset = "Roney 2013", Hormone = "Progesterone",
+      Citation = "Roney, J. R., & Simmons, Z. L. (2013). Hormonal predictors of sexual motivation in natural menstrual cycles. Hormones and Behavior, 63(4), 636–645. https://doi.org/10.1016/j.yhbeh.2013.02.013",
+      LOD = 9.14,
+      Method = "Salivary radioimmunoassay (Siemens Health Diagnostics)",
+      CV_intra = 4.57,
+      CV_inter = 7.36,
+      Procedure = "Women were also instructed to collect a saliva sample each morn- ing. They were asked to do so at least 30 min after any eating or drinking, ideally upon first waking. Collection was via passive drool (a few minutes after rinsing with clean water) into pre-labeled poly- propylene vials. Women stored these vials in home freezers and then delivered them weekly to our research lab, at which time they were given a new batch of vials. Saliva samples were then stored at − 80 C until being shipped for assay. Saliva samples were shipped on dry ice to the Endocrine Core Laboratory at the California Regional Primate Research Center, Davis, CA. Samples were centrifuged at 3000 rpm for 20 min. to separate the aqueous component from other particles. Concentrations of progester- one were estimated in duplicate using commercial radioimmunoassay kits (Siemens Health Diagnostics, Inc., Los Angeles, CA). Assay proce- dures were modified to accommodate overall lower levels of progester- one in human saliva relative to plasma as follows: 1) standards were diluted to concentrations ranging from 0.05 to 4.0 ng/mL; and 2) sample volume was increased to 200 μl. The progesterone assay has a least detectable dose of 0.00914 ng/ml; intra- and inter-assay CVs were 4.57% and 7.36%, respectively.",
+      Scheduling = "Every day for up to two cycles. 'Here we collected daily saliva samples across 1–2 menstrual cycles from a sample of naturally cycling young women, as well as daily diary reports of both sexual behavior and self-reported sexual desire.'",
+        LH_test = "")
+
+df <- roney %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = estradiol, hormone_cens = estradiol_cens, cycle_length)
+
+summarise_hormone(df = df, Dataset = "Roney 2013", Hormone = "Estradiol",
+      Citation = "Roney, J. R., & Simmons, Z. L. (2013). Hormonal predictors of sexual motivation in natural menstrual cycles. Hormones and Behavior, 63(4), 636–645. https://doi.org/10.1016/j.yhbeh.2013.02.013",
+      LOD = 0.1,
+      LOQ = 1,
+      CV_intra = 4.52,
+      CV_inter = 8.15,
+      Method = "Salivary immunoassay (Salimetrics)",
+      Procedure = "Women were also instructed to collect a saliva sample each morn- ing. They were asked to do so at least 30 min after any eating or drinking, ideally upon first waking. Collection was via passive drool (a few minutes after rinsing with clean water) into pre-labeled poly- propylene vials. Women stored these vials in home freezers and then delivered them weekly to our research lab, at which time they were given a new batch of vials. Saliva samples were then stored at − 80 C until being shipped for assay. Saliva samples were shipped on dry ice to the Endocrine Core Laboratory at the California Regional Primate Research Center, Davis, CA. Samples were centrifuged at 3000 rpm for 20 min. to separate the aqueous component from other particles. Concentrations of progester- one were estimated in duplicate using commercial radioimmunoassay kits (Siemens Health Diagnostics, Inc., Los Angeles, CA). Estradiol concentrations were estimated in duplicate using the high sensitivity salivary 17β-estradiol enzyme immunoassay kit (Salimetrics LLC, State College, PA). The estradiol assay has a least detectable dose of 0.1 pg/ml; intra- and inter-assay CVs were 4.52% and 8.15%, respectively.",
+      Scheduling = "Every day for up to two cycles. 'Here we collected daily saliva samples across 1–2 menstrual cycles from a sample of naturally cycling young women, as well as daily diary reports of both sexual behavior and self-reported sexual desire.'",
+        LH_test = "")
+
+df <- roney %>% select(id, cycle, bc_day, fc_day, lh_day, estradiol, progesterone, cycle_length)
+
+summarise_hormones(df = df, Dataset = "Roney 2013")
+```
+

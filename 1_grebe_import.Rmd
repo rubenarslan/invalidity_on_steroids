@@ -1,0 +1,96 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+https://www.sciencedirect.com/science/article/pii/S0018506X1530180X
+We asked participants to provide saliva samples (~5 mL) via passive drool, from which we assayed estradiol, progesterone, and testosterone twice during the study: once during an initial session, and once upon awakening the day of a follow-up session one week later. Saliva samples were pipetted from a cup to test tubes, then frozen at -20° C. Prior to assays, frozen samples were thawed, mixed by vortexing, then centrifuged for 15 minutes to break up and precipitate mucins.
+Salivary 17β estradiol, progesterone, and testosterone concentrations were determined using enzyme-linked immunosorbent assays (ELISA) designed for saliva by Salimetrics LLC (Carlsbad, CA). The manufacturer reports a 0.8 correlation of saliva to serum for estradiol and progesterone, and a .61 correlation of saliva to serum for testosterone (for women). The minimum sensitivity is approximately 0.1 pg/ml for estradiol, 5 pg/ml for progesterone, and 1 pg/ml for testosterone. Intra-assay CVs, calculated as the mean CV of duplicate determinations, were 6.58%, 14.52%, and 4.07%, respectively. Inter-assay CVs were 2.68%, 4.83%, and 7.61%, respectively. The relatively high intra-assay CV for progesterone was more pronounced for relatively low values: 33.99% for the 13 values under 30 pg/ml, and 10.05% for the 49 values greater than 30 pg/ml.
+
+
+As expected, progesterone levels rise markedly during the second half of the cycle, as reported by women. __One cannot detect a notable peak in estradiol mid-cycle, perhaps because surge days varied across a wide span of days (e.g., Stirnemann et al., 2013), as well as the secondary rise of this hormone due to secretion by the corpus luteum. Errors in self-reported beginning of last menses could also have an effect (Wagienka & Baird, 2005).__ Nonetheless, the estradiol to progesterone ratio notably peaked during the late follicular phase and dropped during the luteal phase, consistent with expectation (Baird et al., 1991).
+In designing the study, our goal was to examine the potential proximate influences of hormones on women's sexual desires and to do so by directly examining ovarian hormone levels. While many studies use self-reported cycle day to infer hormonal characteristics, substantial inter- and intra-individual variations in natural cycle length and in relative hormone production mean that associations between self-reported cycle day and hormone levels may be modest. Our results appear to support that view.
+
+
+```{r}
+grebe <- rio::import("data/grebe/EP_cycle_info.xlsx")
+
+ggplot(grebe, aes(dayofcycle, log(estradiol))) + geom_point() + geom_smooth()
+ggplot(grebe, aes(dayofcycle, log(progesterone))) + geom_point() + geom_smooth()
+ggplot(grebe, aes(dayofcycle, log(estradiol/progesterone))) + geom_point() + geom_smooth()
+
+grebe$estradiol[grebe$estradiol == min(grebe$estradiol, na.rm = T)]
+grebe$progesterone[grebe$progesterone == min(grebe$progesterone, na.rm = T)]
+table(is.na(grebe$estradiol))
+table(is.na(grebe$estradiol), is.na(grebe$progesterone))
+table(is.na(grebe$progesterone))
+
+
+grebe <- grebe %>% 
+  mutate(estradiol_cens = if_else(estradiol <= 0.1, "left", "none"),
+    estradiol = if_else(estradiol_cens == "left", 0.1, estradiol)
+  ) %>% 
+  mutate(
+    progesterone_cens = if_else(progesterone <= 5, "left", "none"),
+    progesterone = if_else(progesterone_cens == "left", 5, progesterone)
+  )
+
+table(grebe$estradiol_cens)
+table(grebe$progesterone_cens)
+
+xtabs(~ is.na(estradiol) + is.na(progesterone), grebe)
+
+grebe <- grebe %>% 
+  rename(id = ID, fc_day = dayofcycle, cycle_length = typcyclength) %>%
+  mutate(fc_day = fc_day - 1) %>% 
+  mutate(cycle = 1, bc_day = NA_real_)
+
+range(grebe$fc_day, na.rm = T)
+range(grebe$cycle_length, na.rm = T)
+
+rio::export(grebe, "data/grebe/grebe.rds")
+
+summary(lme4::lmer(scale(log(estradiol)) ~ (1|id), grebe))
+summary(lme4::lmer(scale(log(progesterone)) ~ (1|id), grebe))
+```
+
+## Summarize
+```{r}
+source("0_summary_functions.R")
+```
+
+```{r}
+df <- grebe %>% select(id, fc_day, hormone = progesterone, hormone_cens = progesterone_cens, cycle_length, cycle, bc_day)
+
+summarise_hormone(df = df, 
+                  Dataset = "Grebe et al. 2016", 
+                  Hormone = "Progesterone",
+                  Citation = "Grebe, N. M., Emery Thompson, M., & Gangestad, S. W. (2016). Hormonal predictors of women’s extra-pair vs. in-pair sexual attraction in natural cycles: Implications for extended sexuality. Hormones and Behavior, 78, 211–219. https://doi.org/10.1016/j.yhbeh.2015.11.008",
+                  LOD = 5,
+                  LOQ = 10,
+                  CV_intra = 14.52,
+                  CV_inter = 4.83,
+                  Method = "Salivary immunoassay (Salimetrics)",
+                  Procedure = "We asked participants to provide saliva samples (~5 mL) via passive drool, from which we assayed estradiol, progesterone, and testosterone twice during the study: once during an initial session, and once upon awakening the day of a follow-up session one week later. Saliva samples were pipetted from a cup to test tubes, then frozen at -20° C. Prior to assays, frozen samples were thawed, mixed by vortexing, then centrifuged for 15 minutes to break up and precipitate mucins. Salivary 17β estradiol, progesterone, and testosterone concentrations were determined using enzyme-linked immunosorbent assays (ELISA) designed for saliva by Salimetrics LLC (Carlsbad, CA). ",
+                  Scheduling = "Irrespective of cycle phase. 'We do emphasize that, although we sought to representatively sample days and phases of the cycle, by chance the luteal phase appears to have been overrepresented in our sample.'")
+
+df <- grebe %>% select(id, fc_day, hormone = estradiol, hormone_cens = estradiol_cens, cycle_length, cycle, bc_day)
+
+summarise_hormone(df = df, 
+                  Dataset = "Grebe et al. 2016", 
+                  Hormone = "Estradiol",
+                  Citation = "Grebe, N. M., Emery Thompson, M., & Gangestad, S. W. (2016). Hormonal predictors of women’s extra-pair vs. in-pair sexual attraction in natural cycles: Implications for extended sexuality. Hormones and Behavior, 78, 211–219. https://doi.org/10.1016/j.yhbeh.2015.11.008",
+                  LOD = 0.1,
+                  LOQ = 1,
+                  CV_intra = 6.58,
+                  CV_inter = 2.68,
+                  Method = "Salivary immunoassay (Salimetrics)",
+                  Procedure = "We asked participants to provide saliva samples (~5 mL) via passive drool, from which we assayed estradiol, progesterone, and testosterone twice during the study: once during an initial session, and once upon awakening the day of a follow-up session one week later. Saliva samples were pipetted from a cup to test tubes, then frozen at -20° C. Prior to assays, frozen samples were thawed, mixed by vortexing, then centrifuged for 15 minutes to break up and precipitate mucins. Salivary 17β estradiol, progesterone, and testosterone concentrations were determined using enzyme-linked immunosorbent assays (ELISA) designed for saliva by Salimetrics LLC (Carlsbad, CA). ",
+                  Scheduling = "Irrespective of cycle phase. 'We do emphasize that, although we sought to representatively sample days and phases of the cycle, by chance the luteal phase appears to have been overrepresented in our sample.'")
+
+df <- grebe %>% select(id, fc_day, estradiol, progesterone, cycle_length, cycle, bc_day)
+
+summarise_hormones(df = df, Dataset = "Grebe et al. 2016")
+```
+

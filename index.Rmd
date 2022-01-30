@@ -1,0 +1,430 @@
+---
+title: "Not within spitting distance: salivary immunoassays of estradiol have subpar validity for cycle phase"
+author: "Ruben Arslan"
+output: 
+  distill::distill_article:
+    code_folding: yes
+    toc: yes
+    toc_float: yes
+    self_contained: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+knitr::opts_chunk$set(message = F, warning = F)
+```
+
+What properties do different measures of estradiol and progesterone have?
+
+
+## Data summary
+
+### Methods
+- All data sets were brought into the same standard format (one row per person and cycle day, indicator of cycle phase and hormones as columns) and analyzed using an identical pipeline.
+- The information about scheduling, LH testing, and steroid measures were taken from the respective publications, manufacturer reports and personal communication with authors.
+- All datasets had at least two measures per cycle. Most spanned more than one cycle.
+- Summary statistics are given untransformed and after log-transformation.
+- Reported limits of detection were used to model censoring. The LODs are reflected in graphs as solid lines, limits of quantitation as dashed lines. Using Bayesian multilevel regressions, values at or below the LOD were modelled as censored (i.e., "this value or lower"). `censored` values in the descriptive statistics are values at or below LOD.
+- `missing` are values that were missing for other reasons than censoring (e.g., insufficient sample volume, contamination, not assayed for this hormone, etc.).
+- `outliers` counts values more than 3*SD from the mean on the logged scale. They were not excluded from regression analyses.
+- All regressions were conducted on logged data.
+- Cycle days were calculated relative to the last menstrual onset (FC = forward-counted), next menstrual onset (BC = backward counted), or LH surge (LH).
+- In the validity section
+  - `r_fc/bc/lh` reflects the square root of variance by a spline over cycle day explained after marginalizing inter-individual and cycle-to-cycle variation in means.
+  - `r_loo_fc/bc/lh` reflect the same thing, but using approximative leave-one-out cross-validation, which is necessary because the splines can easily overfit to the data. When these yield NaN, this shows the explained variance veered negative, i.e. no LOO-robust explained variance.
+  - `r_fc/bc/lh_imputed` reflect a correlation of the raw steroid value with a value _imputed_ from the cycle phase using a model based on the BioCycle serum data.
+  - `r_fc/bc_stirn` reflect correlations with the imputed probability of being in the fertile window according to the method in Gangestad et al. 2016 (based on Stirnemann's data).
+  - `r_prob_lh` reflects correlations with the probability of being in the fertile window according to LH tests, based on the method in Stern et al. 2018 (supplement), which meta-analyzed various probabilities of conception relative to the day of ovulation.
+
+```{r, fig.width = 5, fig.height = 15}
+library(tidyverse)
+library(gt)
+library(brms)
+source("0_summary_functions.R")
+summary_table <- function(Hormone) {
+  summaries <- list.files("summaries", full.names = T)
+  summaries <- summaries[!str_detect(summaries, "(Ovulatory|OCMATE HC|BioCycle_Estradiol|Estradiol LCMS|\\.02\\.)")]
+  summaries <- summaries[str_detect(summaries, pattern = Hormone)]
+  summary_names <- str_match(summaries, "table_(.+?)\\.rds")[,2]
+  message(paste(summary_names, "\n"))
+  sus <- list()
+  su_dfs <- list()
+  for(s in seq_along(summaries)) {
+    su <- rio::import(summaries[s])
+    su_df <- su
+    su_df$Sample <- summary_names[s]
+    su_df$imputed_fc_vs_measured_graph <- 
+    su_df$imputed_bc_vs_measured_graph <- 
+    su_df$imputed_lh_vs_measured_graph <- 
+    su_df$bc_day_model <- 
+    su_df$fc_day_model <- 
+    su_df$lh_day_model <- 
+    su_df$distribution <- NULL
+    su_df$imputed_fc_vs_measured_graph <- 
+    su_df$imputed_bc_vs_measured_graph <- 
+    su_df$imputed_lh_vs_measured_graph <- 
+    su_df$Distribution <- 
+    su_df$plot_bc <- 
+    su_df$plot_fc <- 
+    su_df$plot_lh <- summary_names[s]
+    sus[[summary_names[s]]] <- su
+    su_dfs[[summary_names[s]]] <- su_df %>% as_tibble() %>% mutate_if(is.numeric, ~ sprintf("%.2f", .))
+  }
+
+  comp_wide <- as_tibble(bind_rows(su_dfs, .id = "Sample")) %>%
+    mutate_at(vars(n_women, n_cycles, n_days, missing, censored, outliers, usable_n, usable_n_women), 
+              ~ str_sub(., 1, -4))
+  
+  
+  comp_wide <- comp_wide %>%
+    mutate_at(vars(missing, censored, outliers), ~ sprintf("%.0f (%.0f%%)", as.numeric(.), 100*as.numeric(.)/as.numeric(n_days)))
+
+  comp_wide <- comp_wide %>% 
+    mutate(Measure = paste0("LOD=", `Limit of detection`, ", LOQ=", LOQ, ", Intraassay CV=",`Intraassay CV`, ", Interassay CV=", `Interassay CV`)) %>% 
+    select(-`Limit of detection`, -`Intraassay CV`,
+           -`Interassay CV`, -LOQ)
+
+  Hormone_label <- names(sort(table(comp_wide$Hormone),decreasing = T))[1]
+
+  comp_wide <- comp_wide %>% 
+    select(Sample, Dataset, Hormone, Citation, Method,
+           Measure, Procedure, Scheduling, LH_test,
+           Age = age,
+           `In Relationship` = in_relationship,
+           `Cycle length` = cycle_length,
+           Women = n_women,
+           Cycles = n_cycles,
+           Days = n_days,
+           `% women no LH surge` = no_lh_surge_woman,
+           `% cycles no LH surge` = no_lh_surge_cycle,
+           `Usable n women` = usable_n_women,
+           `Usable n days` = usable_n,
+           Distribution,
+           logmean, logsd, missing, outliers, censored,
+           mean, sd, median, mad, range,
+           icc, `Variance Ratio`, 
+           var_id, var_id_cycle, rmse_icc,
+           r_fc_stirn, r_log_fc_stirn, r_diff_fc_stirn, r_log_diff_fc_stirn, r_loo_fc, r_fc_imputed, 
+           r_diff_fc_imputed, sd_fc_imputed, r_diff_fc_imputed_rr, 
+           plot_fc,
+           r_bc_stirn, r_log_bc_stirn, r_diff_bc_stirn, r_log_diff_bc_stirn, r_loo_bc, r_bc_imputed, 
+           r_diff_bc_imputed, sd_bc_imputed, r_diff_bc_imputed_rr, 
+           plot_bc,
+          r_prob_lh, r_log_prob_lh, r_diff_prob_lh, r_log_diff_prob_lh, r_loo_lh, r_lh_imputed, 
+           r_diff_lh_imputed, sd_lh_imputed, r_diff_lh_imputed_rr, 
+           plot_lh,
+           everything(), -matches("rmse_[^i]"), -contains("_vs_measured"))
+  
+  comp <- comp_wide %>% 
+    pivot_longer(-Sample)
+  
+  # print(table(comp$Sample))
+  
+  comp <- comp %>% 
+    pivot_wider(name, Sample) %>% 
+    rename(rowname = name)
+
+  colnames(comp) <- str_trim(str_replace(str_replace(
+    colnames(comp), Hormone, ""), "_", " "))
+
+
+    comp <- comp %>% 
+    mutate(rowgroup = case_when(
+      rowname %in% c("Hormone", "Dataset","Citation", "Scheduling") ~ "Study",
+      rowname %in% c("Method", "Measure", "Procedure", "LH_test") ~ "Measure",
+      rowname %in% c("Women", "Cycles", "Days", "Usable n women", "Usable n days", "Age", "In Relationship", "Cycle length", "% women no LH surge", "% cycles no LH surge") ~ "Sample",
+      rowname %in% c("Distribution", 
+                     "logmean", "logsd", "missing", "censored", "outliers",
+                     "mean", "sd", "median", "mad", "range") ~ "Descriptive statistics",
+      rowname %in%  c("icc", "Variance Ratio", "var_id", "var_id_cycle", "rmse_icc") ~ "Interindividual differences",
+    rowname %in%  c("r_fc", "r_loo_fc", "plot_fc", "imputed_fc_vs_measured_graph",
+           "r_fc_stirn", "r_log_fc_stirn", "r_diff_fc_stirn", "r_log_diff_fc_stirn", "rmse_fc", "r_fc_imputed", "r_diff_fc_imputed", "sd_fc_imputed", "r_diff_fc_imputed_rr",  "rmse_fc_imputed") ~ "Validity (Forward counting)",
+    rowname %in%  c("r_bc", "r_loo_bc", "plot_bc", "imputed_bc_vs_measured_graph",
+           "r_bc_stirn", "r_log_bc_stirn", "r_diff_bc_stirn", "r_log_diff_bc_stirn", "rmse_bc", "r_bc_imputed", "r_diff_bc_imputed", "sd_bc_imputed", "r_diff_bc_imputed_rr", "rmse_bc_imputed") ~ "Validity (Backward counting)",
+    rowname %in%  c("r_lh", "r_loo_lh", "plot_lh", "imputed_lh_vs_measured_graph",
+           "r_prob_lh", "r_log_prob_lh", "r_diff_prob_lh", "r_log_diff_prob_lh", "rmse_lh", "r_lh_imputed", "r_diff_lh_imputed", "sd_lh_imputed", "r_diff_lh_imputed_rr",  "rmse_lh_imputed") ~ "Validity (LH)"
+    ))
+  
+  comp %>% 
+  gt(groupname_col = "rowgroup") %>% 
+  tab_header(
+    title = paste0(Hormone_label, " measures"),
+    subtitle = "Comparing salivary and serum measures on a variety of performance criteria"
+  ) %>% 
+  text_transform(
+    locations = cells_body(everything(), rowname == "Citation"),
+      fn = function(x) {
+            long <- x
+            short <- str_match(str_trim(x), "^(.+?\\))")[,2]
+            str_c("<small><details><summary>", short,"</summary>", long, "</details></small>")
+        }
+  ) %>% 
+  text_transform(
+    locations = cells_body(everything(), rowname %in% c("Procedure", "Scheduling", "LH_test")),
+      fn = function(x) {
+          long <- x
+          short <- str_match(x, "^(.+?)'")[,2]
+          long <- str_match(x, "'(.+)'")[,2]
+          short[is.na(short)] <- ""
+          long[is.na(long)] <- x[is.na(long)]
+          details <- str_c("<small>", short, "<details><summary>More</summary>", long, "</details></small>")
+          details[is.na(x) | x == ""] <- ""
+          details
+        }
+  ) %>% 
+  text_transform(
+    locations = cells_body(everything(), rowname == "Distribution"),
+      fn = function(x) {
+        plots <- character(length(x))
+        for(i in seq_along(x)) {
+          message(x[i])
+          if(!is.null(sus[[x[i]]]$distribution)) {
+            if(Hormone_label == "Estradiol") {
+              breaks <- c(0.2, 1, 2, 10, 15, 20, 30)
+              limits <- c(0.2, 32)
+            } else {
+              breaks <- c(0.2, 1, 5, 10, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 30000)
+              limits <- c(0.2, 30000)
+            }
+            plots[i] <- { sus[[x[i]]]$distribution +
+            scale_x_continuous(Hormone_label, breaks = breaks, labels = breaks, 
+                               limits = limits, trans = "log") +
+            scale_fill_manual(values = c("none" = "black", "left" = "gray"), guide = FALSE) +
+            geom_vline(xintercept = as.numeric(sus[[x[i]]]$`Limit of detection`),
+                       linetype = 'solid') +
+            geom_vline(xintercept = as.numeric(sus[[x[i]]]$LOQ),
+                       linetype = 'dashed') +
+            theme_minimal(base_size = 8) } %>%
+            ggplot_image(height = px(200), aspect_ratio = 0.7)
+          }
+        }
+        plots
+      }
+    ) %>% text_transform(
+    locations = cells_body(everything(), rowname == "plot_fc"),
+      fn = function(x) {
+        plots <- character(length(x))
+        for(i in seq_along(x)) {
+          message(x[i])
+          if(!is.null(sus[[x[i]]]$fc_day_model)) {
+          plots[i] <- cycle_phase_plot(sus[[x[i]]], "fc_day_model", size = 6) %>%
+            ggplot_image(height = px(600), aspect_ratio = 0.33)
+          } else {
+            plots[i] <- "NA"
+          }
+        }
+        plots
+      }
+    ) %>% text_transform(
+    locations = cells_body(everything(), rowname == "plot_bc"),
+      fn = function(x) {
+        plots <- character(length(x))
+        for(i in seq_along(x)) {
+          message(x[i])
+          if(!is.null(sus[[x[i]]]$bc_day_model)) {
+          plots[i] <- cycle_phase_plot(sus[[x[i]]], "bc_day_model", size = 6) %>%
+            ggplot_image(height = px(600), aspect_ratio = 0.33)
+          } else {
+            plots[i] <- "NA"
+          }
+        }
+        plots
+      }
+    ) %>% text_transform(
+    locations = cells_body(everything(), rowname == "plot_lh"),
+      fn = function(x) {
+        plots <- character(length(x))
+        for(i in seq_along(x)) {
+          message(x[i])
+          if(!is.null(sus[[x[i]]]$lh_day_model)) {
+          plots[i] <- cycle_phase_plot(sus[[x[i]]], "lh_day_model", size = 6) %>%
+            ggplot_image(height = px(600), aspect_ratio = 0.33)
+          } else {
+            plots[i] <- "NA"
+          }
+        }
+        plots
+      }
+    ) %>%  
+    tab_style(
+    style = list(
+      cell_text(weight = "bold",
+                size = "large")
+      ),
+    locations = cells_row_groups()
+  ) %>%
+    cols_width(everything() ~ px(230)
+  )
+}
+
+ratio_summary_table <- function() {
+  summaries <- list.files("summaries", full.names = T)
+  summaries <- summaries[str_detect(summaries, pattern = "ratio")]
+  summaries <- summaries[!str_detect(summaries, "(Ovulatory|OCMATE HC|Dinh)")]
+  summary_names <- str_match(summaries, "table_(.+?)\\.")[,2]
+  sus <- list()
+  su_dfs <- list()
+  for(s in seq_along(summaries)) {
+    su <- rio::import(summaries[s])
+    su_df <- su
+    su_df$m_bc_prob_rat <- 
+      su_df$m_fc_prob_rat <- 
+      su_df$m_lh_prob_rat <- 
+      su_df$m_bc_prob <- 
+      su_df$m_fc_prob <- 
+      su_df$m_lh_prob <- 
+      su_df$scatterplot <- NULL
+    su_df$plot_scatter <- summary_names[s]
+    sus[[summary_names[s]]] <- su
+    su_dfs[[summary_names[s]]] <- su_df
+  }
+
+comp_wide <- as_tibble(bind_rows(su_dfs, .id = "Sample")) %>%
+  mutate_if(is.numeric, ~ sprintf("%.2f", .)) %>% 
+  mutate_at(vars(n_women, n_cycles, n_days, usable_n), ~ str_sub(., 1, -4)) %>% 
+  select(Dataset, Method,
+         Women = n_women,
+         Cycles = n_cycles,
+         Days = n_days,
+         `Usable n` = usable_n,
+         plot_scatter,
+         r_ep, r_log_ep, r_e_ratio, r_log_e_ratio, r_p_ratio, r_log_p_ratio, r_bc_ratio, r_bc_log_ratio, r_erat_bc, r_loo_bc, r_fc_ratio, r_fc_log_ratio, r_erat_fc, r_loo_fc, r_lh_ratio, r_lh_log_ratio, r_erat_lh, r_loo_lh,
+         everything())
+
+
+comp <- comp_wide %>% 
+  pivot_longer(-Sample) %>% 
+  pivot_wider(name, Sample) %>% 
+  rename(rowname = name)
+
+colnames(comp) <- str_trim(str_replace(
+  colnames(comp), "_", " "))
+
+Hormone_label <- names(sort(table(comp_wide$Hormone),decreasing = T))[1]
+
+comp <- comp %>% 
+  mutate(rowgroup = case_when(
+    rowname %in% c("Dataset", "Method", "Hormone") ~ "Measure",
+    rowname %in% c("Women", "Cycles", "Days", "Usable n") ~ "Sample size",
+  TRUE ~ "Relationship"
+  )) 
+
+comp %>% 
+gt(groupname_col = "rowgroup") %>% 
+  tab_header(
+    title = paste0("Estradiol and progesterone measures"),
+    subtitle = "Comparing salivary and serum measures on a variety of performance criteria"
+  ) %>% 
+  text_transform(
+    locations = cells_body(everything(), 7),
+      fn = function(x) {
+        plots <- character(length(x))
+        for(i in seq_along(x)) {
+          message(x[i])
+          if(!is.null(sus[[x[i]]]$scatterplot)) {
+            plots[i] <- { sus[[x[i]]]$scatterplot +
+            theme_minimal() } %>%
+            ggplot_image(height = px(200))
+          }
+        }
+        plots
+      }
+    )
+}
+```
+
+
+### Estradiol (E2)
+
+```{r layout='l-screen-inset'}
+summary_table("Estradiol")
+```
+
+### Progesterone (P4)
+
+```{r layout='l-screen-inset'}
+summary_table("Progesterone")
+```
+
+### Estrogen & Progesterone (E2/P4)
+
+```{r layout='l-screen-inset'}
+ratio_summary_table()
+```
+
+
+### Literature survey of estradiol assays
+
+We performed the following search on [SCOPUS](https://www.scopus.com/search/form.uri?sort=plf-f&src=s&st1=psychoneuroendocrinology&st2=hormones+AND+behavior&nlo=&nlr=&nls=&sid=4229b6ef70b022c42e94bc266d5c0572&sot=b&sdt=b&sl=135&s=%28SRCTITLE%28psychoneuroendocrinology%29+OR+SRCTITLE%28hormones+AND+behavior%29+AND+TITLE-ABS-KEY%28estradiol%29+AND+TITLE-ABS-KEY%28menstrual+cycle%29%29&display=edit&numOfFields=0&edit=t&partialQuery=&origin=resultslist&txGid=f33e53ad58ab589af4081327f62e4d89#basic). Journal: Psychoneuroendocrinology or Hormones and Behavior
+In Abstract Title or Keywords: Menstrual Cycle, Estradiol
+Limited to articles published 2017 or later.
+
+```
+( SRCTITLE ( psychoneuroendocrinology )  OR  
+  SRCTITLE ( hormones  AND  behavior )  AND  
+  TITLE-ABS-KEY ( estradiol )  AND  
+  TITLE-ABS-KEY ( menstrual  AND  cycle ) )  
+  AND  ( LIMIT-TO ( PUBYEAR ,  2022 )  OR  
+         LIMIT-TO ( PUBYEAR ,  2021 )  OR  
+         LIMIT-TO ( PUBYEAR ,  2020 )  OR  
+         LIMIT-TO ( PUBYEAR ,  2019 )  OR  
+         LIMIT-TO ( PUBYEAR ,  2018 )  OR  
+         LIMIT-TO ( PUBYEAR ,  2017 ) ) 
+```
+
+We then examined the fulltext of each article to code the following information:
+
+- Is the article an empirical primary study related to menstrual cycle effects?
+- Did they collect saliva, serum, urine, or something else?
+- How did they assay estradiol?
+
+```{r}
+lit <- rio::import("lit_search_estradiol.xlsx")
+lit <- lit %>% filter(Year >= 2017)
+table(lit$`Menstrual Cycle`)
+litmc <- lit %>% filter(`Menstrual Cycle` == "yes")
+table(litmc$`Source title`)
+saliva <- sum(litmc$`Body Fluid` == "Saliva")
+table(litmc$`Body Fluid`)
+litsal <- litmc %>% filter(`Body Fluid` == "Saliva", coalesce(Notes,"") != "prog only")
+table(litsal$`Source title`)
+table(litsal$Assay) %>% sort()
+```
+
+We found N=`r nrow(lit)` papers. Of those, n=`r nrow(litmc)` papers were empirical primary studies with at least one research question related to menstrual cycle changes within-women. Of those, n=`r saliva` collected saliva. The estradiol immunoassays studied here, i.e. Salimetrics, IBL, and DRG immunoassays accounted for `r round(100*(12+11+6)/37)`% of the assays performed on salivary estradiol (*n*s=12,11,6). In most cases, the progesterone assay was done using kits from the same company.
+
+```{r}
+library(gtsummary)
+litsal %>% select(Assay) %>% tbl_summary(sort = list(everything() ~ "frequency"))
+```
+
+<details><summary>List of papers</summary>
+
+```{r}
+lit %>% select(Authors, Title, `Source title`, DOI, `Menstrual Cycle`, `Body Fluid`, `Assay`, Notes) %>% gt()
+```
+
+
+</details>
+
+### Small re-analysis of urinary validity data
+
+Roos et al. 2015 and Johnson et al. 2015 report aggregated data for E3g and Pdg in urine, as well as E2 and P4 in serum.
+
+```{r}
+ser <- rio::import("data/tabula-roos2015.tsv")
+uri <- rio::import("data/tabula-2015_Urinary_hormones_nomograms_Gnoth_Clin_Chem_Lab_Med.tsv")
+seruri <- ser %>% left_join(uri, by = c("Day relative to ovulation"), suffix = c("_serum", "_urine")) %>% mutate_all(~ as.numeric(str_match(., "([0-9.]+)( \\()?")[,2]))
+cor.test(seruri$`E2 (pmol/l)`, seruri$`E3G, ng/mL`)
+cor.test(seruri$`E2 (pmol/l)`, lead(seruri$`E3G, ng/mL`))
+psych::cor.wt(cbind(seruri$`E2 (pmol/l)`, lead(seruri$`E3G, ng/mL`)), w = seruri$n_serum*seruri$n_urine)
+cor.test(seruri$`Progesterone (nmol/l)`, seruri$`P3G, ug/mL`)
+cor.test(seruri$`Progesterone (nmol/l)`, lead(seruri$`P3G, ug/mL`))
+psych::cor.wt(cbind(seruri$`Progesterone (nmol/l)`, lead(seruri$`P3G, ug/mL`)), w = seruri$n_serum*seruri$n_urine)
+```
+
+

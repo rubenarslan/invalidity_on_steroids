@@ -1,0 +1,17 @@
+name: "Salivary and serum immunoassay comparison"
+title: "Salivary and serum immunoassay comparison"
+output_dir: "docs"
+output:
+  distill::distill_article
+exclude:
+- '*.rda'
+- '*.pdf'
+- '*.dta'
+- '*.csv'
+- data
+- merge_files
+- models
+- renv
+- '*.xlsx'
+- '*.rds'
+

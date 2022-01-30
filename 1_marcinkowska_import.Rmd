@@ -1,0 +1,232 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidylog)
+```
+
+## Import
+
+### Hormones
+```{r}
+m_e2 <- rio::import("data/marcinkowska/manual_clean/estradiolALL.xlsx") %>% tibble()
+
+p4_dfs <- list.files("data/marcinkowska/manual_clean/", pattern = "progesteron", full.names = T) %>% map(rio::import) %>% map(tibble)
+names(p4_dfs) <- list.files("data/marcinkowska/manual_clean/", pattern = "progesteron")
+m_p4 <- p4_dfs %>% map(. %>% select(ID, data, `pg/ml`, Meetings)) %>% bind_rows(.id = "batch")
+
+m_p4 <- m_p4 %>% filter(!str_detect(data, "brak")) %>% filter(!str_detect(data, "BRAK")) %>% 
+  mutate(date = lubridate::dmy(data))
+
+m_e2 <- m_e2 %>% 
+  mutate(date = lubridate::dmy(data))
+marc <- m_e2 %>% rename(estradiol = `pg/ml`) %>% full_join(m_p4 %>% rename(progesterone = `pg/ml`), by = c("ID", "date"))
+
+min(marc$estradiol, na.rm = T)
+min(marc$progesterone, na.rm = T)
+cor.test(log(marc$estradiol), log(marc$progesterone))
+xtabs(~ is.na(estradiol) + is.na(progesterone) + is.na(date), marc)
+# m_p4 %>% filter(is.na(date)) %>% select(ID, data) %>% View
+
+
+marc <- marc %>% 
+  mutate(estradiol_cens = if_else(estradiol <= 0.4, "left", "none"),
+    estradiol = if_else(estradiol_cens == "left", 0.4, estradiol)
+  ) %>% 
+  mutate(
+    progesterone_cens = if_else(progesterone <= 2.5, "left", "none"),
+    progesterone = if_else(progesterone_cens == "left", 2.5, progesterone)
+  )
+```
+
+### Calendar
+The legend for colours:
+First blue is the follicular days. Grey is when they started doing LH tests. Green/blue is the luteal phase.
+If the hour is written in the cell, it means the meeting took place then.
+Pink is when they report a positive result of the LH test, pink hour is on the date that the peri-ovulatory meeting took place.
+Yellow is a peri-ovulatory meeting, but in a cycle that was potentially anovulatory - participants did not report positive results of the LH test.
+Red is the first day of the next menses.
+
+A032: red # bg_colors[23]
+AF05: pink # bg_colors[44]
+AD19: pink # bg_colors[61]
+DS51: pink # 
+EL66: pink # bg_colors[90]
+
+```{r}
+## STRATEGY A
+mensdates <- rio::import("data/marcinkowska/manual_clean/Calendar.xlsx") %>% 
+  slice(1:102) %>% 
+  mutate(LH_peak = case_when(
+    `LH+When` %in% c("x", "--", "-") ~ NA_real_,
+    TRUE ~ as.numeric(`LH+When`))) %>% 
+  select(ID, LH_peak, cycle_length = `Cycle length`, `42185`:`42424`) %>% 
+  mutate_all(as.character) %>% 
+  pivot_longer(-c(ID, LH_peak, cycle_length)) %>% 
+  mutate(date = as.Date(as.numeric(name), origin = "1899-12-30"),
+         cycle_length = as.numeric(cycle_length),
+         LH_peak = as.numeric(LH_peak)) %>% 
+  filter(value == 1) %>% 
+  mutate(last_menstrual_onset = date,
+         next_menstrual_onset = date + cycle_length,
+         lh_surge_date = date + cycle_length + LH_peak) %>% 
+  select(-name, -value, -date)
+rio::export(mensdates, "data/marcinkowska/manual_clean/Calendar_dates.xlsx")
+
+## STRATEGY B
+library(tidyxl)
+formats <- xlsx_formats("data/marcinkowska/manual_clean/Calendar.xlsx")
+bg_colors <- formats$local$fill$patternFill$bgColor$rgb
+bg_colors[23]
+table(bg_colors)
+bg_colors <- tibble(local_format_id = 1:length(bg_colors), color = bg_colors) %>% drop_na()
+showCols <- function(cl=colors(), bg = "grey",
+                     cex = 0.75, rot = 30) {
+    m <- ceiling(sqrt(n <-length(cl)))
+    length(cl) <- m*m; cm <- matrix(cl, m)
+    require("grid")
+    grid.newpage(); vp <- viewport(w = .92, h = .92)
+    grid.rect(gp=gpar(fill=bg))
+    grid.text(cm, x = col(cm)/m, y = rev(row(cm))/m, rot = rot,
+              vp=vp, gp=gpar(cex = cex, col = cm))
+}
+showCols(bg="gray20",cl=bg_colors$color %>% unique() %>% str_sub(3) %>% str_c("#", .), rot=0, cex=1.9)
+
+bg_colors %>% drop_na() %>% mutate(id = factor(local_format_id)) %>% ggplot(aes(id, 1, color = paste0("#", color))) + geom_point()
+dates <- xlsx_cells("data/marcinkowska/manual_clean/Calendar.xlsx") %>% 
+  left_join(bg_colors)
+date_in_study <- dates %>% filter(row == 1, !is.na(date)) %>% select(col, part_date = date)
+ids <- dates %>% filter(col == 1) %>% mutate(ID = coalesce(character, as.character(round(numeric))), row) %>% select(ID, row) %>% slice(2:103)
+
+date_colors <- dates %>% select(row, col, color) %>% 
+  left_join(date_in_study, by = "col") %>% 
+  left_join(ids, by = "row")
+# drop_na(date_colors) %>% View
+  
+
+dates %>% filter(color == "FFFF00FF") %>% pull(numeric) %>% table(exclude = NULL)
+dates %>% filter(color == "FFFF00FF") %>% pull(date) %>% table(exclude = NULL)
+```
+
+## Merge
+```{r}
+mensdates <- mensdates %>% 
+  mutate(ID = case_when(
+    str_detect(ID, "K") ~ str_replace(ID, "K", "K "),
+    TRUE ~ paste("P", ID)
+  ))
+
+mensdates %>% filter(lh_surge_date > next_menstrual_onset |
+                       lh_surge_date < last_menstrual_onset) %>% 
+  select(ID, lh_surge_date, next_menstrual_onset, last_menstrual_onset)
+mensdates <- mensdates %>% group_by(ID) %>% 
+  arrange(ID, last_menstrual_onset) %>% 
+  mutate(cycle = row_number())
+
+merge_date_on_cycle <- mensdates %>% 
+  group_by(ID, cycle) %>% 
+  expand(date = seq(from = last_menstrual_onset, 
+                    to = next_menstrual_onset - lubridate::days(1),
+                    by = 1)) %>% 
+  left_join(mensdates, by = c("ID", "cycle"))
+
+marc <- marc %>% left_join(merge_date_on_cycle, by = c("ID", "date"))
+
+marc <- marc %>% 
+  filter(date > "2015-02-12") %>% 
+  group_by(ID) %>% 
+  mutate(
+    bc_day = as.numeric(date - next_menstrual_onset),
+    fc_day = as.numeric(date - last_menstrual_onset),
+    lh_day = as.numeric(date - lh_surge_date))
+qplot(marc$date)
+print(range(marc$fc_day, na.rm =T))
+print(range(marc$bc_day, na.rm =T))
+print(range(marc$lh_day, na.rm =T))
+
+
+marc <- marc %>% group_by(ID) %>% 
+  mutate(
+    lh_surge_date_2 = first(date[ which(str_detect(Meetings.x, "O")) ])
+    )
+
+# n_nonmissing(marc$lh_surge_date)
+# n_nonmissing(marc$lh_surge_date_2)
+table(marc$lh_surge_date == marc$lh_surge_date_2, exclude=NULL)
+marc %>% filter(lh_surge_date != lh_surge_date_2) %>% select(ID, lh_surge_date, lh_surge_date_2, date, Meetings.x)
+
+ggplot(marc, aes(fc_day, progesterone)) + geom_smooth() +
+  geom_pointrange(stat = 'summary') + xlim(0, 30)
+ggplot(marc, aes(bc_day, progesterone)) + geom_smooth() +
+  geom_pointrange(stat = 'summary') + xlim(-30, -1)
+ggplot(marc, aes(lh_day, progesterone)) + geom_smooth() +
+  geom_pointrange(stat = 'summary') + xlim(-15, 14)
+
+ggplot(marc, aes(fc_day, estradiol)) + geom_smooth() +
+  geom_pointrange(stat = 'summary') + xlim(0, 30)
+ggplot(marc, aes(bc_day, estradiol)) + geom_smooth() +
+  geom_pointrange(stat = 'summary') + xlim(-30, -1)
+ggplot(marc, aes(lh_day, estradiol)) + geom_smooth() +
+  geom_pointrange(stat = 'summary') + xlim(-15, 14)
+
+marc <- marc %>% rename(id=ID)
+
+marc %>% filter(Meetings.x != Meetings.y) %>% select(Meetings.x, Meetings.y)
+table(marc$Meetings.x==marc$Meetings.y)
+marc %>% select(id, cycle, contains("date"), bc_day, fc_day, lh_day, estradiol, estradiol_cens, progesterone, progesterone_cens, cycle_length, Meetings_E2 = Meetings.x, Meetings_P4 = Meetings.y) %>% 
+rio::export("data/marcinkowska/manual_clean/ula_merged.xlsx")
+```
+
+
+
+## Summarize
+```{r}
+source("0_summary_functions.R")
+```
+
+```{r}
+options(mc.cores = parallel::detectCores(), 
+        brms.backend = "rstan",
+        brms.file_refit = "on_change")
+
+df <- marc %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = progesterone, hormone_cens = progesterone_cens, cycle_length)
+
+summarise_hormone(df = df, Dataset = "Marcinkowska 2020", Hormone = "Progesterone", 
+                  Method = "Salivary immunoassay (DRG)", 
+                  Citation = "Marcinkowska, U. M. (2020). Importance of Daily Sex Hormone Measurements Within the Menstrual Cycle for Fertility Estimates in Cyclical Shifts Studies. Evolutionary Psychology: An International Journal of Evolutionary Approaches to Psychology and Behavior, 18(1), 1474704919897913. https://doi.org/10.1177/1474704919897913
+
+Marcinkowska, U. M., Ellison, P. T., Galbarczyk, A., Milkowska, K., Pawlowski, B., Thune, I., & Jasienska, G. (2016). Lack of support for relation between woman’s masculinity preference, estradiol level and mating context. Hormones and Behavior, 78, 1–7. https://doi.org/10.1016/j.yhbeh.2015.10.012
+
+Marcinkowska, U. M., Galbarczyk, A., & Jasienska, G. (2018). La donna è mobile? Lack of cyclical shifts in facial symmetry, and facial and body masculinity preferences-A hormone based study. Psychoneuroendocrinology, 88, 47–53. https://doi.org/10.1016/j.psyneuen.2017.11.007
+
+Marcinkowska, U. M., Kaminski, G., Little, A. C., & Jasienska, G. (2018). Average ovarian hormone levels, rather than daily values and their fluctuations, are related to facial preferences among women. Hormones and Behavior, 102, 114–119. https://doi.org/10.1016/j.yhbeh.2018.05.013", 
+      LOD = 2.5,
+      LOQ = 10,
+      CV_intra = "9%",
+      CV_inter = "23% for lower values (15 pmol/l) to 13% for higher values (50 pmol/l)",
+      Procedure = "Participants were asked to collect saliva samples each morning starting from the first day of menstrual bleeding, until the end of the menstrual cycle (i.e., the day before the onset of the next menstrual bleeding). Women were verbally instructed by the principal investigator concerning collecting and storing the saliva and were given a set of 2-ml centrifuge tubes with the minimum amount of required saliva marked on a tube together with written instructions. Saliva samples were collected in the morning, preferably before eating, drinking, or smoking, or not earlier than 30 min after eating, drinking, or smoking. Immediately after collec- tion, samples were frozen in the participant’s home freezer. After the end of the cycle, samples were transported in portable freezers to the laboratory where hormonal assays for measure- ments of 17-b-estradiol (E2) and 17-a-hydroxy-progesterone (P) were conducted. Hormonal measurements were conducted using commercially available hormonal assays of DRG Inter- national, Inc. ELISA plates SLV4188 (sensitivity: 0.4 pg/ml, standard range: 1–100 pg/ml) for E2 and SLV3140 for P (sen- sitivity: 2.5 pg/ml, standard range: 10–5,000 pg/ml). All sam- ples were assayed in duplicates. The quality of hormonal measurements was monitored for each plate separately by including samples of known concentrations with low and high E2 and P levels. Inter-assay variability was 10.1%, intra-assay variability was 7.5% for E2 and 14.1% and 4.9% for P, which is within acceptable values for steroid sex hormones assays (Schultheiss & Stanton, 2009).",
+      Scheduling = "Whole cycle 'Participants were asked to collect saliva samples each morning starting from the first day of menstrual bleeding, until the end of the menstrual cycle (i.e., the day before the onset of the next menstrual bleeding).'",
+        LH_test = "All participants received LH kits. Each kit consisted of sterilized urine cups and 10 LH tests. Women were instructed to conduct the tests from the 10th until the 20th day of the cycle or until a positive result was obtained.")
+
+df <- marc %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = estradiol, hormone_cens = estradiol_cens, cycle_length)
+
+summarise_hormone(df = df, Dataset = "Marcinkowska 2020", Hormone = "Estradiol", Method = "Salivary immunoassay (DRG)",       
+                  Citation = "Marcinkowska, U. M. (2020). Importance of Daily Sex Hormone Measurements Within the Menstrual Cycle for Fertility Estimates in Cyclical Shifts Studies. Evolutionary Psychology: An International Journal of Evolutionary Approaches to Psychology and Behavior, 18(1), 1474704919897913. https://doi.org/10.1177/1474704919897913
+
+Marcinkowska, U. M., Ellison, P. T., Galbarczyk, A., Milkowska, K., Pawlowski, B., Thune, I., & Jasienska, G. (2016). Lack of support for relation between woman’s masculinity preference, estradiol level and mating context. Hormones and Behavior, 78, 1–7. https://doi.org/10.1016/j.yhbeh.2015.10.012
+
+Marcinkowska, U. M., Galbarczyk, A., & Jasienska, G. (2018). La donna è mobile? Lack of cyclical shifts in facial symmetry, and facial and body masculinity preferences-A hormone based study. Psychoneuroendocrinology, 88, 47–53. https://doi.org/10.1016/j.psyneuen.2017.11.007
+
+Marcinkowska, U. M., Kaminski, G., Little, A. C., & Jasienska, G. (2018). Average ovarian hormone levels, rather than daily values and their fluctuations, are related to facial preferences among women. Hormones and Behavior, 102, 114–119. https://doi.org/10.1016/j.yhbeh.2018.05.013", 
+      LOD = 0.4,
+      LOQ = 1,
+      CV_intra = "9%",
+      CV_inter = "23% for lower values (15 pmol/l) to 13% for higher values (50 pmol/l)",
+      Procedure = "Participants were asked to collect saliva samples each morning starting from the first day of menstrual bleeding, until the end of the menstrual cycle (i.e., the day before the onset of the next menstrual bleeding). Women were verbally instructed by the principal investigator concerning collecting and storing the saliva and were given a set of 2-ml centrifuge tubes with the minimum amount of required saliva marked on a tube together with written instructions. Saliva samples were collected in the morning, preferably before eating, drinking, or smoking, or not earlier than 30 min after eating, drinking, or smoking. Immediately after collec- tion, samples were frozen in the participant’s home freezer. After the end of the cycle, samples were transported in portable freezers to the laboratory where hormonal assays for measure- ments of 17-b-estradiol (E2) and 17-a-hydroxy-progesterone (P) were conducted. Hormonal measurements were conducted using commercially available hormonal assays of DRG Inter- national, Inc. ELISA plates SLV4188 (sensitivity: 0.4 pg/ml, standard range: 1–100 pg/ml) for E2 and SLV3140 for P (sen- sitivity: 2.5 pg/ml, standard range: 10–5,000 pg/ml). All sam- ples were assayed in duplicates. The quality of hormonal measurements was monitored for each plate separately by including samples of known concentrations with low and high E2 and P levels. Inter-assay variability was 10.1%, intra-assay variability was 7.5% for E2 and 14.1% and 4.9% for P, which is within acceptable values for steroid sex hormones assays (Schultheiss & Stanton, 2009).",
+      Scheduling = "Whole cycle 'Participants were asked to collect saliva samples each morning starting from the first day of menstrual bleeding, until the end of the menstrual cycle (i.e., the day before the onset of the next menstrual bleeding).'",
+        LH_test = "All participants received LH kits. Each kit consisted of sterilized urine cups and 10 LH tests. Women were instructed to conduct the tests from the 10th until the 20th day of the cycle or until a positive result was obtained.")
+
+df <- marc %>% select(id, cycle, bc_day, fc_day, lh_day, estradiol, progesterone, cycle_length) %>% mutate(hormone_cens = "none")
+
+summarise_hormones(df = df, Dataset = "Marcinkowska 2020", Method = "Salivary immunoassay (DRG)")
+```
+

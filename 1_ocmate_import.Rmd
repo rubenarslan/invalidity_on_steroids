@@ -1,0 +1,498 @@
+---
+title: "Cycle Quest Data"
+author: "Lisa DeBruine"
+date: "10/02/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+```{r, message=FALSE}
+# get hormone data from Jones et al 2018 Psych Sci 
+# doi: 10.1177/0956797618760197
+hormones <- read_csv("data/ocmate/OCMATE_facepref_anon.csv",
+                     col_types = "--cddccDn--cnc--dddd---") %>%
+  distinct()
+
+# anonymised cycle questionnaire data for only subjects above
+cycle <- read_csv("data/ocmate/OCMATE_cycle_anon.csv")
+
+whitespace <- function(x) {
+  x <- str_trim(x)
+  x <- str_replace_all(x, "\\s+", " ")
+}
+notes <- read_csv("data/ocmate/OCMATE hormone notes.csv")
+notes <- notes %>% mutate(
+  e_LOQ = case_when(
+    whitespace(labnotes) == "The concentration of estradiol is below the lowest calibration standard but above the low limit of sensitivity. Data are acceptable for analysis." ~ T,
+    whitespace(labnotes) == "Cortisol = 27.62, The concentration of estradiol is below the lowest calibration standard but above the low limit of sensitivity. Data are acceptable for analysis. Low level of saliva. Possible solid particulate present from when the samples were centrifu" ~ T,
+    whitespace(labnotes) == "The concentration of progesterone & estradiol is below the lowest calibration standard but above the low limit of sensitivity. Data are acceptable for analysis." ~ T,
+    TRUE ~ F),
+  p_LOQ = case_when(
+    whitespace(labnotes) == "The concentration of progesterone is below the lowest calibration standard but above the low limit of sensitivity. Data are acceptable for analysis." ~ T,
+    whitespace(labnotes) == "The concentration of progesterone & estradiol is below the lowest calibration standard but above the low limit of sensitivity. Data are acceptable for analysis." ~ T,
+    whitespace(labnotes) == "The concentration of progesterone & cortisol is below the lowest calibration standard but above the low limit of sensitivity. Data are acceptable for analysis." ~ T,
+    whitespace(labnotes) == "Concentration of progesterone is below the lowest calibration standard but above the low limit of sensitivity. Data are acceptable for analysis." ~ T,
+    whitespace(labnotes) == "Progesterone concentration below lowest calibration standard but above low limit of sensitivity. Data acceptable for analysis. Cortisol is <.007, concentration is below the low limit of sensitivity for the assay, data may NOT be acceptable for analysis." ~ T,
+    TRUE ~ F),
+  p_LOD = case_when(
+    whitespace(labnotes) == "Progesterone is <5, concentration is below the low limit of sensitivity for the assay, data may NOT be acceptable for analysis" ~ T,
+    whitespace(labnotes) == "Progesterone is <5, concentration is below the low limit of sensitivity for the assay" ~ T,
+    TRUE ~ F,
+    ),
+  e_LOD = case_when(
+    whitespace(labnotes) == "Estradiol is <0.1, concentration is below the low limit of sensitivity for the assay" ~ T,
+    TRUE ~ F
+  )
+)
+table(notes$e_LOD)
+table(notes$e_LOQ)
+table(notes$p_LOD)
+table(notes$p_LOQ)
+notes %>% filter(e_LOD | e_LOQ ) %>% select(estradiol, e_LOQ, e_LOD) %>% arrange(estradiol) %>% knitr::kable()
+notes %>% filter(p_LOD | p_LOQ) %>% select(progesterone, p_LOQ, p_LOD) %>% arrange(progesterone) %>% knitr::kable()
+table(whitespace(notes$labnotes)) %>% sort()
+```
+
+### Hormones
+
+Data is long with each row representing a face trial, so we selected just relevant data and removed duplicate rows.
+
+* `oc_id`: ID of the subject 
+* `block`: testing block (1, 2 or 3)
+* `age`: age (in years) of subject on day of testing 
+* `ethnicity`: ethnic group of subject (all white)
+* `sexpref`: sexual preference of subject (all heterosexual)
+* `date`: date of testing session
+* `pill`: is subject currently using OCP (0 = no hormonal contraception, 1 = using OCP)
+* `partner`: does subject currently have a romantic partner? (0 = no partner, 1 = yes partner)
+* `block_pill`: all unique pill column values in the block (0 if never used OCP, 1 if always used OCP, otherwise mixed: e.g., 1,0)
+* `block_partner`: all unique partner column values in the block (0 if never had partner, 1 if always had partner, otherwised mixed: e.g., 1,0)
+* `progesterone`: salivary progesterone for that session, pg/mL
+* `estradiol`: salivary estradiol for that session, pg/mL
+* `testosterone`: salivary testosterone for that session, pg/mL
+* `cortisol`: salivary cortisol for that session, μg/dL (1 ug/dL = 10000 pg/mL)
+
+Saliva samples were frozen immediately and stored at −32° C until being shipped on dry ice to the Salimet- rics Lab (Suffolk, United Kingdom) for analysis, where they were assayed using the Salivary 17β-Estradiol Enzyme Immunoassay Kit 1-3702 (M = 3.30 pg/mL, SD = 1.27 pg/mL, sensitivity = 0.1 pg/mL, intra-assay coefficient of variability, or CV = 7.13%, inter-assay CV = 7.45%), Salivary Progesterone Enzyme Immunoassay Kit 1-1502 (M = 148.55 pg/mL, SD = 96.13 pg/mL, sen- sitivity = 5 pg/mL, intra-assay CV = 6.20%, inter-assay CV = 7.55%), Salivary Testosterone Enzyme Immunoas- say Kit 1-2402 (M = 87.66 pg/mL, SD = 27.19 pg/mL, sensitivity < 1.0 pg/mL, intra-assay CV = 4.60%, inter- assay CV = 9.83%), and Salivary Cortisol Enzyme Immu- noassay Kit 1-3002 (M = 0.23 μg/dL, SD = 0.16 μg/dL, sensitivity < 0.003 μg/dL, intra-assay CV = 3.50%, inter- assay CV = 5.08%). Only hormone levels from women not using hormonal contraceptives were used in analy- ses (values given above are for these women only).
+Hormone levels more than 3 standard deviations from the sample mean for that hormone or where Sali- metrics indicated levels were outside their sensitivity range were excluded from the data set (~1% of hor- mone measures were excluded for these reasons). The descriptive statistics given above do not include these excluded values. 
+
+### Cycle Questionnaire
+
+* `oc_id`: unique identifier for the subject
+* `date`: date the questionnaire was completed
+* `last_menst`: When was the first day of your last period? (If you have stopped menstruating for any reason skip to Question 6)	
+    - datemenu: -100y to +0y
+* `next_menst`: When do you expect to start your next period?	
+    - datemenu: +0y to +1y
+* `regular: `How regular is your menstrual cycle?	
+    - 0: I don't know
+    - 1: Very Irregular (e.g. "I can never really predict when my period will start")
+    - 2: Somewhat Irregular (e.g. "my cyle is about the same length, but can vary by a few days")
+    - 3: Regular (e.g. "my cycle is the same length every month")
+* `cycle_length`: Typically, how long is your menstrual cycle (i.e. how many days are there between the first day of your period and the start of your next period)?
+    - selectnum: 14 to 56
+
+
+### Join data
+
+Join by oc_id and date.
+
+```{r}
+data <- hormones %>%
+  full_join(cycle, by = c("oc_id", "date"))
+```
+    
+
+
+```{r}
+table(is.na(hormones$estradiol))
+table(is.na(hormones$progesterone))
+table(is.na(hormones$cortisol))
+```
+
+
+## Menstrual onsets
+```{r}
+menstrual_onsets <- data %>% 
+  group_by(oc_id) %>% 
+  arrange(date) %>% 
+  select(oc_id, date, menstrual_onset_date = last_menst) %>% 
+  filter(!is.na(menstrual_onset_date)) %>% 
+  unique()
+
+menstrual_onsets %>% filter(oc_id=="OC_0119e87d")
+
+qplot(data$date)
+# remove onsets long before study period
+library(tidylog)
+menstrual_onsets <- menstrual_onsets %>% 
+  mutate(menstrual_onset_date =  if_else(menstrual_onset_date < as.Date("2012-08-01") |
+        menstrual_onset_date > as.Date("2016-12-14"), as.Date(NA_real_), menstrual_onset_date))
+menstrual_onsets <- menstrual_onsets %>% 
+  mutate(menstrual_onset_date =  if_else(menstrual_onset_date > date, as.Date(NA_real_), menstrual_onset_date))
+
+
+menstrual_onsets <-  menstrual_onsets %>% 
+  distinct(oc_id, menstrual_onset_date, .keep_all = TRUE)
+
+menstrual_onsets <-  menstrual_onsets %>% 
+  group_by(oc_id) %>%
+      # step 3: prefer reports closer to event if they conflict
+  mutate(
+    report_diff = as.numeric(date - menstrual_onset_date, units = "days")
+  ) %>% 
+  filter(report_diff < 50) %>% 
+  mutate(
+    onset_diff = abs( as.double( lag(menstrual_onset_date) - menstrual_onset_date, units = "days")), # was there a change compared to the last reported menstrual onset (first one gets NA)
+    menstrual_onset_date = if_else(onset_diff < 7, # if last date is known, but is slightly different from current date 
+                 as.Date(NA), # attribute it to memory, not extremely short cycle, use fresher date
+                 menstrual_onset_date, # if it's a big difference, use the current date 
+                 menstrual_onset_date # use current date if last date not known/first onset
+                 ) # if no date is assigned today, keep it like that
+  )
+menstrual_onsets %>% filter(oc_id=="OC_0119e87d")
+
+menstrual_onsets_reduced <- menstrual_onsets %>% 
+  filter(!is.na(menstrual_onset_date)) %>% 
+  mutate(date_origin = "questionnaire")
+
+### REPEAT
+menstrual_onsets_reduced <-  menstrual_onsets_reduced %>% 
+  group_by(oc_id) %>%
+      # step 3: prefer reports closer to event if they conflict
+  mutate(
+    onset_diff = abs( as.double( lag(menstrual_onset_date) - menstrual_onset_date, units = "days")), # was there a change compared to the last reported menstrual onset (first one gets NA)
+    menstrual_onset_date = if_else(onset_diff < 7, # if last date is known, but is slightly different from current date 
+                 as.Date(NA), # attribute it to memory, not extremely short cycle, use fresher date
+                 menstrual_onset_date, # if it's a big difference, use the current date 
+                 menstrual_onset_date # use current date if last date not known/first onset
+                 ) # if no date is assigned today, keep it like that
+  )
+
+menstrual_onsets_reduced <- menstrual_onsets_reduced %>% 
+  filter(!is.na(menstrual_onset_date)) %>% 
+  mutate(date_origin = "questionnaire")
+
+
+### REPEAT AGAIN, THIS TIME ORDERED BY ONSET, NOT REPORTED DATE (catch those wildly out of order reports)
+menstrual_onsets_reduced <-  menstrual_onsets_reduced %>% 
+  group_by(oc_id) %>%
+  arrange(menstrual_onset_date, date) %>% 
+      # step 3: prefer reports closer to event if they conflict
+  mutate(
+    onset_diff = abs( as.double( lag(menstrual_onset_date) - menstrual_onset_date, units = "days")), # was there a change compared to the last reported menstrual onset (first one gets NA)
+    menstrual_onset_date = if_else(onset_diff < 7, # if last date is known, but is slightly different from current date 
+                 as.Date(NA), # attribute it to memory, not extremely short cycle, use fresher date
+                 menstrual_onset_date, # if it's a big difference, use the current date 
+                 menstrual_onset_date # use current date if last date not known/first onset
+                 ) # if no date is assigned today, keep it like that
+  ) %>% 
+  arrange(date, menstrual_onset_date) 
+
+
+menstrual_onsets_reduced <- menstrual_onsets_reduced %>% 
+  filter(!is.na(menstrual_onset_date)) %>% 
+  mutate(date_origin = "questionnaire")
+
+menstrual_onsets_reduced <-  menstrual_onsets_reduced %>% 
+  group_by(oc_id) %>%
+  mutate(
+    onset_diff = abs( as.double( lag(menstrual_onset_date) - menstrual_onset_date, units = "days")), # was there a change compared to the last reported menstrual onset (first one gets NA)
+    menstrual_onset_date = if_else(onset_diff < 7, # if last date is known, but is slightly different from current date 
+                 as.Date(NA), # attribute it to memory, not extremely short cycle, use fresher date
+                 menstrual_onset_date, # if it's a big difference, use the current date 
+                 menstrual_onset_date # use current date if last date not known/first onset
+                 ) # if no date is assigned today, keep it like that
+  )
+
+menstrual_onsets_reduced %>% filter(oc_id=="OC_0119e87d")
+
+menstrual_onsets_reduced %>% group_by(oc_id, date) %>% filter(n()> 1)
+menstrual_onsets_reduced %>% filter(oc_id=="OC_4f0197da")
+
+mons <- menstrual_onsets_reduced
+# now turn our dataset of menstrual onsets into full time series
+
+menstrual_days = data %>% 
+  select(oc_id, date) %>% 
+  distinct(oc_id, date) %>% 
+  arrange(oc_id, date) %>%
+  full_join(mons %>% mutate(date = menstrual_onset_date), by = c("oc_id", "date")) %>%
+  mutate(date_origin = if_else(is.na(date_origin), "not_onset", date_origin)) %>% 
+  group_by(oc_id) %>%
+  complete(date = full_seq(date, period = 1)) %>%
+  mutate(date_origin = if_else(is.na(date_origin), "unobserved_day", date_origin)) %>% 
+  arrange(date) %>%
+  distinct(oc_id, date, menstrual_onset_date, .keep_all = TRUE) %>% 
+  arrange(oc_id, date, menstrual_onset_date) %>% 
+  distinct(oc_id, date, .keep_all = TRUE)
+
+menstrual_days %>% filter(oc_id == "OC_5bfa454b")
+table(menstrual_days$date_origin, exclude=NULL)
+menstrual_days %>% group_by(oc_id) %>% summarise(n = n()) %>% pull(n) %>% qplot()
+
+menstrual_days %>% group_by(oc_id) %>% summarise(n = n()) %>% filter(n> 1000) %>% left_join(menstrual_days)
+
+# menstrual_days %>% group_by(oc_id) %>% summarise(n = n()) %>% filter(n> 1000) %>% left_join(cycle) %>% View
+# str(data$last_menst)
+
+menstrual_days %>% drop_na(oc_id, date) %>%  
+            group_by(oc_id, date) %>% filter(n()>1) %>% nrow() %>% { . == 0} %>% stopifnot()
+
+
+menstrual_days = menstrual_days %>%
+  group_by(oc_id) %>% 
+  mutate(
+    # carry the last observation (the last observed menstrual onset) backward/forward (within person), but we don't do this if we'd bridge more than 40 days this way
+    # first we carry it backward (because reporting is retrospective)
+    next_menstrual_onset = rcamisc::repeat_last(menstrual_onset_date, forward = FALSE),
+    # then we carry it forward
+    last_menstrual_onset = rcamisc::repeat_last(menstrual_onset_date),
+    # in the next cycle, count to the next onset, not the last
+    next_menstrual_onset = if_else(next_menstrual_onset == last_menstrual_onset,
+                                   lead(next_menstrual_onset),
+                                   next_menstrual_onset),
+    # calculate the diff to current date
+    menstrual_onset_days_until = as.numeric(date - next_menstrual_onset),
+    menstrual_onset_days_since = as.numeric(date - last_menstrual_onset)
+    )
+
+avg_cycle_lengths = menstrual_days %>% 
+  select(oc_id, last_menstrual_onset, next_menstrual_onset) %>%
+  mutate(next_menstrual_onset_if_no_last = if_else(is.na(last_menstrual_onset), next_menstrual_onset, as.Date(NA_character_))) %>% 
+  arrange(oc_id, next_menstrual_onset_if_no_last, last_menstrual_onset) %>% 
+  select(-next_menstrual_onset) %>% 
+  distinct(oc_id, last_menstrual_onset, next_menstrual_onset_if_no_last, .keep_all = TRUE) %>% 
+  group_by(oc_id) %>% 
+  mutate(
+    number_of_cycles = n(),
+    cycle_nr = row_number(),
+    cycle_length = as.double(lead(last_menstrual_onset) - last_menstrual_onset, units = "days"),
+    cycle_nr_fully_observed = sum(!is.na(cycle_length)),
+    mean_cycle_length_diary = mean(cycle_length, na.rm = TRUE),
+    median_cycle_length_diary = median(cycle_length, na.rm = TRUE)) %>% 
+  filter(!is.na(last_menstrual_onset) | !is.na(next_menstrual_onset_if_no_last))
+
+table(avg_cycle_lengths$cycle_length < 7)
+avg_cycle_lengths %>% select(oc_id,last_menstrual_onset, cycle_length) %>% filter(cycle_length < 7)
+
+# mons %>% filter(oc_id ==  "OC_5bfa454b") %>% View
+# menstrual_days %>% filter(oc_id ==  "OC_5bfa454b") %>% View
+table(avg_cycle_lengths$cycle_length > 7 & avg_cycle_lengths$cycle_length < 40)
+table(avg_cycle_lengths$cycle_length)
+qplot(avg_cycle_lengths$cycle_length) + scale_x_sqrt(breaks = c(7, 28, 50, 100, 200, 500) )
+
+avg_cycle_lengths <- avg_cycle_lengths %>% rename(
+  obs_cycle_length = cycle_length
+)
+
+ocmate <- data %>% left_join(menstrual_days, by = c("oc_id", "date")) %>% 
+    mutate(next_menstrual_onset_if_no_last = if_else(is.na(last_menstrual_onset), next_menstrual_onset, as.Date(NA_character_))) %>% 
+    left_join(avg_cycle_lengths, by = c("oc_id", "last_menstrual_onset", "next_menstrual_onset_if_no_last"))
+
+ocmate <- ocmate %>% 
+  mutate(mens_pm_15 = case_when(
+    menstrual_onset_days_until > -16  ~ menstrual_onset_days_until,
+    menstrual_onset_days_since < 16 ~ 
+      menstrual_onset_days_since,
+    TRUE ~ NA_real_
+  ))
+
+ocmate %>% select(estradiol, progesterone) %>% summarise_all(~ min(., na.rm = T))
+
+ocmate <- ocmate %>%
+  mutate(
+    estradiol_cens = if_else(estradiol <= 0.1,
+                             "left", "none"),
+    estradiol = if_else(estradiol < 0.1,
+                             0.1, estradiol),
+    progesterone_cens = if_else(progesterone <= 5,
+                               "left", "none"),
+    progesterone = if_else(progesterone < 5,
+                               5, progesterone)
+  )
+table(ocmate$estradiol_cens)
+table(ocmate$progesterone_cens)
+
+ocmate <- ocmate %>% rename(
+  id = oc_id, 
+  cycle = cycle_nr, 
+  bc_day = menstrual_onset_days_until, 
+  fc_day = menstrual_onset_days_since,
+  reported_cycle_length = cycle_length,
+  cycle_length = obs_cycle_length)
+
+range(ocmate$cycle_length, na.rm = T)
+range(ocmate$fc_day, na.rm = T)
+range(ocmate$bc_day, na.rm = T)
+
+# because of OCMATEs unique scheduling with repeated measures across long times, there are many cycles where it's likely that we have missed a menstrual onset
+ocmate <- ocmate %>% 
+  mutate(cycle_length = 
+           if_else(cycle_length > 35, 
+                   true = 36, 
+                   false = cycle_length,
+                   missing = NA_real_),
+         fc_day = 
+           if_else(fc_day > 34, 
+                   true = NA_real_, 
+                   false = fc_day,
+                   missing = NA_real_),
+         bc_day = 
+           if_else(bc_day < -35, 
+                   true = NA_real_, 
+                   false = bc_day,
+                   missing = NA_real_))
+range(ocmate$cycle_length, na.rm = T)
+range(ocmate$fc_day, na.rm = T)
+range(ocmate$bc_day, na.rm = T)
+
+saveRDS(ocmate, "ocmate.rds")
+```
+
+## Hormone plot
+```{r}
+ocmate_long <- ocmate %>% 
+  drop_na(pill) %>% 
+  filter(cycle_length > 7, cycle_length < 40,
+  bc_day > -40) %>% 
+  select(id, pill, mens_pm_15, bc_day, fc_day, estradiol, progesterone, testosterone, cortisol) %>% pivot_longer(cols = c(estradiol, progesterone, testosterone, cortisol))
+
+ocmate_long %>%  
+  ggplot(aes(bc_day, log(value))) + 
+  geom_point(alpha = 0.1) + 
+  geom_smooth(formula = y ~ s(x), method = "gam") + facet_grid(name ~ pill, scales = "free_y")
+
+ocmate_long %>%  
+  ggplot(aes(fc_day, log(value))) + 
+  geom_point(alpha = 0.1) + 
+  geom_smooth(formula = y ~ s(x), method = "gam") + facet_grid(name ~ pill, scales = "free_y")
+
+ocmate_long %>%  
+  ggplot(aes(mens_pm_15, log(value))) + 
+  geom_point(alpha = 0.1) + 
+  geom_smooth(formula = y ~ s(x), method = "gam") + facet_grid(name ~ pill, scales = "free_y")
+
+
+mean(ocmate$progesterone, na.rm = T)
+median(ocmate$progesterone, na.rm = T)
+sd(ocmate$progesterone, na.rm = T)
+mad(ocmate$progesterone, na.rm = T)
+
+
+mean(ocmate$estradiol, na.rm = T)
+median(ocmate$estradiol, na.rm = T)
+sd(ocmate$estradiol, na.rm = T)
+mad(ocmate$estradiol, na.rm = T)
+
+lme4::lmer(estradiol ~ (1|id), ocmate %>% filter(pill == 0))
+lme4::lmer(scale(log(estradiol)) ~ (1|id), ocmate %>% filter(pill == 0))
+lme4::lmer(scale(log(estradiol)) ~ (1|id), ocmate %>% filter(pill == 1))
+lme4::lmer((log(estradiol)) ~ (1|id), ocmate %>% filter(pill == 0))
+lme4::lmer((log(estradiol)) ~ (1|id), ocmate %>% filter(pill == 1))
+lme4::lmer(progesterone ~ (1|id), ocmate)
+lme4::lmer(log(progesterone) ~ (1|id), ocmate)
+
+
+cor.test(log(ocmate$progesterone),log(ocmate$estradiol))
+lme4::lmer(scale(log(estradiol)) ~ scale(log(progesterone)) + (1|id), ocmate)
+```
+
+## Compare pill/non-pill
+```{r}
+ocmate %>% group_by(pill, id) %>% 
+  summarise_at(vars(progesterone, estradiol, testosterone, cortisol), mean, na.rm = T) %>% 
+  summarise_at(vars(progesterone, estradiol, testosterone, cortisol), funs(mean, var), na.rm = T) %>% 
+  pivot_longer(-pill) %>% 
+  drop_na() %>% 
+  pivot_wider(names_from = pill) %>% 
+  mutate(diff = `0`-`1`,
+         ratio = 100*`1`/`0`) %>% 
+  arrange(name)
+
+# 83.8 vs. 23.1
+# diff in pg/ml for total estradiol in serum for Zethraeus et al. 62.4
+# ratio: 23.1/83.8=27%
+# diff in pg/ml for free testosterone in serum for Zethraeus et al. 2.1
+# ratio: 1.8/3.9=46%
+# variance ratio e2 in zethraeus 52.3^2/(70.9^2)=54%
+# variance ratio free t in zethraeus 1.2^2/1.6^2=56%
+
+ocmate %>% group_by(pill, id) %>% 
+  summarise_at(vars(progesterone, estradiol, testosterone, cortisol), mean, na.rm = T) %>% 
+  pivot_longer(c(-pill, -id)) %>% 
+  drop_na() %>% 
+  ggplot(aes(factor(pill), value)) + 
+  ggbeeswarm::geom_beeswarm() + 
+  geom_pointrange(stat = 'summary', fun.data = 'mean_cl_boot', color = 'blue') +
+  facet_wrap(~ name, scales = 'free_y')
+
+ocmate %>% group_by(pill, id) %>% 
+  mutate_at(vars(progesterone, estradiol, testosterone, cortisol), log) %>% 
+  summarise_at(vars(progesterone, estradiol, testosterone, cortisol), mean, na.rm = T) %>% 
+  pivot_longer(c(-pill, -id)) %>% 
+  drop_na() %>% 
+  ggplot(aes(factor(pill), value)) + 
+  ggbeeswarm::geom_beeswarm() + 
+  geom_pointrange(stat = 'summary', fun.data = 'mean_cl_boot', color = 'blue') +
+  facet_wrap(~ name, scales = 'free_y')
+```
+
+
+## Summarize
+```{r}
+source("0_summary_functions.R")
+```
+
+```{r}
+df <- ocmate %>% filter(pill == 0) %>% select(id, cycle, bc_day, fc_day, estradiol, progesterone, cycle_length, age, partner)
+
+summarise_hormones(df, "OCMATE Non-HC")
+
+df <- ocmate %>% filter(pill == 1) %>% select(id, cycle, bc_day, fc_day, estradiol, progesterone, cycle_length, age, partner)
+
+summarise_hormones(df = df, Dataset = "OCMATE HC")
+
+df <- ocmate %>% filter(pill == 0) %>% select(id, cycle, bc_day, fc_day, cycle_length, age, partner, hormone = estradiol, hormone_cens = estradiol_cens)
+
+summarise_hormone(df, "OCMATE Non-HC", "Estradiol", 
+                  Method = "Salivary immunoassay (Salimetrics)", 
+                  Citation = "Jones, B. C., Hahn, A. C., Fisher, C. I., Wang, H., Kandrik, M., Han, C., Fasolt, V., Morrison, D., Lee, A. J., Holzleitner, I. J., O’Shea, K. J., Roberts, S. C., Little, A. C., & DeBruine, L. M. (2018). No Compelling Evidence that Preferences for Facial Masculinity Track Changes in Women’s Hormonal Status. Psychological Science, 29(6), 996–1005. https://doi.org/10.1177/0956797618760197",
+                  LOD = 0.1,
+                  LOQ = 1,
+                  CV_intra = 7.13,
+                  CV_inter = 7.45,
+                  Procedure = "Participants provided a saliva sample via passive drool (Papacosta & Nassis, 2011) in each test session. Partici- pants were instructed to avoid consuming alcohol and coffee in the 12 hr prior to participation and avoid eating, smoking, drinking, chewing gum, or brushing their teeth in the 60 min prior to participation. Each woman’s test sessions took place at approximately the same time of day to minimize effects of diurnal changes in hormone levels (Bao et al., 2003; Veldhuis et al., 1988).
+Saliva samples were frozen immediately and stored at −32° C until being shipped on dry ice to the Salimet- rics Lab (Suffolk, United Kingdom) for analysis, where they were assayed using the Salivary 17β-Estradiol Enzyme Immunoassay Kit 1-3702 (M = 3.30 pg/mL, SD = 1.27 pg/mL, sensitivity = 0.1 pg/mL, intra-assay coefficient of variability, or CV = 7.13%, inter-assay CV = 7.45%).",
+                  Scheduling = "Irrespective of cycle. 'Participants completed up to three blocks of test sessions (mean time between Block 1 and Block 2 = 230 days; mean time between Block 2 and Block 3 = 487 days). Each of the three blocks of test sessions consisted of five weekly test sessions. Table 1 shows how many women completed one, two, three, four, or five test sessions in Blocks 1 through 3.'", 
+                  LH_test = "")
+
+df <- ocmate %>% filter(pill == 0) %>% select(id, cycle, bc_day, fc_day, cycle_length, age, partner, hormone = progesterone, hormone_cens = progesterone_cens)
+
+summarise_hormone(df = df, Dataset = "OCMATE Non-HC", 
+                  Hormone = "Progesterone", 
+                  Method = "Salivary immunoassay (Salimetrics)", 
+                  Citation = "Jones, B. C., Hahn, A. C., Fisher, C. I., Wang, H., Kandrik, M., Han, C., Fasolt, V., Morrison, D., Lee, A. J., Holzleitner, I. J., O’Shea, K. J., Roberts, S. C., Little, A. C., & DeBruine, L. M. (2018). No Compelling Evidence that Preferences for Facial Masculinity Track Changes in Women’s Hormonal Status. Psychological Science, 29(6), 996–1005. https://doi.org/10.1177/0956797618760197",
+                  LOD = 5,
+                  LOQ = 10,
+                  CV_intra = 6.20,
+                  CV_inter = 7.55,
+                  Procedure = "Participants provided a saliva sample via passive drool (Papacosta & Nassis, 2011) in each test session. Partici- pants were instructed to avoid consuming alcohol and coffee in the 12 hr prior to participation and avoid eating, smoking, drinking, chewing gum, or brushing their teeth in the 60 min prior to participation. Each woman’s test sessions took place at approximately the same time of day to minimize effects of diurnal changes in hormone levels (Bao et al., 2003; Veldhuis et al., 1988).
+Saliva samples were frozen immediately and stored at −32° C until being shipped on dry ice to the Salimet- rics Lab (Suffolk, United Kingdom) for analysis, where they were assayed using the Salivary Progesterone Enzyme Immunoassay Kit 1-1502 (M = 148.55 pg/mL, SD = 96.13 pg/mL, sen- sitivity = 5 pg/mL, intra-assay CV = 6.20%, inter-assay CV = 7.55%).",
+                  Scheduling = "Irrespective of cycle. 'Participants completed up to three blocks of test sessions (mean time between Block 1 and Block 2 = 230 days; mean time between Block 2 and Block 3 = 487 days). Each of the three blocks of test sessions consisted of five weekly test sessions. Table 1 shows how many women completed one, two, three, four, or five test sessions in Blocks 1 through 3.'", 
+                  LH_test = "")
+
+
+df <- ocmate %>% filter(pill == 1) %>% select(id, cycle, bc_day, fc_day, cycle_length, age, partner, hormone = estradiol, hormone_cens = estradiol_cens)
+
+summarise_hormone(df, "OCMATE HC", "Estradiol", Method = "Salivary immunoassay (Salimetrics)")
+
+df <- ocmate %>% filter(pill == 1) %>% select(id, cycle, bc_day, fc_day, cycle_length, age, partner, hormone = progesterone, hormone_cens = progesterone_cens)
+
+summarise_hormone(df = df, Dataset = "OCMATE HC", Hormone = "Progesterone", Method = "Salivary immunoassay (Salimetrics)")
+```
+

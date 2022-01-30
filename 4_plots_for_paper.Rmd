@@ -1,0 +1,414 @@
+---
+title: "Tabular comparison"
+author: "Ruben Arslan"
+output: 
+  distill::distill_article:
+    code_folding: yes
+    toc: yes
+    toc_float: yes
+    self_contained: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, fig.width = 5, fig.height = 15}
+library(tidyverse)
+library(gt)
+library(brms)
+```
+
+```{r}
+source("0_summary_functions.R")
+library(patchwork)
+```
+
+
+
+Tabular overview of studies (assay, available cycle phase measures, means, SDs, ranges, logmean/sd, missing/censored values.
+Perhaps a facet plot to better show associations and allow comparison of means with BC for all six except Grebe and Blake.
+Coefplots for whatever the best effect size measure is for E2 and P4.
+Maybe a stacked bar graph to compare variance decomposition? Or a coefplot for all model estimates across LH datasets?
+
+```{r}
+summaries <- list.files("summaries", full.names = T)
+summaries <- summaries[!str_detect(summaries, "(empty|Ovulatory|OCMATE HC|BioCycle_Estradiol|Estradiol LCMS|BioCycle_Progesterone\\.rds)")]
+summary_names <- str_match(summaries, "table_(.+?)\\.rds")[,2]
+e2_summaries <- summaries[str_detect(summaries, pattern = "Estradiol")]
+e2_summaries <- e2_summaries[!str_detect(e2_summaries, "(Estradiol LCMS)")]
+warning(paste(e2_summaries, collapse = " "))
+e2_summaries <- e2_summaries %>% map(rio::import)
+names(e2_summaries) <- e2_summaries %>% map("Dataset") %>% unlist()
+
+p4_summaries <- summaries[str_detect(summaries, pattern = "Progesterone")]
+warning(paste(p4_summaries, collapse = " "))
+p4_summaries <- p4_summaries %>% map(rio::import)
+names(p4_summaries) <- p4_summaries %>% map("Dataset") %>% unlist()
+```
+
+
+Maybe a stacked bar graph to compare variance decomposition? Or a coefplot for all model estimates across LH datasets?
+
+## Table 1
+Tabular overview of studies (assay, available cycle phase measures, means, SDs, ranges, logmean/sd, missing/censored values.
+
+```{r}
+summaries <- list.files("summaries", full.names = T)
+summaries <- summaries[!str_detect(summaries, "(empty|Ovulatory|OCMATE HC|BioCycle_Estradiol|Estradiol LCMS|BioCycle_Progesterone\\.rds)")]
+summaries <- summaries[str_detect(summaries, pattern = "(Estradiol|Progesterone)")]
+summary_names <- str_match(summaries, "table_(.+?)\\.rds")[,2]
+message(paste(summary_names, "\n"))
+sus <- list()
+su_dfs <- list()
+for(s in seq_along(summaries)) {
+    su <- rio::import(summaries[s])
+    su_df <- su
+    su_df$Sample <- summary_names[s]
+    su_df$imputed_fc_vs_measured_graph <- 
+    su_df$imputed_bc_vs_measured_graph <- 
+    su_df$imputed_lh_vs_measured_graph <- 
+    su_df$bc_day_model <- 
+    su_df$fc_day_model <- 
+    su_df$lh_day_model <- 
+    su_df$distribution <- NULL
+    su_df$imputed_fc_vs_measured_graph <- 
+    su_df$imputed_bc_vs_measured_graph <- 
+    su_df$imputed_lh_vs_measured_graph <- 
+    su_df$Distribution <- 
+    su_df$plot_bc <- 
+    su_df$plot_fc <- 
+    su_df$plot_lh <- summary_names[s]
+    sus[[summary_names[s]]] <- su
+    su_dfs[[summary_names[s]]] <- su_df %>% as_tibble() %>% mutate_if(is.numeric, ~ sprintf("%.2f", .))
+  }
+```
+
+
+```{r}
+comp_wide <- as_tibble(bind_rows(su_dfs, .id = "Sample")) %>%
+    mutate_at(vars(n_women, n_cycles, n_days, missing, censored, outliers, usable_n, usable_n_women), 
+              ~ str_sub(., 1, -4))
+all_stats <- comp_wide
+  
+comp_wide <- comp_wide %>%
+    mutate_at(vars(missing, censored, outliers), ~ sprintf("%.0f (%.0f%%)", as.numeric(.), 100*as.numeric(.)/as.numeric(n_days)))
+
+comp_wide <- comp_wide %>% 
+  mutate(
+    Scheduling = str_match(Scheduling, "^(.+?)'")[,2],
+    Scheduling = case_when(str_detect(Scheduling, "Whole") ~ "each day",
+                           str_detect(Scheduling, "Every day") ~ "each day",
+                           str_detect(Scheduling, "Irrespective") ~ "random",
+                           TRUE ~ "distributed"),
+    `Body fluid` = case_when(str_detect(Method, "Serum") ~ "Serum",
+                             TRUE ~ "Saliva"),
+    Assay = case_when(str_detect(Method, "(R|r)adioimmunoassay") ~ "RIA",
+                      str_detect(Method, "Serum CL") ~ "CIA",
+                      str_detect(Method, "chromato") ~ "LCMS/MS",
+                      str_detect(Method, "Salivary [Ii]mmunoassay") ~ "CIA"),
+    `Indicators` = 
+           case_when(is.na(r_bc_stirn) ~ "FC",
+                     is.na(r_prob_lh) ~ "FC+BC",
+                     TRUE ~ "FC+BC+LH")) %>% 
+  mutate(`Geometric mean` = sprintf("%.2f",exp(as.numeric(logmean)))) %>% 
+    select(Sample, Dataset,Hormone,
+           Women = n_women,
+           Cycles = n_cycles,
+           Days = n_days,
+           Age = age,
+           `In relationship` = in_relationship,
+           `Cycle length` = cycle_length,
+           `Indicators`,
+           Scheduling,
+           `Body fluid`,
+           Assay,
+            # Method,
+           # `Limit of quantitation` = LOQ, `Limit of detection`, `Intraassay CV`, `Interassay CV`, 
+           `Usable n women` = usable_n_women,
+           `Usable n` = usable_n,
+           `Geometric mean`, Mean = mean, SD = sd, Range = range)
+           # icc, `Variance Ratio`, 
+           # var_id, var_id_cycle, rmse_icc)
+
+comp_wide <- comp_wide %>% arrange(desc(as.numeric(Days)))
+library(tidylog)
+comp <- comp_wide %>% 
+  select(-Sample) %>% 
+  pivot_longer(c(-Dataset, -Hormone))
+
+table(comp$Hormone)
+comp <- comp %>% 
+    mutate(
+      Hormone = str_replace(Hormone, "Free ", ""),
+      Hormone = str_replace(Hormone, ".02", ""),
+      name = if_else(name %in% c("Women", "Cycles", "Days", "Indicators", "Scheduling", "Body fluid", "Age", "In relationship", "Cycle length"),
+                                      name,
+                                      paste0(Hormone,"__", name))) %>% 
+    select(-Hormone) %>% 
+    distinct() %>% 
+    pivot_wider(name, Dataset) %>% 
+    rename(rowname = name)
+
+comp <- comp %>% 
+  mutate(rowgroup = case_when(
+    rowname %in% c("Women", "Cycles", "Days", "Age", "In relationship", "Body fluid") ~ "Sample",
+    rowname %in% c("Cycle length", "Indicators", "Scheduling") ~ "Cycle phase",
+    str_detect(rowname, "Estradiol") ~ "Estradiol",
+    str_detect(rowname, "Progesterone") ~ "Progesterone",
+    TRUE ~ "XX"
+  ),
+  rowname = str_match(rowname, "(__)?([^_]+?)$")[,3])
+  
+comp %>% 
+  gt(groupname_col = "rowgroup") %>% 
+  tab_header(
+    title = "Study summary",
+    subtitle = "Descriptive statistics"
+  )# %>%
+    # cols_width(everything() ~ px(230))
+```
+
+
+## Figure 1
+Cycle phase plot relative to LH for at least BioCycle, one LCMS/MS and one salivary IA.
+Cycle phase plot relative to LH for at least BioCycle, one LCMS/MS and one salivary IA.
+
+```{r fig.width = 10, fig.height = 7.1}
+library(cowplot)
+theme_set(theme_cowplot())
+
+low_space <- list(
+  ggtitle("", subtitle = ""),
+  theme_minimal(base_size = 14),
+  scale_x_continuous("", breaks = seq(-12, 12, by = 4)),
+  theme(panel.spacing = unit(c(0), "cm"),
+        # panel.background = element_rect(fill = "red"),
+        # plot.background = element_rect(fill = "green"),
+        plot.margin = unit(c(0, 0, 0, 0), "cm"))
+        )
+remove_y_axis_e2 <- list(
+  theme(axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.line.y = element_blank())
+)
+remove_y_axis_p4 <- list(
+  theme(axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.line.y = element_blank())
+)
+
+
+plot_grid(nrow = 2, align = "hv", labels = c("", "BioCycle Free E2", "", "Marcinkowska '20 E2", "", "Jünger '18 E2",
+"", "BioCycle 2% P4", "", "Marcinkowska '20 P4", "", "Jünger '18 P4"), hjust = -0.8, vjust = 3, 
+  rel_widths = c(0.05, rep(c(1,-0.15), times = 3), 0.05, rep(c(1,-0.15))),
+NULL,
+cycle_phase_plot(e2_summaries[["BioCycle"]], "lh_day_model") + low_space, NULL,
+cycle_phase_plot(e2_summaries[["Marcinkowska 2020"]], "lh_day_model") + low_space + remove_y_axis_e2, NULL,
+cycle_phase_plot(e2_summaries[["GOCD2"]], "lh_day_model") + low_space + remove_y_axis_e2,
+
+NULL,
+cycle_phase_plot(p4_summaries[["BioCycle"]], "lh_day_model", custom_limits = log(c(0.2, 1900))) + low_space, NULL,
+cycle_phase_plot(p4_summaries[["Marcinkowska 2020"]], "lh_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["GOCD2"]], "lh_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4
+)
+
+ggsave("plots/Figure1.pdf", width = 10, height = 7.1, units = "in")
+ggsave("plots/Figure1.png", width = 10, height = 7.1, units = "in")
+```
+
+## Figure 2
+Perhaps a facet plot to better show associations and allow comparison of means with BC for all six except Grebe and Blake.
+
+```{r fig.width = 14.22, fig.height = 10}
+low_space <- list(
+  ggtitle("", subtitle = ""),
+  theme_minimal(base_size = 14),
+  scale_x_continuous("", breaks = seq(-29, 0, by = 4)),
+  theme(panel.spacing = unit(c(0), "cm"),
+        # panel.background = element_rect(fill = "red"),
+        # plot.background = element_rect(fill = "green"),
+        plot.margin = unit(c(0, 0, 0, 0), "cm"))
+        )
+
+plot_grid(nrow = 2, align = "hv", 
+          labels = c("", "BioCycle Free E2", "", "OCMATE E2", "", "Roney '13 E2", "", "Jünger '18 E2", "", "Stern '21 E2", "", "Marcinkowska '20 E2", 
+"", "BioCycle 2% P4", "", "OCMATE P4", "", "Roney '13 P4", "", "Jünger '18 P4", "", "Stern '21 P4", "", "Marcinkowska '20 P4"), 
+label_y = 0.99, hjust = -0.3,
+rel_widths = c(0.1, rep(c(1,-0.2), times = 6), 0.1, rep(c(1,-0.2))),
+NULL,
+cycle_phase_plot(e2_summaries[["BioCycle"]], "bc_day_model") + low_space, NULL,
+cycle_phase_plot(e2_summaries[["OCMATE Non-HC"]], "bc_day_model") + low_space + remove_y_axis_e2, NULL,
+cycle_phase_plot(e2_summaries[["Roney 2013"]], "bc_day_model") + low_space + remove_y_axis_e2, NULL,
+cycle_phase_plot(e2_summaries[["GOL2"]], "bc_day_model") + low_space + remove_y_axis_e2, NULL,
+cycle_phase_plot(e2_summaries[["GOCD2"]], "bc_day_model") + low_space + remove_y_axis_e2, NULL,
+cycle_phase_plot(e2_summaries[["Marcinkowska 2020"]], "bc_day_model") + low_space + remove_y_axis_e2, 
+
+NULL,
+cycle_phase_plot(p4_summaries[["BioCycle"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space, NULL,
+cycle_phase_plot(p4_summaries[["OCMATE Non-HC"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["Roney 2013"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["GOL2"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["GOCD2"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["Marcinkowska 2020"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4)
+
+ggsave("plots/Figure2.pdf", width = 14.22, height = 10, units = "in")
+ggsave("plots/Figure2.png", width = 14.22, height = 10, units = "in")
+```
+
+## Figure 3
+Plot for GOL2 data for all kinds of cycle phase
+
+```{r fig.width = 10, fig.height = 7}
+low_space <- list(
+  ggtitle("", subtitle = ""),
+  theme_minimal(base_size = 14),
+  theme(panel.spacing = unit(c(0), "cm"),
+        # panel.background = element_rect(fill = "red"),
+        # plot.background = element_rect(fill = "green"),
+        plot.margin = unit(c(0, 0, 0, 0), "cm"))
+        )
+plot_grid(nrow = 2, align = "hv", labels = c("", "Forward-counting", "", "Backward-counting", "", "LH surge",
+"", "Forward-counting", "", "Backward-counting", "", "LH surge"), hjust = -0.8, vjust = 3, 
+  rel_widths = c(0.05, rep(c(1,-0.15), times = 3), 0.05, rep(c(1,-0.15))),
+NULL,
+cycle_phase_plot(e2_summaries[["GOL2"]], "fc_day_model", custom_limits = log(c(1.8, 20))) + low_space, NULL,
+cycle_phase_plot(e2_summaries[["GOL2"]], "bc_day_model", custom_limits = log(c(1.8, 20))) + low_space + remove_y_axis_e2, NULL,
+cycle_phase_plot(e2_summaries[["GOL2"]], "lh_day_model", custom_limits = log(c(1.8, 20))) + low_space + remove_y_axis_e2,
+
+NULL,
+cycle_phase_plot(p4_summaries[["GOL2"]], "fc_day_model", custom_limits = log(c(0.5, 700))) + low_space, NULL,
+cycle_phase_plot(p4_summaries[["GOL2"]], "bc_day_model", custom_limits = log(c(0.5, 700))) + low_space + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["GOL2"]], "lh_day_model", custom_limits = log(c(0.5, 700))) + low_space + remove_y_axis_p4
+)
+
+ggsave("plots/Figure3.pdf", width = 10, height = 7, units = "in")
+ggsave("plots/Figure3.png", width = 10, height = 7, units = "in")
+```
+
+## Figure 4
+Coefplots for whatever the best effect size measure is for E2 and P4.
+
+```{r fig.width = 5, fig.height = 5}
+rr_saliva <- all_stats %>% select(Hormone, Dataset, contains("_imputed_rr")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
+  mutate(name = str_replace(name, "^r_diff_", ""),
+         name = str_replace(name, "_imputed_rr$", "")) %>% 
+  rename(cycle_phase = name) %>% 
+  extract(value, into = c("estimate", "conf.low", "conf.high"), regex = "([^\\[]+) \\[([^;]+);([^(]+)\\]",
+          convert = TRUE) %>% 
+  mutate(Hormone = str_replace(Hormone, "Free ", "")) %>% 
+  mutate(Hormone = str_replace(Hormone, ".02", "")) %>% 
+  group_by(Hormone, cycle_phase) %>% 
+  mutate(serum = estimate[which(Dataset=="BioCycle")],
+         estimate = estimate/serum,
+         conf.low = conf.low/serum,
+         conf.high = conf.high/serum)
+
+library(ggrepel)
+rr_saliva %>% 
+  filter(Dataset != "BioCycle") %>% 
+  ggplot(aes(Dataset, estimate, ymin = conf.low, ymax = conf.high,
+             color = cycle_phase, label = sprintf("%.2f", estimate))) + 
+  geom_pointrange(position = position_dodge(0.4), size = 0.3) +
+  ggrepel::geom_text_repel(size = 2.5, position = position_dodge(0.4)) +
+  facet_wrap(~ Hormone) +
+  coord_flip() +
+  theme_bw() + 
+  scale_y_continuous("Estimated correlation serum/saliva", limits = c(NA, 1)) +
+  theme(legend.position="none")
+
+ggsave("plots/Figure4.pdf", width = 5, height = 5, units = "in")
+ggsave("plots/Figure4.png", width = 5, height = 5, units = "in")
+```
+
+## Statement 1
+```{r}
+e2_summaries %>% map(list("n_women"), .default = NA) %>% unlist() %>% sum()
+e2_summaries %>% map(list("n_days"), .default = NA) %>% unlist() %>% sum()
+
+e2_summaries %>% map(list("usable_n_women"), .default = NA) %>% unlist() %>% sum()
+e2_summaries %>% map(list("usable_n"), .default = NA) %>% unlist() %>% sum()
+p4_summaries %>% map(list("usable_n_women"), .default = NA) %>% unlist() %>% sum()
+p4_summaries %>% map(list("usable_n"), .default = NA) %>% unlist() %>% sum()
+```
+
+
+## Statement 2
+### E2
+```{r}
+rr_saliva %>% 
+  filter(Dataset != "BioCycle") %>% 
+  filter(Hormone == "Estradiol") %>% {
+print(psych::describeBy(.$estimate, .$cycle_phase))
+psych::describe(.$estimate)
+}
+```
+
+### P4
+```{r}
+rr_saliva %>%
+  filter(Dataset != "BioCycle") %>% 
+  filter(Hormone == "Progesterone") %>% {
+print(psych::describeBy(.$estimate, .$cycle_phase))
+psych::describe(.$estimate)
+}
+```
+
+## Statement 3
+In all salivary immunoassay datasets, the variance explained by cycle phase was much lower. The leave-one-out-adjusted r never exceeded .14, was indistinguishable from zero more often than not, and not systematically larger for more valid measures of cycle phase. 
+
+```{r}
+loos <- all_stats %>% select(Hormone, Dataset, contains("loo")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
+  mutate(name = str_replace(name, "^r_loo_", "")) %>% 
+  rename(cycle_phase = name) %>% 
+  extract(value, into = c("estimate", "conf.low", "conf.high"), regex = "([^\\[]+) \\[([^;]+);([^(]+)\\]",
+          convert = TRUE) %>% 
+  mutate(Hormone = str_replace(Hormone, "Free ", "")) %>% 
+  mutate(Hormone = str_replace(Hormone, ".02", ""))
+
+loos %>% 
+  filter(Hormone == "Estradiol", Dataset != "BioCycle") %>% 
+  arrange(desc(estimate))
+
+imps <- all_stats %>% select(Hormone, Dataset, contains("_imputed_rr")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
+  mutate(name = str_replace(name, "^r_diff_", ""),
+         name = str_replace(name, "_imputed_rr$", "")) %>% 
+  rename(cycle_phase = name) %>% 
+  extract(value, into = c("estimate", "conf.low", "conf.high"), regex = "([^\\[]+) \\[([^;]+);([^(]+)\\]",
+          convert = TRUE) %>% 
+  mutate(Hormone = str_replace(Hormone, "Free ", "")) %>% 
+  mutate(Hormone = str_replace(Hormone, ".02", ""))
+
+imps %>% 
+  filter(Hormone == "Estradiol", Dataset != "BioCycle") %>% 
+  arrange(desc(estimate))
+```
+
+## Statement 4
+```{r}
+trafos <- all_stats %>% select(Hormone, Dataset, contains("stirn"), contains("prob")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
+  mutate(name = str_replace(name, "^r_", ""),
+         name = str_replace(name, "_stirn$", ""),
+         name = str_replace(name, "prob_", "")) %>% 
+  separate(name, c("transformation", "diff", "cycle_phase"), fill = "left") %>% 
+  unite("transformation", c("transformation", "diff"), na.rm = T) %>% 
+  extract(value, into = c("estimate", "conf.low", "conf.high"), regex = "([^\\[]+) \\[([^;]+);([^(]+)\\]",
+          convert = TRUE) %>% 
+  mutate(Hormone = str_replace(Hormone, "Free ", "")) %>% 
+  mutate(Hormone = str_replace(Hormone, ".02", ""))
+
+trafos %>% group_by(Hormone, transformation) %>% 
+  summarise(median = median(estimate, na.rm = T),
+            mean = mean(estimate, na.rm = T)) %>% 
+  arrange(Hormone, abs(mean)) %>% 
+  group_by(Hormone) %>% 
+  mutate(max_diff = diff(range(mean, na.rm = T)))
+
+trafos %>% 
+  ggplot(aes(Dataset, estimate, ymin = conf.low, ymax = conf.high, color = transformation)) + geom_pointrange(position = position_dodge(width = .2)) + facet_grid(Hormone ~ cycle_phase) + coord_flip()
+trafos %>% 
+  ggplot(aes(transformation, estimate, ymin = conf.low, ymax = conf.high, color = Dataset)) + geom_pointrange(position = position_dodge(width = .2)) + facet_grid(Hormone ~ cycle_phase) + coord_flip()
+```
+

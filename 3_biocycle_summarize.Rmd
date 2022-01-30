@@ -1,0 +1,155 @@
+---
+title: "Summarize BioCycle"
+author: "Ruben Arslan"
+date: "1/4/2021"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Summarize BioCycle data
+
+## Summarize
+```{r}
+source("0_summary_functions.R")
+biocycle_stdnames <- rio::import("biocycle.rds")
+```
+
+
+```{r}
+df <- biocycle_stdnames %>% select(id, estradiol, progesterone, cycle, bc_day, fc_day, lh_day, cycle_length)
+
+summarise_hormones(df, Dataset = "BioCycle", Method = "Serum Immunoassay")
+```
+
+### Estradiol
+```{r}
+df <- biocycle_stdnames %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = total_estradiol, cycle_length, hormone_cens = estradiol_cens, age, partner)
+
+summarise_hormone(df, "BioCycle", 
+                  "Estradiol", 
+                  Method = "Serum Radioimmunoassay", 
+                  Citation = "
+Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., & BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x
+  
+Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., & Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287
+
+Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., & Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012",
+                  LOD = 20,
+                  CV_intra = NA,
+                  CV_inter = "<10",
+                  Procedure = "Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY).",
+                  Scheduling = "Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'", 
+                  LH_test = "Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. ")
+```
+
+### Free Estradiol
+```{r}
+df <- biocycle_stdnames %>% select(id, cycle, bc_day, fc_day, lh_day, cycle_length, hormone = estradiol, hormone_cens = estradiol_cens, age, partner)
+
+summarise_hormone(df, "BioCycle", 
+                  "Free Estradiol", 
+                  Method = "Serum Radioimmunoassay + mass-action-algorithms", 
+                  Citation = "
+Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., & BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x
+  
+Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., & Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287
+
+Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., & Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012",
+                  LOD = 0.21,
+                  CV_intra = NA,
+                  CV_inter = "<10",
+                  Procedure = "Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY).",
+                  Scheduling = "Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'", 
+                  LH_test = "Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. ")
+```
+
+### Progesterone
+```{r}
+df <- biocycle_stdnames %>% select(id, cycle, bc_day, fc_day,  lh_day, cycle_length, hormone = progesterone, hormone_cens = progesterone_cens, age, partner)
+
+summarise_hormone(df = df, Dataset = "BioCycle", 
+                  Hormone = "Progesterone", 
+                  Method = "Serum CL-EIA (chemiluminescence enzyme immunoassay)",
+                  Citation = "
+Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., & BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x
+  
+Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., & Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287
+
+Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., & Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012",
+                  LOD = 200,
+                  CV_intra = NA,
+                  CV_inter = "<10",
+                  Procedure = "Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY).",
+                  Scheduling = "Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'", 
+                  LH_test = "Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www.clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. ")
+```
+
+
+### Progesterone 2%
+```{r}
+df <- biocycle_stdnames %>% select(id, cycle, bc_day, fc_day,  lh_day, cycle_length, hormone = progesterone, hormone_cens = progesterone_cens, age, partner) %>% mutate(hormone = hormone * 0.02)
+
+summarise_hormone(df = df, Dataset = "BioCycle", 
+                  Hormone = "Progesterone.02", 
+                  Method = "Serum CL-EIA (chemiluminescence enzyme immunoassay)",
+                  Citation = "
+Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., & BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x
+  
+Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., & Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287
+
+Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., & Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012",
+                  LOD = 200 * .02,
+                  CV_intra = NA,
+                  CV_inter = "<10",
+                  Procedure = "Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY).",
+                  Scheduling = "Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'", 
+                  LH_test = "Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www.clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. ")
+```
+
+
+
+### Testosterone
+```{r}
+df <- biocycle_stdnames %>% select(id, cycle, bc_day, fc_day,  lh_day, hormone = Testo, cycle_length, hormone_cens = Testo_cens, age, partner)
+
+summarise_hormone(df = df, Dataset = "BioCycle", 
+                  Hormone = "Testosterone", 
+                  Method = "Serum LCMS/MS",
+                  Citation = "
+Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., & BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x
+  
+Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., & Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287
+
+Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., & Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012",
+                  LOD = 0.2,
+                  CV_intra = NA,
+                  CV_inter = "<7",
+                  Procedure = "Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Serum testosterone was measured by liquid chromatography/ tandem mass spectrometry (Shimadzu Prominence Liquid Chromatogram with an ABSceix 5500 tandem mass spectrometer) by the Advanced Research and Diagnostic Laboratory, Minneapolis, MN. Increased sensitivity was achieved by using 100% acetonitrile mobile phase B as the solvent gradient elution and adding a low standard of 4 ng/dL.",
+                  Scheduling = "Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'", 
+                  LH_test = "Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. ")
+```
+
+### SHBG
+```{r}
+df <- biocycle_stdnames %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = SHBG, cycle_length, hormone_cens = SHBG_cens, age, partner)
+
+summarise_hormone(df, "BioCycle", 
+                  "SHBG", 
+                  Method = "Serum Radioimmunoassay", 
+                  Citation = "
+Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., & BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x
+  
+Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., & Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287
+
+Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., & Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012",
+                  LOD = 20,
+                  CV_intra = NA,
+                  CV_inter = "<10",
+                  Procedure = "Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY).",
+                  Scheduling = "Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'", 
+                  LH_test = "Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. ")
+```

@@ -1,0 +1,429 @@
+---
+title: "Impute hormones by cycle day"
+author: "Ruben Arslan"
+date: "1/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(codebook)
+library(brms)
+
+plot_curve <- function(model, method = "fitted") {
+  cond <- tibble(.rows = 1)
+  cond[[names(model$data)[2]]] <- "none"
+  plot(conditional_effects(model, method = method,
+                conditions = cond, 
+                spaghetti = TRUE, nsamples = 100), 
+              points = TRUE, 
+              point_args = list(alpha = 0.05),
+              spaghetti_args = list(alpha = 0.01, colour = '#FF000007'), 
+              line_args = list(size = 0), 
+              plot = FALSE)[[1]]
+}
+rmse <- function(error) { sqrt(mean(error^2, na.rm = TRUE)) }
+rmse_brms <- function(model) {
+  resid <- residuals(model, summary = F)
+  rmse_samples <- apply(resid, 1, rmse)
+  rmse_ci <- rstantools::posterior_interval(as.matrix(rmse_samples), prob = 0.95)
+  sprintf("%.2f [%.2f;%.2f]", mean(rmse_samples), rmse_ci[1], rmse_ci[2]) 
+}
+mae <- function(error) { mean(abs(error), na.rm = TRUE) }
+mae_brms <- function(model) {
+  resid <- residuals(model, summary = F)
+  mae_samples <- apply(resid, 1, mae)
+  mae_ci <- rstantools::posterior_interval(as.matrix(mae_samples), prob = 0.95)
+  sprintf("%.2f [%.2f;%.2f]", mean(mae_samples), mae_ci[1], mae_ci[2]) 
+}
+
+loo_ci <- function(model) {
+  loo_R <- loo_R2(model, re_formula = NA)
+  loo_R <- sqrt(loo_R)
+  sprintf("%.2f [%.2f;%.2f]", loo_R[,"Estimate"], loo_R[,"Q2.5"], loo_R[,"Q97.5"]) 
+}
+```
+
+
+```{r}
+biocycle <- readRDS("biocycle.rds")
+options(mc.cores = parallel::detectCores(), brms.backend = "cmdstanr", brms.file_refit = "on_change")
+rstan::rstan_options(auto_write = TRUE)
+
+biocycle <- biocycle %>% filter(between(cycle_length, 20, 35))
+biocycle$logE_P <- log(biocycle$E_P)
+biocycle$logE <- log(biocycle$total_estradiol)
+biocycle$logP <- log(biocycle$progesterone)
+biocycle$logT <- log(biocycle$Testo)
+biocycle$logFE <- log(biocycle$estradiol)
+biocycle$logFT <- log(biocycle$`Free T (ng/dL)`)
+biocycle$fertile_lh <- NULL
+```
+
+## Days
+```{r}
+bc_days <- data.frame(
+	bc_day = c(-28:-1, -29:-40),
+	prc_stirn_bc = c(.01, .01, .02, .03, .05, .09, .16, .27, .38, .48, .56, .58, .55, .48, .38, .28, .20, .14, .10, .07, .06, .04, .03, .02, .01, .01, .01, .01, rep(.01, times = 12)),
+# 	                rep(.01, times = 70)), # gangestad uses .01 here, but I think such cases are better thrown than kept, since we might simply have missed a mens
+	prc_wcx_bc = c(.000, .000, .001, .002, .004, .009, .018, .032, .050, .069, .085, .094, .093, .085, .073, .059, .047, .036, .028, .021, .016, .013, .010, .008, .007, .006, .005, .005, rep(.005, times = 12))
+) %>% arrange(bc_day)
+
+fc_days <- data.frame(
+	fc_day = c(0:39),
+	prc_stirn_fc = c(.01, .01, .02, .03, .05, .09, .16, .27, .38, .48, .56, .58, .55, .48, .38, .28, .20, .14, .10, .07, .06, .04, .03, .02, .01, .01, .01, .01, rep(.01, times = 12)),
+# 	                rep(.01, times = 70)), # gangestad uses .01 here, but I think such cases are better thrown than kept, since we might simply have missed a mens
+	prc_wcx_fc = c(.000, .000, .001, .002, .004, .009, .018, .032, .050, .069, .085, .094, .093, .085, .073, .059, .047, .036, .028, .021, .016, .013, .010, .008, .007, .006, .005, .005, rep(.005, times = 12))
+)
+
+lh_days <- tibble(
+    conception_risk_lh = c(rep(0,8), 0.00, 0.01, 0.02, 0.06, 0.16, 0.20, 0.25, 0.24, 0.10, 0.02, 0.02, rep(0,12)),
+    lh_day = -15:15
+  ) %>% 
+    mutate(fertile_lh = conception_risk_lh/max(conception_risk_lh)*0.25/0.31)
+biocycle <- biocycle %>% left_join(lh_days %>% select(lh_day, fertile_lh), by = "lh_day")
+```
+
+
+## Impute E
+### Backward counting
+```{r}
+(mod_e_bc = brm(bf(logE | cens(estradiol_cens) ~ s(bc_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle, control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_e_bc'))
+
+performance::variance_decomposition(mod_e_bc)
+# performance::model_performance(mod_e_bc, metrics = c("RMSE", "R2", "R2_adj"))
+loo_R2(mod_e_bc, re_formula = NA)
+rmse_brms(mod_e_bc)
+mae_brms(mod_e_bc)
+plot_curve(mod_e_bc)
+
+bc_days[,paste0("est_estradiol_bc", c("", "_se", "_low", "_high"))] <- round(predict(mod_e_bc, newdata = bc_days, re_formula = NA),2)
+```
+
+### Forward counting
+```{r}
+(mod_e_fc = brm(bf(logE | cens(estradiol_cens) ~ s(fc_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle, control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_e_fc'))
+
+loo_R2(mod_e_fc, re_formula = NA)
+rmse_brms(mod_e_fc)
+mae_brms(mod_e_fc)
+plot_curve(mod_e_fc, method = "fitted")
+
+fc_days[,paste0("est_estradiol_fc", c("", "_se", "_low", "_high"))] <- round(predict(mod_e_fc, newdata = fc_days, re_formula = NA),2)
+```
+
+### Relative to LH surge
+```{r}
+(mod_e_lh = brm(bf(logE | cens(estradiol_cens) ~ s(lh_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle %>% filter(between(lh_day, -20, 14)), control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_e_lh')
+)
+
+loo_R2(mod_e_lh, re_formula = NA)
+rmse_brms(mod_e_lh)
+mae_brms(mod_e_lh)
+plot_curve(mod_e_lh, method = "fitted")
+
+lh_days[,paste0("est_estradiol_lh", c("", "_se", "_low", "_high"))] <- round(predict(mod_e_lh, newdata = lh_days, re_formula = NA),2)
+```
+
+## Impute FE
+### Backward counting
+```{r}
+(mod_fe_bc = brm(bf(logFE | cens(estradiol_cens) ~ s(bc_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle, control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_fe_bc'))
+
+loo_R2(mod_fe_bc, re_formula = NA)
+rmse_brms(mod_fe_bc)
+mae_brms(mod_fe_bc)
+plot_curve(mod_fe_bc, method = "fitted")
+
+bc_days[,paste0("est_free_estradiol_bc", c("", "_se", "_low", "_high"))] <- round(predict(mod_fe_bc, newdata = bc_days, re_formula = NA),2)
+```
+
+### Forward counting
+```{r}
+mod_fe_fc = brm(bf(logFE | cens(estradiol_cens) ~ s(fc_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle, control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_fe_fc')
+
+loo_R2(mod_fe_fc, re_formula = NA)
+rmse_brms(mod_fe_fc)
+mae_brms(mod_fe_fc)
+plot_curve(mod_fe_fc, method = "fitted")
+
+fc_days[,paste0("est_free_estradiol_fc", c("", "_se", "_low", "_high"))] <- round(predict(mod_fe_fc, newdata = fc_days, re_formula = NA),2)
+```
+
+### Relative to LH surge
+```{r}
+mod_fe_lh = brm(bf(logFE | cens(estradiol_cens) ~ s(lh_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle %>% filter(between(lh_day, -20, 14)), control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_fe_lh')
+
+loo_R2(mod_fe_lh, re_formula = NA)
+rmse_brms(mod_fe_lh)
+mae_brms(mod_fe_lh)
+plot_curve(mod_fe_lh, method = "fitted")
+
+lh_days[,paste0("est_free_estradiol_lh", c("", "_se", "_low", "_high"))] <- round(predict(mod_fe_lh, newdata = lh_days, re_formula = NA),2)
+```
+
+## Impute P
+### Backward counting
+```{r}
+mod_p_bc = brm(bf(logP | cens(progesterone_cens) ~ s(bc_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle, control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_p_bc')
+plot_curve(mod_p_bc, method = "fitted")
+
+bc_days[,paste0("est_progesterone_bc", c("", "_se", "_low", "_high"))] <- round(predict(mod_p_bc, newdata = bc_days, re_formula = NA),2)
+```
+
+### Forward counting
+```{r}
+mod_p_fc = brm(bf(logP | cens(progesterone_cens)  ~ s(fc_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle, control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_p_fc')
+plot_curve(mod_p_fc, method = "fitted")
+
+fc_days[,paste0("est_progesterone_fc", c("", "_se", "_low", "_high"))] <- round(predict(mod_p_fc, newdata = fc_days, re_formula = NA),2)
+```
+
+
+### Relative to LH surge
+```{r}
+mod_p_lh = brm(bf(logP | cens(progesterone_cens)  ~ s(lh_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle %>% filter(between(lh_day, -20, 14)), control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_p_lh')
+
+plot_curve(mod_p_lh, method = "fitted")
+
+lh_days[,paste0("est_progesterone_lh", c("", "_se", "_low", "_high"))] <- round(predict(mod_p_lh, newdata = lh_days, re_formula = NA),2)
+```
+
+## New PBFW (probability of being in fertile window)
+### Backward counting
+```{r}
+mod_pbfw_bc = brm(bf(fertile_lh ~ s(bc_day) + (1 | id) + (1|id:cycle)),
+                data = biocycle, 
+                file ='models/mod_pbfw_bc')
+plot_curve(mod_pbfw_bc, method = "fitted")
+
+bc_days[,paste0("est_pbfw_bc", c("", "_se", "_low", "_high"))] <- round(predict(mod_pbfw_bc, newdata = bc_days, re_formula = NA),2)
+```
+
+### Forward counting
+```{r}
+mod_pbfw_fc = brm(bf(fertile_lh ~ s(fc_day)  + (1 | id) + (1|id:cycle)),
+                data = biocycle, 
+                file ='models/mod_pbfw_fc')
+plot_curve(mod_pbfw_fc, method = "fitted")
+
+fc_days[,paste0("est_pbfw_fc", c("", "_se", "_low", "_high"))] <- round(predict(mod_pbfw_fc, newdata = fc_days, re_formula = NA),2)
+```
+
+### Relative to LH surge
+Not done, because predictor = criterion.
+
+
+
+## Impute T
+### Backward counting
+```{r}
+mod_t_bc = brm(bf(logT | cens(Testo_cens)  ~ s(bc_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle, control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_t_bc')
+
+loo_R2(mod_t_bc, re_formula = NA)
+rmse_brms(mod_t_bc)
+mae_brms(mod_t_bc)
+plot_curve(mod_t_bc, method = "fitted")
+
+
+bc_days[,paste0("est_testosterone_bc", c("", "_se", "_low", "_high"))] <- round(predict(mod_t_bc, newdata = bc_days, re_formula = NA),2)
+```
+
+### Forward counting
+```{r}
+mod_t_fc = brm(bf(logT | cens(Testo_cens)  ~ s(fc_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle, control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_t_fc')
+
+plot_curve(mod_t_fc, method = "fitted")
+
+fc_days[,paste0("est_testosterone_fc", c("", "_se", "_low", "_high"))] <- round(predict(mod_t_fc, newdata = fc_days, re_formula = NA),2)
+```
+
+### Relative to LH surge
+```{r}
+mod_t_lh = brm(bf(logT | cens(Testo_cens)  ~ s(lh_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle %>% filter(between(lh_day, -20, 14)), control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_t_lh')
+
+plot_curve(mod_t_lh, method = "fitted")
+
+lh_days[,paste0("est_testosterone_lh", c("", "_se", "_low", "_high"))] <- round(predict(mod_t_lh, newdata = lh_days, re_formula = NA),2)
+```
+
+## Impute FE
+### Backward counting
+```{r}
+mod_ft_bc = brm(bf(logFT | cens(Testo_cens)  ~ s(bc_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle, control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_ft_bc')
+
+plot_curve(mod_ft_bc, method = "fitted")
+
+bc_days[,paste0("est_free_testosterone_bc", c("", "_se", "_low", "_high"))] <- round(predict(mod_ft_bc, newdata = bc_days, re_formula = NA),2)
+```
+
+### Forward counting
+```{r}
+mod_ft_fc = brm(bf(logFT | cens(Testo_cens)  ~ s(fc_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle, control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_ft_fc')
+
+plot_curve(mod_ft_fc, method = "fitted")
+
+fc_days[,paste0("est_free_testosterone_fc", c("", "_se", "_low", "_high"))] <- round(predict(mod_ft_fc, newdata = fc_days, re_formula = NA),2)
+```
+
+### Relative to LH surge
+```{r}
+mod_ft_lh = brm(bf(logFT | cens(Testo_cens)  ~ s(lh_day) + (1 | id) + (1|id:cycle)),  
+                data = biocycle %>% filter(between(lh_day, -20, 14)), control = list(adapt_delta = 0.95, max_treedepth = 20),
+                file ='models/mod_ft_lh')
+
+plot_curve(mod_ft_lh, method = "fitted")
+
+lh_days[,paste0("est_free_testosterone_lh", c("", "_se", "_low", "_high"))] <- round(predict(mod_ft_lh, newdata = lh_days, re_formula = NA),2)
+```
+
+
+## Label variables
+```{r}
+lh_days <- as.data.frame(lh_days)
+var_label(fc_days) <- list(fc_day = "Forward-counted cycle day. Counted from last (recalled) menstrual onset, starting at zero.",
+                           prc_stirn_fc = "Probability of being in the fertile window determined according to the forward-counted cycle days, probabilities from Gangestad et al. 2016 based on Stirnemann et al. 2013",
+                           prc_wcx_fc = "Probability of being in the fertile window determined according to the forward-counted cycle days, probabilities from Gangestad et al. 2016 based on Wilcox et al. 2001",
+                           est_estradiol_fc = paste("Imputed serum estradiol level based on the BioCycle study, loo-R =", loo_ci(mod_e_fc)),
+                           est_estradiol_fc_se = "Standard error: Imputed serum estradiol.",
+                           est_estradiol_fc_low = "Lower 95% CI: Imputed serum estradiol.",
+                           est_estradiol_fc_high = "Upper 95% CI: Imputed serum estradiol.",
+                           est_free_estradiol_fc = paste("Imputed free serum estradiol level based on the BioCycle study, loo-R =", loo_ci(mod_fe_fc)),
+                           est_free_estradiol_fc_se = "Standard error: Imputed free serum estradiol.",
+                           est_free_estradiol_fc_low = "Lower 95% CI: Imputed free serum estradiol.",
+                           est_free_estradiol_fc_high = "Upper 95% CI: Imputed free serum estradiol.",
+                           est_progesterone_fc = paste("Imputed serum progesterone level based on the BioCycle study, loo-R =", loo_ci(mod_p_fc)),
+                           est_progesterone_fc_se = "Standard error: Imputed serum progesterone",
+                           est_progesterone_fc_low = "Lower 95% CI: Imputed serum progesterone",
+                           est_progesterone_fc_high = "Upper 95% CI: Imputed serum progesterone",
+                           est_testosterone_fc = paste("Imputed serum testosterone level based on the BioCycle study, loo-R =", loo_ci(mod_t_fc)),
+                           est_testosterone_fc_se = "Standard error: Imputed serum testosterone",
+                           est_testosterone_fc_low = "Lower 95% CI: Imputed serum testosterone",
+                           est_testosterone_fc_high = "Upper 95% CI: Imputed serum testosterone",
+                           est_free_testosterone_fc = paste("Imputed free serum testosterone level based on the BioCycle study, loo-R =", loo_ci(mod_ft_fc)),
+                           est_free_testosterone_fc_se = "Standard error: Imputed free serum testosterone",
+                           est_free_testosterone_fc_low = "Lower 95% CI: Imputed free serum testosterone",
+                           est_free_testosterone_fc_high = "Upper 95% CI: Imputed free serum testosterone",
+                           est_pbfw_fc = paste("Imputed probability of being in the fertile window based on the BioCycle study (LH test), loo-R =", loo_ci(mod_pbfw_fc)),
+                           est_pbfw_fc_se = "Standard error: Imputed probability of being in the fertile window",
+                           est_pbfw_fc_low = "Lower 95% CI: Imputed probability of being in the fertile window",
+                           est_pbfw_fc_high = "Upper 95% CI: Imputed probability of being in the fertile window"
+                           )
+
+var_label(bc_days) <- list(bc_day = "Backward-counted cycle day. Counted from next observed menstrual onset (0), beginning with -1.",
+                           prc_stirn_bc = "Probability of being in the fertile window determined according to the backward-counted cycle days, probabilities from Gangestad et al. 2016 based on Stirnemann et al. 2013",
+                           prc_wcx_bc = "Probability of being in the fertile window determined according to the backward-counted cycle days, probabilities from Gangestad et al. 2016 based on Wilcox et al. 2001",
+                           est_estradiol_bc = paste("Imputed serum estradiol level based on the BioCycle study, loo-R =", loo_ci(mod_e_bc)),
+                           est_estradiol_bc_se = "Standard error: Imputed serum estradiol.",
+                           est_estradiol_bc_low = "Lower 95% CI: Imputed serum estradiol.",
+                           est_estradiol_bc_high = "Upper 95% CI: Imputed serum estradiol.",
+                           est_free_estradiol_bc = paste("Imputed free serum estradiol level based on the BioCycle study, loo-R =", loo_ci(mod_fe_bc)),
+                           est_free_estradiol_bc_se = "Standard error: Imputed free serum estradiol.",
+                           est_free_estradiol_bc_low = "Lower 95% CI: Imputed free serum estradiol.",
+                           est_free_estradiol_bc_high = "Upper 95% CI: Imputed free serum estradiol.",
+                           est_progesterone_bc = paste("Imputed serum progesterone level based on the BioCycle study, loo-R =", loo_ci(mod_p_bc)),
+                           est_progesterone_bc_se = "Standard error: Imputed serum progesterone",
+                           est_progesterone_bc_low = "Lower 95% CI: Imputed serum progesterone",
+                           est_progesterone_bc_high = "Upper 95% CI: Imputed serum progesterone",
+                           est_testosterone_bc = paste("Imputed serum testosterone level based on the BioCycle study, loo-R =", loo_ci(mod_t_bc)),
+                           est_testosterone_bc_se = "Standard error: Imputed serum testosterone",
+                           est_testosterone_bc_low = "Lower 95% CI: Imputed serum testosterone",
+                           est_testosterone_bc_high = "Upper 95% CI: Imputed serum testosterone",
+                           est_free_testosterone_bc = paste("Imputed free serum testosterone level based on the BioCycle study, loo-R =", loo_ci(mod_ft_bc)),
+                           est_free_testosterone_bc_se = "Standard error: Imputed free serum testosterone",
+                           est_free_testosterone_bc_low = "Lower 95% CI: Imputed free serum testosterone",
+                           est_free_testosterone_bc_high = "Upper 95% CI: Imputed free serum testosterone",
+                           est_pbfw_bc = paste("Imputed probability of being in the fertile window based on the BioCycle study (LH test), loo-R =", loo_ci(mod_pbfw_bc)),
+                           est_pbfw_bc_se = "Standard error: Imputed probability of being in the fertile window",
+                           est_pbfw_bc_low = "Lower 95% CI: Imputed probability of being in the fertile window",
+                           est_pbfw_bc_high = "Upper 95% CI: Imputed probability of being in the fertile window"
+                           )
+
+var_label(lh_days) <- list(lh_day = "Day relative to LH surge",
+                           est_estradiol_lh = paste("Imputed serum estradiol level based on the BioCycle study, loo-R =", loo_ci(mod_e_lh)),
+                           est_estradiol_lh_se = "Standard error: Imputed serum estradiol.",
+                           est_estradiol_lh_low = "Lower 95% CI: Imputed serum estradiol.",
+                           est_estradiol_lh_high = "Upper 95% CI: Imputed serum estradiol.",
+                           est_free_estradiol_lh = paste("Imputed free serum estradiol level based on the BioCycle study, loo-R =", loo_ci(mod_fe_lh)),
+                           est_free_estradiol_lh_se = "Standard error: Imputed free serum estradiol.",
+                           est_free_estradiol_lh_low = "Lower 95% CI: Imputed free serum estradiol.",
+                           est_free_estradiol_lh_high = "Upper 95% CI: Imputed free serum estradiol.",
+                           est_progesterone_lh = paste("Imputed serum progesterone level based on the BioCycle study, loo-R =", loo_ci(mod_p_lh)),
+                           est_progesterone_lh_se = "Standard error: Imputed serum progesterone",
+                           est_progesterone_lh_low = "Lower 95% CI: Imputed serum progesterone",
+                           est_progesterone_lh_high = "Upper 95% CI: Imputed serum progesterone",
+                           est_testosterone_lh = paste("Imputed serum testosterone level based on the BioCycle study, loo-R =", loo_ci(mod_t_lh)),
+                           est_testosterone_lh_se = "Standard error: Imputed serum testosterone",
+                           est_testosterone_lh_low = "Lower 95% CI: Imputed serum testosterone",
+                           est_testosterone_lh_high = "Upper 95% CI: Imputed serum testosterone",
+                           est_free_testosterone_lh = paste("Imputed free serum testosterone level based on the BioCycle study, loo-R =", loo_ci(mod_ft_lh)),
+                           est_free_testosterone_lh_se = "Standard error: Imputed free serum testosterone",
+                           est_free_testosterone_lh_low = "Lower 95% CI: Imputed free serum testosterone",
+                           est_free_testosterone_lh_high = "Upper 95% CI: Imputed free serum testosterone",
+                           conception_risk_lh = "Risk of conception according to Stern, Kordsmeyer, & Penke 2021 Table 1 weighted averages.",
+                           fertile_lh = "Probability of being in the fertile window according to Stern, Kordsmeyer, & Penke 2021 Table 1, taking highest conception risk as the denominator and brought to same mean as Stirnemann numbers."
+                           )
+```
+
+## Save merge files
+```{r}
+rio::export(fc_days, "merge_files/fc_days.rds")
+rio::export(bc_days, "merge_files/bc_days.rds")
+rio::export(lh_days, "merge_files/lh_days.rds")
+rio::export(fc_days, "merge_files/fc_days.sav")
+rio::export(bc_days, "merge_files/bc_days.sav")
+rio::export(lh_days, "merge_files/lh_days.sav")
+rio::export(fc_days, "merge_files/fc_days.tsv")
+rio::export(bc_days, "merge_files/bc_days.tsv")
+rio::export(lh_days, "merge_files/lh_days.tsv")
+```
+
+
+# Codebooks
+## Forward-counted
+```{r}
+codebook::compact_codebook(fc_days)
+```
+
+## Backward-counted
+```{r}
+codebook::compact_codebook(bc_days)
+```
+
+## Relative to LH surge
+```{r}
+codebook::compact_codebook(lh_days)
+```
+
