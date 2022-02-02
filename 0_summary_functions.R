@@ -187,6 +187,7 @@ summarise_hormone <- function(df,
            log_hormone_diff = log(hormone) - mean(log(hormone))) %>% 
     ungroup()
   results$usable_n <- nrow(df)
+  results$usable_n_cycles <- n_distinct(paste(df$id, df$cycle))
   results$usable_n_women <- n_distinct(df$id)
   
   bc_days <- readRDS("merge_files/bc_days.rds")
