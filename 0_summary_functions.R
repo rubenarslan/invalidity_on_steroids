@@ -335,28 +335,28 @@ summarise_hormone <- function(df,
     results$r_loo_bc <- sprintf("%.2f [%.2f;%.2f]", sqrt(r2[,"Estimate"]), sqrt(r2[,"Q2.5"]), sqrt(r2[,"Q97.5"])) 
     
     cor_stirn <- broom::tidy(cor.test(df$prc_stirn_bc, df$hormone))
-    results$r_bc_stirn <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_bc_stirn <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
 
     cor_stirn <- broom::tidy(cor.test(df$prc_stirn_bc, log(df$hormone)))
-    results$r_log_bc_stirn <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_log_bc_stirn <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
 
     cor_stirn <- broom::tidy(cor.test(df$prc_stirn_bc, df$hormone_diff))
-    results$r_diff_bc_stirn <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_diff_bc_stirn <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
 
     cor_stirn <- broom::tidy(cor.test(df$prc_stirn_bc, df$log_hormone_diff))
-    results$r_log_diff_bc_stirn <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_log_diff_bc_stirn <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
     
     cor_imp <- broom::tidy(cor.test(df[[paste0("est_", Hormone_name, "_bc")]], log(df$hormone)))
-    results$r_bc_imputed <- sprintf("% .2f [% .2f;% .2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
+    results$r_bc_imputed <- sprintf("%.2f [%.2f;%.2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
     
     cor_imp <- broom::tidy(cor.test(df[[paste0("est_", Hormone_name, "_bc")]], df$log_hormone_diff))
-    results$r_diff_bc_imputed <- sprintf("% .2f [% .2f;% .2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
+    results$r_diff_bc_imputed <- sprintf("%.2f [%.2f;%.2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
     sd_unrestricted <- sd(bc_days[which(bc_days$bc_day > -30), paste0("est_", Hormone_name, "_bc")])
     sd_observed <- sd(df[[paste0("est_", Hormone_name, "_bc")]], na.rm = T)
     results$sd_bc_imputed <- sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
     rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
                                  sd_observed, sd_unrestricted)
-    results$r_diff_bc_imputed_rr <- sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+    results$r_diff_bc_imputed_rr <- sprintf("%.2f [%.2f;%.2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
     
     
     factor <- compute_factor(df$bc_day, df[[paste0("est_", Hormone_name, "_bc")]], df$hormone, threshold = c(-10, -2))
@@ -371,7 +371,7 @@ summarise_hormone <- function(df,
     
     
     
-    results$rmse_bc_imputed <- sprintf("% .2f", rmse(log(df$hormone * factor) - df[[paste0("est_", Hormone_name, "_bc")]]))
+    results$rmse_bc_imputed <- sprintf("%.2f", rmse(log(df$hormone * factor) - df[[paste0("est_", Hormone_name, "_bc")]]))
     
   }
   
@@ -387,28 +387,28 @@ summarise_hormone <- function(df,
     results$r_loo_fc <- sprintf("%.2f [%.2f;%.2f]", sqrt(r2[,"Estimate"]), sqrt(r2[,"Q2.5"]), sqrt(r2[,"Q97.5"])) 
     
     cor_stirn <- broom::tidy(cor.test(df$prc_stirn_fc, df$hormone))
-    results$r_fc_stirn <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_fc_stirn <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
 
     cor_stirn <- broom::tidy(cor.test(df$prc_stirn_fc, log(df$hormone)))
-    results$r_log_fc_stirn <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_log_fc_stirn <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
 
     cor_stirn <- broom::tidy(cor.test(df$prc_stirn_fc, df$hormone_diff))
-    results$r_diff_fc_stirn <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_diff_fc_stirn <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
     
     cor_stirn <- broom::tidy(cor.test(df$prc_stirn_fc, df$log_hormone_diff))
-    results$r_log_diff_fc_stirn <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_log_diff_fc_stirn <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
     
     cor_imp <- broom::tidy(cor.test(df[[paste0("est_", Hormone_name, "_fc")]], log(df$hormone)))
-    results$r_fc_imputed <- sprintf("% .2f [% .2f;% .2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
+    results$r_fc_imputed <- sprintf("%.2f [%.2f;%.2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
     
     cor_imp <- broom::tidy(cor.test(df[[paste0("est_", Hormone_name, "_fc")]], df$log_hormone_diff))
-    results$r_diff_fc_imputed <- sprintf("% .2f [% .2f;% .2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
+    results$r_diff_fc_imputed <- sprintf("%.2f [%.2f;%.2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
     sd_unrestricted <- sd(fc_days[which(fc_days$fc_day < 29), paste0("est_", Hormone_name, "_fc")])
     sd_observed <- sd(df[[paste0("est_", Hormone_name, "_fc")]], na.rm = T)
     results$sd_fc_imputed <- sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
     rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
                                  sd_observed, sd_unrestricted)
-    results$r_diff_fc_imputed_rr <- sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+    results$r_diff_fc_imputed_rr <- sprintf("%.2f [%.2f;%.2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
     
     factor <- compute_factor(df$fc_day, df[[paste0("est_", Hormone_name, "_fc")]], df$hormone, threshold = c(20, 28))
     
@@ -423,7 +423,7 @@ summarise_hormone <- function(df,
     
     
     
-    results$rmse_fc_imputed <- sprintf("% .2f", rmse(log(df$hormone * factor) - df[[paste0("est_", Hormone_name, "_fc")]]))
+    results$rmse_fc_imputed <- sprintf("%.2f", rmse(log(df$hormone * factor) - df[[paste0("est_", Hormone_name, "_fc")]]))
     
   }
   
@@ -438,29 +438,29 @@ summarise_hormone <- function(df,
     results$r_loo_lh <- sprintf("%.2f [%.2f;%.2f]", sqrt(r2[,"Estimate"]), sqrt(r2[,"Q2.5"]), sqrt(r2[,"Q97.5"])) 
     
     cor_stirn <- broom::tidy(cor.test(df$fertile_lh, df$hormone))
-    results$r_prob_lh <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_prob_lh <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
 
     cor_stirn <- broom::tidy(cor.test(df$fertile_lh, log(df$hormone)))
-    results$r_log_prob_lh <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_log_prob_lh <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
     
     cor_stirn <- broom::tidy(cor.test(df$fertile_lh, df$hormone_diff))
-    results$r_diff_prob_lh <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_diff_prob_lh <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
     
     cor_stirn <- broom::tidy(cor.test(df$fertile_lh, df$log_hormone_diff))
-    results$r_log_diff_prob_lh <- sprintf("% .2f [% .2f;% .2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
+    results$r_log_diff_prob_lh <- sprintf("%.2f [%.2f;%.2f]", cor_stirn["estimate"], cor_stirn["conf.low"], cor_stirn["conf.high"])
     
     
     cor_imp <- broom::tidy(cor.test(df[[paste0("est_", Hormone_name, "_lh")]], log(df$hormone)))
-    results$r_lh_imputed <- sprintf("% .2f [% .2f;% .2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
+    results$r_lh_imputed <- sprintf("%.2f [%.2f;%.2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
     
     cor_imp <- broom::tidy(cor.test(df[[paste0("est_", Hormone_name, "_lh")]], df$log_hormone_diff))
-    results$r_diff_lh_imputed <- sprintf("% .2f [% .2f;% .2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
+    results$r_diff_lh_imputed <- sprintf("%.2f [%.2f;%.2f]", cor_imp["estimate"], cor_imp["conf.low"], cor_imp["conf.high"])
     sd_unrestricted <- sd(lh_days[which(between(lh_days$lh_day, -15, 13)),paste0("est_", Hormone_name, "_lh")])
     sd_observed <- sd(df[[paste0("est_", Hormone_name, "_lh")]], na.rm = T)
     results$sd_lh_imputed <- sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
     rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
                                  sd_observed, sd_unrestricted)
-    results$r_diff_lh_imputed_rr <- sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+    results$r_diff_lh_imputed_rr <- sprintf("%.2f [%.2f;%.2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
     
     factor <- compute_factor(df$lh_day, df[[paste0("est_", Hormone_name, "_lh")]], df$hormone, threshold = c(2, 10))
     
@@ -473,7 +473,7 @@ summarise_hormone <- function(df,
       ylab(paste0("log(", Hormone_name," × ",sprintf("%.0f", factor),")")) +
       scale_x_continuous("Day relative to LH-surge", limits = c(-15, 15))
     
-    results$rmse_lh_imputed <- sprintf("% .2f", rmse(log(df$hormone * factor) - df[[paste0("est_", Hormone_name, "_lh")]]))
+    results$rmse_lh_imputed <- sprintf("%.2f", rmse(log(df$hormone * factor) - df[[paste0("est_", Hormone_name, "_lh")]]))
   }
   
   rio::export(results, paste0("summaries/table_", Dataset, "_", Hormone, ".rds"))
@@ -503,24 +503,24 @@ summarise_hormones <- function(df, Dataset, Method = "Salivary Immunoassay") {
   df$ratio <- df$estradiol/df$progesterone
   
   cor_hormones <- broom::tidy(cor.test(df$estradiol, df$progesterone))
-  results$r_ep <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+  results$r_ep <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
   
   cor_hormones <- broom::tidy(cor.test(log(df$estradiol), log(df$progesterone)))
-  results$r_log_ep <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+  results$r_log_ep <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
   
   cor_hormones <- broom::tidy(cor.test((df$estradiol), (df$ratio)))
-  results$r_e_ratio <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+  results$r_e_ratio <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
   
   
   cor_hormones <- broom::tidy(cor.test(log(df$estradiol), log(df$ratio)))
-  results$r_log_e_ratio <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+  results$r_log_e_ratio <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
   
   cor_hormones <- broom::tidy(cor.test((df$progesterone), (df$ratio)))
-  results$r_p_ratio <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+  results$r_p_ratio <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
   
   
   cor_hormones <- broom::tidy(cor.test(log(df$progesterone), log(df$ratio)))
-  results$r_log_p_ratio <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+  results$r_log_p_ratio <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
   
   df <- df %>% filter(!is.na(estradiol), !is.na(progesterone), 
                       is.na(cycle_length) | between(cycle_length, 20,35))
@@ -549,10 +549,10 @@ summarise_hormones <- function(df, Dataset, Method = "Salivary Immunoassay") {
   if(n_nonmissing(df$bc_day)>20) {
     
     cor_hormones <- broom::tidy(cor.test(df$prc_stirn_bc, (df$ratio)))
-    results$r_bc_ratio <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+    results$r_bc_ratio <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
     
     cor_hormones <- broom::tidy(cor.test(df$prc_stirn_bc, log(df$ratio)))
-    results$r_bc_log_ratio <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+    results$r_bc_log_ratio <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
     
     (m_bc_prob_rat <- brm(prc_stirn_bc ~ log(estradiol) + log(ratio), data = df , file_refit = "on_change",
                       control = list(adapt_delta = 0.99),
@@ -579,10 +579,10 @@ summarise_hormones <- function(df, Dataset, Method = "Salivary Immunoassay") {
   if(n_nonmissing(df$fc_day)>20) {
     
     cor_hormones <- broom::tidy(cor.test(df$prc_stirn_fc, (df$ratio)))
-    results$r_fc_ratio <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+    results$r_fc_ratio <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
     
     cor_hormones <- broom::tidy(cor.test(df$prc_stirn_fc, log(df$ratio)))
-    results$r_fc_log_ratio <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+    results$r_fc_log_ratio <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
     
     
     (m_fc_prob_rat <- brm(prc_stirn_fc ~ log(estradiol) + log(ratio), data = df , file_refit = "on_change",
@@ -610,10 +610,10 @@ summarise_hormones <- function(df, Dataset, Method = "Salivary Immunoassay") {
   if(n_nonmissing(df$lh_day)>20) {
     
     cor_hormones <- broom::tidy(cor.test(df$fertile_lh, (df$ratio)))
-    results$r_lh_ratio <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
+    results$r_lh_ratio <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])
     
     cor_hormones <- broom::tidy(cor.test(df$fertile_lh, log(df$ratio)))
-    results$r_lh_log_ratio <- sprintf("% .2f [% .2f;% .2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])  
+    results$r_lh_log_ratio <- sprintf("%.2f [%.2f;%.2f]", cor_hormones["estimate"], cor_hormones["conf.low"], cor_hormones["conf.high"])  
     
     (m_lh_prob_rat <- brm(fertile_lh ~ log(estradiol) + log(ratio), data = df, file_refit = "on_change",
                           control = list(adapt_delta = 0.99),
