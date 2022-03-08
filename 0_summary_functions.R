@@ -207,36 +207,55 @@ summarise_hormone <- function(df,
   # Day relative to ovulation	Schwartz et al., (1980)	Wilcox et al., (1998)	Colombo & Masarotto (2000)	Weighted average
   lh_days <- readRDS("merge_files/lh_days.rds")
   
-  if(is.null(df$lh_day)) { 
+  if(is.null(df$lh_day) || all(is.na(df$lh_day))) { 
     df$lh_day <- NA_real_
     results$no_lh_surge_woman <- "NA"
     results$no_lh_surge_cycle <- "NA"
   } else {
     results$no_lh_surge_woman <- df %>% group_by(id) %>% 
+      filter(!is.na(hormone), !is.na(fc_day)) %>% 
       summarise(no_lh_surge = all(is.na(lh_day))) %>% 
-      summarise(count = sum(no_lh_surge), percent = mean(no_lh_surge)) %>% 
-      { sprintf("%.0f (%.0f%%)", .$count, .$percent*100) }
+      summarise(count = sum(no_lh_surge), percent = mean(no_lh_surge),
+                cycles = n()) %>% 
+      { sprintf("%.0f/%.0f (%.0f%%)", .$count, .$cycles, .$percent*100) }
     results$no_lh_surge_cycle <- df %>% group_by(id, cycle) %>% 
+      filter(!is.na(hormone), !is.na(fc_day)) %>% 
       summarise(no_lh_surge = all(is.na(lh_day))) %>% 
       ungroup() %>% 
-      summarise(count = sum(no_lh_surge), percent = mean(no_lh_surge)) %>% 
-      { sprintf("%.0f (%.0f%%)", .$count, .$percent*100) }
+      summarise(count = sum(no_lh_surge), percent = mean(no_lh_surge),
+                cycles = n()) %>% 
+      { sprintf("%.0f/%.0f (%.0f%%)", .$count, .$cycles, .$percent*100) }
   }
+    
   df = df %>% left_join(lh_days, by = "lh_day")
   
   several_cycles <- { df %>% group_by(id) %>% filter(n_distinct(cycle) > 1) %>% nrow() } > 0
   several_timepoints <- { df %>% group_by(id) %>% filter(n() > 1) %>% nrow() } > 0
   
   if (several_cycles) {
-    (icc_model <- brm(log(hormone) | cens(hormone_cens) ~ (1|id) + (1|id:cycle), data = df, file_refit = "on_change",
+    (icc_model_id <- brm(log(hormone) | cens(hormone_cens) ~ (1|id), data = df, file_refit = "on_change",
                       control = list(adapt_delta = 0.99),
-                      file = paste0("models/m_", Dataset, "_", Hormone, "_icc")))
-    results$icc <- performance::icc(icc_model)$ICC_adjusted
-    results$rmse_icc <- rmse_brms(icc_model)
+                      file = paste0("models/m_", Dataset, "_", Hormone, "_icc_id"))) %>% 
+      add_criterion("loo_R2")
+
+    (icc_model_id_cycle <- brm(log(hormone) | cens(hormone_cens) ~ (1|id) + (1|id:cycle), data = df, file_refit = "on_change",
+                         control = list(adapt_delta = 0.99),
+                         file = paste0("models/m_", Dataset, "_", Hormone, "_icc"))) %>% 
+      add_criterion("loo_R2")
+
+    r2 <- loo_R2(icc_model_id)
+    results$var_id_loo <- sprintf("%.2f [%.2f;%.2f]", r2[,"Estimate"], r2[,"Q2.5"], r2[,"Q97.5"])
+    r2 <- loo_R2(icc_model_id_cycle)
+    results$var_cycle_loo <- sprintf("%.2f [%.2f;%.2f]", r2[,"Estimate"], r2[,"Q2.5"], r2[,"Q97.5"])
     
-    vc <- VarCorr(icc_model)
-    results$var_id <- sprintf("%.2f [%.2f;%.2f]", vc$id$sd[,"Estimate"], vc$id$sd[,"Q2.5"], vc$id$sd[,"Q97.5"]) 
-    results$var_id_cycle <- sprintf("%.2f [%.2f;%.2f]", vc$`id:cycle`$sd[,"Estimate"], vc$`id:cycle`$sd[,"Q2.5"], vc$`id:cycle`$sd[,"Q97.5"])
+    vc <- VarCorr(icc_model_id_cycle)
+    r2_id <- bayes_R2(icc_model_id_cycle, re_formula = ~ (1|id))
+    r2_cycle <- bayes_R2(icc_model_id_cycle, re_formula = ~ (1|id:cycle))
+    
+    results$var_id <- sprintf("%.2f [%.2f;%.2f] (%.0f%%)", vc$id$sd[,"Estimate"], vc$id$sd[,"Q2.5"], vc$id$sd[,"Q97.5"], 100* r2_id[,"Estimate"]) 
+    results$var_cycle <- sprintf("%.2f [%.2f;%.2f] (%.0f%%)", vc$`id:cycle`$sd[,"Estimate"], vc$`id:cycle`$sd[,"Q2.5"], vc$`id:cycle`$sd[,"Q97.5"], 100* r2_cycle[,"Estimate"])
+    results$var_resid <- sprintf("%.2f [%.2f;%.2f] (%.0f%%)", vc$residual$sd[,"Estimate"], vc$residual$sd[,"Q2.5"], vc$residual$sd[,"Q97.5"], (1 - r2_cycle[,"Estimate"] - r2_id[,"Estimate"]) * 100)
+    
     
     if(n_nonmissing(df$bc_day) > 20) {
       (bc_day_model <- brm(log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1|id) + (1|id:cycle) , data = df , file_refit = "on_change",
@@ -244,9 +263,6 @@ summarise_hormone <- function(df,
                            file = paste0("models/m_", Dataset, "_", Hormone, "_bc")) %>% 
          add_criterion("loo_R2", re_formula = NA) %>%
          add_criterion("bayes_R2", re_formula = NA))
-      
-      var_decomp <- performance::variance_decomposition(bc_day_model)
-      results$`Variance Ratio` <- sprintf("%.2f [%.2f;%.2f]", var_decomp$ICC_decomposed, var_decomp$ICC_CI[1], var_decomp$ICC_CI[2])
     }
     
     if(n_nonmissing(df$fc_day) > 20) {
@@ -270,12 +286,15 @@ summarise_hormone <- function(df,
     (icc_model <- brm(log(hormone) | cens(hormone_cens) ~ (1|id), data = df, file_refit = "on_change",
                       control = list(adapt_delta = 0.99),
                       file = paste0("models/m_", Dataset, "_", Hormone, "_icc")))
-    
-    results$icc <- performance::icc(icc_model)$ICC_adjusted
-    results$rmse_icc <- rmse_brms(icc_model)
+
+    r2 <- loo_R2(icc_model)
+    results$var_id_loo <- sprintf("%.2f [%.2f;%.2f]", r2[,"Estimate"], r2[,"Q2.5"], r2[,"Q97.5"])
     
     vc <- VarCorr(icc_model)
-    results$var_id <- sprintf("%.2f [%.2f;%.2f]", vc$id$sd[,"Estimate"], vc$id$sd[,"Q2.5"], vc$id$sd[,"Q97.5"]) 
+    r2_id <- bayes_R2(icc_model, re_formula = ~ (1|id))
+
+    results$var_id <- sprintf("%.2f [%.2f;%.2f] (%.0f%%)", vc$id$sd[,"Estimate"], vc$id$sd[,"Q2.5"], vc$id$sd[,"Q97.5"], 100* r2_id[,"Estimate"]) 
+    results$var_resid <- sprintf("%.2f [%.2f;%.2f] (%.0f%%)", vc$residual$sd[,"Estimate"], vc$residual$sd[,"Q2.5"], vc$residual$sd[,"Q97.5"], (1 - r2_id[,"Estimate"]) * 100)
     
     
     if(n_nonmissing(df$bc_day)>20) {
