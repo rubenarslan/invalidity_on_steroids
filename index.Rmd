@@ -10,13 +10,9 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
 ```
 
-
-```{r}
-knitr::opts_chunk$set(message = F, warning = F)
-```
 
 What properties do different measures of estradiol and progesterone have?
 
@@ -106,8 +102,8 @@ summary_table <- function(Hormone) {
            Distribution,
            logmean, logsd, missing, outliers, censored,
            mean, sd, median, mad, range,
-           icc, `Variance Ratio`, 
-           var_id, var_id_cycle, rmse_icc,
+           var_id_loo, var_cycle_loo,
+           var_id, var_cycle, var_resid,
            r_fc_stirn, r_log_fc_stirn, r_diff_fc_stirn, r_log_diff_fc_stirn, r_loo_fc, r_fc_imputed, 
            r_diff_fc_imputed, sd_fc_imputed, r_diff_fc_imputed_rr, 
            plot_fc,
@@ -119,20 +115,28 @@ summary_table <- function(Hormone) {
            plot_lh,
            everything(), -matches("rmse_[^i]"), -contains("_vs_measured"))
   
+  study_names <- c("BioCycle", "Roney 2013", "OCMATE Non-HC", "Marcinkowska 2020", "GOL2", "GOCD2", "Blake 2017", "Grebe et al. 2016")
+  short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Jünger '18", "Stern '21", "Blake '17", "Grebe '16")
+  names(short_names) <- study_names
+  comp_wide$Dataset <- factor(as.character(short_names[comp_wide$Dataset]), levels = short_names)
+
+  if(n_distinct(comp_wide$Sample) == n_distinct(comp_wide$Dataset)) {
+    comp_wide$Sample <- comp_wide$Dataset
+  }
+
   comp <- comp_wide %>% 
     pivot_longer(-Sample)
   
-  # print(table(comp$Sample))
-  
+  # comp$Sample <- str_trim(str_replace(str_replace(str_replace(
+  #   comp$Sample, Hormone, ""), "Free", ""), "_", " "))
+
+  comp <- comp %>% arrange(Sample)
+
   comp <- comp %>% 
     pivot_wider(name, Sample) %>% 
     rename(rowname = name)
 
-  colnames(comp) <- str_trim(str_replace(str_replace(
-    colnames(comp), Hormone, ""), "_", " "))
-
-
-    comp <- comp %>% 
+  comp <- comp %>% 
     mutate(rowgroup = case_when(
       rowname %in% c("Hormone", "Dataset","Citation", "Scheduling") ~ "Study",
       rowname %in% c("Method", "Measure", "Procedure", "LH_test") ~ "Measure",
@@ -140,7 +144,7 @@ summary_table <- function(Hormone) {
       rowname %in% c("Distribution", 
                      "logmean", "logsd", "missing", "censored", "outliers",
                      "mean", "sd", "median", "mad", "range") ~ "Descriptive statistics",
-      rowname %in%  c("icc", "Variance Ratio", "var_id", "var_id_cycle", "rmse_icc") ~ "Interindividual differences",
+      rowname %in%  c("var_id_loo", "var_cycle_loo", "var_id", "var_cycle", "var_resid") ~ "Interindividual differences",
     rowname %in%  c("r_fc", "r_loo_fc", "plot_fc", "imputed_fc_vs_measured_graph",
            "r_fc_stirn", "r_log_fc_stirn", "r_diff_fc_stirn", "r_log_diff_fc_stirn", "rmse_fc", "r_fc_imputed", "r_diff_fc_imputed", "sd_fc_imputed", "r_diff_fc_imputed_rr",  "rmse_fc_imputed") ~ "Validity (Forward counting)",
     rowname %in%  c("r_bc", "r_loo_bc", "plot_bc", "imputed_bc_vs_measured_graph",
@@ -295,6 +299,15 @@ comp_wide <- as_tibble(bind_rows(su_dfs, .id = "Sample")) %>%
          r_ep, r_log_ep, r_e_ratio, r_log_e_ratio, r_p_ratio, r_log_p_ratio, r_bc_ratio, r_bc_log_ratio, r_erat_bc, r_loo_bc, r_fc_ratio, r_fc_log_ratio, r_erat_fc, r_loo_fc, r_lh_ratio, r_lh_log_ratio, r_erat_lh, r_loo_lh,
          everything())
 
+
+  study_names <- c("BioCycle", "Roney 2013", "OCMATE Non-HC", "Marcinkowska 2020", "GOL2", "GOCD2", "Blake 2017", "Grebe et al. 2016")
+  short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Jünger '18", "Stern '21", "Blake '17", "Grebe '16")
+  names(short_names) <- study_names
+  comp_wide$Dataset <- factor(as.character(short_names[comp_wide$Dataset]), levels = short_names)
+
+  if(n_distinct(comp_wide$Sample) == n_distinct(comp_wide$Dataset)) {
+    comp_wide$Sample <- comp_wide$Dataset
+  }
 
 comp <- comp_wide %>% 
   pivot_longer(-Sample) %>% 

@@ -1,5 +1,5 @@
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
 library(tidyverse)
 library(tidylog)
 ```
@@ -53,6 +53,11 @@ roney <- roney %>%
   )
 table(roney$estradiol_cens)
 table(roney$progesterone_cens)
+
+# exclude women without any hormone data
+roney <- roney %>% group_by(id) %>% filter(any(!is.na(estradiol)) | any(!is.na(progesterone))) %>% ungroup()
+nrow(roney)
+n_distinct(roney$id)
 
 saveRDS(roney, "roney.rds")
 

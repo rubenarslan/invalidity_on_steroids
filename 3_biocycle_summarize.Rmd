@@ -7,7 +7,7 @@ output: html_document
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
 ```
 
 # Summarize BioCycle data
@@ -31,7 +31,7 @@ df <- biocycle_stdnames %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = 
 
 summarise_hormone(df, "BioCycle", 
                   "Estradiol", 
-                  Method = "Serum Radioimmunoassay", 
+                  Method = "Serum CL-EIA (chemiluminescence enzyme immunoassay)",
                   Citation = "
 Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., & BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x
   
@@ -52,7 +52,7 @@ df <- biocycle_stdnames %>% select(id, cycle, bc_day, fc_day, lh_day, cycle_leng
 
 summarise_hormone(df, "BioCycle", 
                   "Free Estradiol", 
-                  Method = "Serum Radioimmunoassay + mass-action-algorithms", 
+                  Method = "Serum CL-EIA (chemiluminescence enzyme immunoassay) + mass-action-algorithm", 
                   Citation = "
 Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., & BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x
   

@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
 ```
 
 From Prasad et al. 2014
@@ -31,6 +31,7 @@ biocycle_sexdiary <- rio::import("../data/BioCycle_StudyItems/sex_nodates.sas7bd
 biocycle <- biocycle %>% left_join(biocycle_update %>% 
                                      select(id = idnum, cycle, day, visit, ALBUMN, Testo, cycle_length_bl, LH_monitor_peak, E3g_monitor_peak, peak_day))
 biocycle <- full_join(biocycle, biocycle_between, by = c("id" = "idnum"))
+
 
 var_label(biocycle$Testo) <- "Testosterone (ng/dL)"
 var_label(biocycle$ALBUMN) <- "Albumin (g/dL)"
@@ -78,7 +79,7 @@ biocycle <- biocycle %>%
   mutate(
     ESTRGEN = if_else(ESTRGEN_cens == "left", 20, ESTRGEN),
     Testo = if_else(Testo_cens == "left", 3, Testo),
-    PROGEST <- if_else(PROGEST_cens == "left", 0.2, PROGEST),
+    PROGEST = if_else(PROGEST_cens == "left", 0.2, PROGEST),
     SHBG = if_else(SHBG_cens == "left", 2, SHBG),
     ALBUMN = if_else(ALBUMN_cens == "left", 1.7, ALBUMN)
   )
@@ -144,6 +145,39 @@ biocycle %>% group_by(id) %>% mutate(PROGEST = (scale(PROGEST,scale=F))) %>% pul
 biocycle %>% group_by(id) %>% mutate(PROGEST = (scale(ESTRGEN,scale=F))) %>% pull(PROGEST) %>% qplot
 ```
 
+## Remove one woman with empty rows in one cycle
+```{r}
+## remove one woman with empty rows for cycle 2
+biocycle %>% filter(id == 1608, cycle == 2) %>% nrow
+nrow(biocycle)
+biocycle <- biocycle %>% filter(id!=1608 | cycle == 1)
+nrow(biocycle)
+```
+
+## Recompute anovul rate
+
+```{r}
+missing <- rowSums(is.na(biocycle))
+table(missing)
+# get denominator right
+biocycle %>% group_by(id, cycle) %>%
+  filter(!noserum) %>% 
+  filter(n() >= 7) %>% 
+summarise(p=1) %>% 
+ungroup() %>% 
+summarise(n())
+
+# get numerator
+biocycle %>% group_by(id, cycle) %>%
+  filter(!noserum) %>% 
+  filter(n() >= 7, !is.na(cycle_length_bl)) %>% 
+summarise(anov = all(is.na(peak_day))) %>% 
+ungroup() %>% 
+summarise(sum(anov), n())
+```
+
+
+
 ## Reverse cycle days
 ```{r}
 # anovulation algorithms https://www.sciencedirect.com/science/article/pii/S0015028214003951?casa_token=iNDHLoTcXM0AAAAA:AXjpvGRKhpZsSAK1frf9JGTjhzWgM72bbvw6w-0UlezAQkwGWhhrXmuavdmgz4myL66Sebu-4Q#kwrds0010
@@ -194,11 +228,52 @@ biocycle <- biocycle %>%
     standardized_day = 28*(FCD+1)/cycle_length) %>% 
   ungroup()
 
+xtabs(~ is.na(serum_LH_surge_day), biocycle)
+xtabs(~ is.na(peak_day), biocycle)
+xtabs(~ is.na(serum_LH_surge_day) + is.na(peak_day), biocycle)
+xtabs(~ is.na(serum_LH_surge_day) + is.na(serum_LH_peak_day), biocycle)
+xtabs(~ is.na(serum_LH_surge_day) + is.na(peak_day), biocycle)
+
+
 # biocycle %>% select(id, cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, peak_day) %>% distinct() %>% head
 biocycle %>% filter(cycle ==1) %>% select(id, cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak,serum_LH_peak_day, serum_LH_surge_day, peak_day) %>% summarise_all(mean,na.rm=T)
 biocycle %>% filter(cycle ==1) %>% select(id, cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak,serum_LH_peak_day, serum_LH_surge_day, peak_day) %>% summarise_all(sd,na.rm=T)
 biocycle %>% select(id, cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, serum_LH_peak_day, peak_day) %>% distinct() %>% cor(use='p') %>% .[c(-1,-2),c(-1,-2)] %>% round(2)
 ```
+
+## Urine validity
+```{r}
+table(is.na(biocycle$peak_day))
+table((biocycle$peak_day))
+options(pillar.sigfig = 2)
+biocycle %>% filter(between(peak_day - cday, -5, 5)) %>% 
+  group_by(peak_day - cday) %>% 
+  summarise(
+  cor(ESTRGEN, E3g_monitor_peak),
+  cor(ESTRGEN, E3g_monitor_peak, method = "s"),
+  cor(log(ESTRGEN), log(E3g_monitor_peak)),
+  n_E=  cor.test(ESTRGEN, E3g_monitor_peak)$parameter + 2,
+  cor(LH, LH_monitor_peak),
+  cor(LH, LH_monitor_peak, method = "s"),
+  cor(log(LH), log(LH_monitor_peak)),
+  n_LH =  cor.test(LH, LH_monitor_peak)$parameter + 2
+)
+```
+
+
+## Anovulatory cycles vs. rest
+
+```{r}
+biocycle %>% group_by(anovulatory) %>% 
+  summarise(mean_cl = mean(cycle_length, na.rm = T),
+            min_cl = min(cycle_length, na.rm = T),
+            max_cl =max(cycle_length, na.rm = T),
+            sd_cl = sd(cycle_length, na.rm = T),
+            mean(log(ESTRGEN), na.rm = T),
+            mean(log(PROGEST), na.rm = T)
+            )
+```
+
 
 ## Which day do the different methods get as the day of ovulation?
 ```{r}

@@ -1,5 +1,5 @@
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
 library(tidyverse)
 library(tidylog)
 ```
@@ -9,16 +9,85 @@ library(tidylog)
 ### Hormones
 ```{r}
 m_e2 <- rio::import("data/marcinkowska/manual_clean/estradiolALL.xlsx") %>% tibble()
+n_distinct(m_e2$ID)
+
+m_e2 <- m_e2 %>% filter(is.na(Notes) | Notes != "control")
+e2_dfs <- list.files("data/marcinkowska/manual_clean/", pattern = "estradiol ", full.names = T) %>% map(rio::import) %>% map(tibble)
+names(e2_dfs) <- list.files("data/marcinkowska/manual_clean/", pattern = "estradiol ")
+m_e2_2 <- e2_dfs %>% map(. %>% select(ID, data, `pg/ml`, Meetings)) %>% bind_rows(.id = "batch")
+n_distinct(m_e2_2$ID)
 
 p4_dfs <- list.files("data/marcinkowska/manual_clean/", pattern = "progesteron", full.names = T) %>% map(rio::import) %>% map(tibble)
 names(p4_dfs) <- list.files("data/marcinkowska/manual_clean/", pattern = "progesteron")
 m_p4 <- p4_dfs %>% map(. %>% select(ID, data, `pg/ml`, Meetings)) %>% bind_rows(.id = "batch")
 
 m_p4 <- m_p4 %>% filter(!str_detect(data, "brak")) %>% filter(!str_detect(data, "BRAK")) %>% 
-  mutate(date = lubridate::dmy(data))
+  mutate(date = lubridate::dmy(data)) %>% 
+  filter(!is.na(date))
 
 m_e2 <- m_e2 %>% 
-  mutate(date = lubridate::dmy(data))
+  mutate(date = lubridate::dmy(data)) %>% 
+  filter(!is.na(date))
+m_e2_2 <- m_e2_2 %>% filter(!str_detect(data, "brak")) %>% filter(!str_detect(data, "BRAK")) %>% 
+  mutate(date = lubridate::dmy(data)) %>% 
+  filter(!is.na(date))
+```
+
+
+### Dates in right order?
+```{r}
+m_e2_2 %>% group_by(ID) %>% mutate(date_o = date[order(date)]) %>% filter(date != date_o) %>% select(ID, date, date_o) %>% nrow
+m_p4 %>% group_by(ID) %>% mutate(date_o = date[order(date)]) %>% filter(date != date_o) %>% select(ID, date, date_o) %>% nrow
+m_e2 %>% group_by(ID) %>% mutate(date_o = date[order(date)]) %>% filter(date != date_o) %>% select(ID, date, date_o) %>% nrow
+
+m_e2 %>% group_by(ID, date) %>% filter(n()> 1)
+m_e2_2 %>% group_by(ID, date) %>% filter(n()> 1)
+m_p4 %>% group_by(ID, date) %>% filter(n()> 1)
+```
+
+
+### Checks
+```{r}
+# cor/rank order avrg pg/ml
+cor.test(m_e2$Avrg, m_e2$`pg/ml`)
+cor.test(m_e2$Avrg, m_e2$`pg/ml`, method = "s")
+```
+
+### Collect IDs
+```{r}
+n_distinct(m_e2$ID)
+n_distinct(m_p4$ID)
+n_distinct(m_e2_2$ID)
+all_ids <- union(m_e2$ID, union(m_e2_2$ID, m_p4$ID))
+table(str_sub(all_ids, 1, 1))
+table(str_sub(all_ids, 2)) %>% sort()
+length(union(m_e2$ID, union(m_e2_2$ID, m_p4$ID)))
+length(union(m_e2$ID, m_e2_2$ID))
+length(union(m_e2$ID, m_p4$ID))
+length(union(m_e2_2$ID, m_p4$ID))
+intersect(m_e2$ID, m_p4$ID)
+setdiff(m_e2$ID, m_p4$ID)
+setdiff(m_p4$ID, m_e2$ID)
+intersect(m_e2_2$ID, m_p4$ID)
+setdiff(m_e2_2$ID, m_p4$ID)
+setdiff(m_p4$ID, m_e2_2$ID)
+intersect(m_e2_2$ID, m_e2$ID)
+setdiff(m_e2_2$ID, m_e2$ID)
+setdiff(m_e2$ID, m_e2_2$ID)
+setdiff(m_p4$ID, union(m_e2$ID, m_e2_2$ID))
+setdiff(union(m_e2$ID, m_e2_2$ID), m_p4$ID)
+```
+
+### Bind E2 files
+```{r}
+m_e2 <- bind_rows(m_e2, m_e2_2 %>% anti_join(m_e2, by = "ID") %>% select(ID, data, `pg/ml`, Meetings, date))
+n_distinct(m_e2$ID)
+nrow(m_e2)
+```
+
+
+### Merge E2/P4
+```{r}
 marc <- m_e2 %>% rename(estradiol = `pg/ml`) %>% full_join(m_p4 %>% rename(progesterone = `pg/ml`), by = c("ID", "date"))
 
 min(marc$estradiol, na.rm = T)
@@ -54,82 +123,116 @@ EL66: pink # bg_colors[90]
 
 ```{r}
 ## STRATEGY A
-mensdates <- rio::import("data/marcinkowska/manual_clean/Calendar.xlsx") %>% 
+mensdates_orig <- rio::import("data/marcinkowska/manual_clean/Calendar.xlsx") %>% 
   slice(1:102) %>% 
+  rename(cycle_length = `Cycle length`) %>% 
   mutate(LH_peak = case_when(
     `LH+When` %in% c("x", "--", "-") ~ NA_real_,
-    TRUE ~ as.numeric(`LH+When`))) %>% 
-  select(ID, LH_peak, cycle_length = `Cycle length`, `42185`:`42424`) %>% 
+    TRUE ~ as.numeric(`LH+When`)),
+    cycle_length = as.numeric(cycle_length))
+
+n_distinct(mensdates_orig$ID)
+intersect(mensdates_orig$ID, m_e2$ID)
+setdiff(mensdates_orig$ID, m_e2$ID)
+setdiff(m_e2$ID, mensdates_orig$ID)
+mensdates <- mensdates_orig %>%   
+  select(ID, LH_peak, cycle_length, `42185`:`42424`) %>% 
   mutate_all(as.character) %>% 
   pivot_longer(-c(ID, LH_peak, cycle_length)) %>% 
   mutate(date = as.Date(as.numeric(name), origin = "1899-12-30"),
          cycle_length = as.numeric(cycle_length),
          LH_peak = as.numeric(LH_peak)) %>% 
   filter(value == 1) %>% 
+  group_by(ID) %>% 
+  arrange(date) %>% 
+  filter(row_number() == 1) %>% 
+  ungroup() %>% 
   mutate(last_menstrual_onset = date,
          next_menstrual_onset = date + cycle_length,
          lh_surge_date = date + cycle_length + LH_peak) %>% 
   select(-name, -value, -date)
+nrow(mensdates)
+n_distinct(mensdates$ID)
+
+mensdates <- mensdates_orig %>% select(ID, cycle_length, LH_peak) %>% 
+  full_join(mensdates)
+nrow(mensdates)
+n_distinct(mensdates$ID)
+
 rio::export(mensdates, "data/marcinkowska/manual_clean/Calendar_dates.xlsx")
 
-## STRATEGY B
-library(tidyxl)
-formats <- xlsx_formats("data/marcinkowska/manual_clean/Calendar.xlsx")
-bg_colors <- formats$local$fill$patternFill$bgColor$rgb
-bg_colors[23]
-table(bg_colors)
-bg_colors <- tibble(local_format_id = 1:length(bg_colors), color = bg_colors) %>% drop_na()
-showCols <- function(cl=colors(), bg = "grey",
-                     cex = 0.75, rot = 30) {
-    m <- ceiling(sqrt(n <-length(cl)))
-    length(cl) <- m*m; cm <- matrix(cl, m)
-    require("grid")
-    grid.newpage(); vp <- viewport(w = .92, h = .92)
-    grid.rect(gp=gpar(fill=bg))
-    grid.text(cm, x = col(cm)/m, y = rev(row(cm))/m, rot = rot,
-              vp=vp, gp=gpar(cex = cex, col = cm))
-}
-showCols(bg="gray20",cl=bg_colors$color %>% unique() %>% str_sub(3) %>% str_c("#", .), rot=0, cex=1.9)
-
-bg_colors %>% drop_na() %>% mutate(id = factor(local_format_id)) %>% ggplot(aes(id, 1, color = paste0("#", color))) + geom_point()
-dates <- xlsx_cells("data/marcinkowska/manual_clean/Calendar.xlsx") %>% 
-  left_join(bg_colors)
-date_in_study <- dates %>% filter(row == 1, !is.na(date)) %>% select(col, part_date = date)
-ids <- dates %>% filter(col == 1) %>% mutate(ID = coalesce(character, as.character(round(numeric))), row) %>% select(ID, row) %>% slice(2:103)
-
-date_colors <- dates %>% select(row, col, color) %>% 
-  left_join(date_in_study, by = "col") %>% 
-  left_join(ids, by = "row")
-# drop_na(date_colors) %>% View
-  
-
-dates %>% filter(color == "FFFF00FF") %>% pull(numeric) %>% table(exclude = NULL)
-dates %>% filter(color == "FFFF00FF") %>% pull(date) %>% table(exclude = NULL)
+# ## STRATEGY B (abandoned)
+# library(tidyxl)
+# formats <- xlsx_formats("data/marcinkowska/manual_clean/Calendar.xlsx")
+# bg_colors <- formats$local$fill$patternFill$bgColor$rgb
+# bg_colors[23]
+# table(bg_colors)
+# bg_colors <- tibble(local_format_id = 1:length(bg_colors), color = bg_colors) %>% drop_na()
+# showCols <- function(cl=colors(), bg = "grey",
+#                      cex = 0.75, rot = 30) {
+#     m <- ceiling(sqrt(n <-length(cl)))
+#     length(cl) <- m*m; cm <- matrix(cl, m)
+#     require("grid")
+#     grid.newpage(); vp <- viewport(w = .92, h = .92)
+#     grid.rect(gp=gpar(fill=bg))
+#     grid.text(cm, x = col(cm)/m, y = rev(row(cm))/m, rot = rot,
+#               vp=vp, gp=gpar(cex = cex, col = cm))
+# }
+# showCols(bg="gray20",cl=bg_colors$color %>% unique() %>% str_sub(3) %>% str_c("#", .), rot=0, cex=1.9)
+# 
+# bg_colors %>% drop_na() %>% mutate(id = factor(local_format_id)) %>% ggplot(aes(id, 1, color = paste0("#", color))) + geom_point()
+# 
+# dates <- xlsx_cells("data/marcinkowska/manual_clean/Calendar.xlsx") %>% 
+#   left_join(bg_colors)
+# date_in_study <- dates %>% filter(row == 1, !is.na(date)) %>% select(col, part_date = date)
+# ids <- dates %>% filter(col == 1) %>% mutate(ID = coalesce(character, as.character(round(numeric))), row) %>% select(ID, row) %>% slice(2:103)
+# 
+# date_colors <- dates %>% select(row, col, color) %>% 
+#   left_join(date_in_study, by = "col") %>% 
+#   left_join(ids, by = "row")
+# # drop_na(date_colors) %>% View
+#   
+# 
+# dates %>% filter(color == "FFFF00FF") %>% pull(numeric) %>% table(exclude = NULL)
+# dates %>% filter(color == "FFFF00FF") %>% pull(date) %>% table(exclude = NULL)
 ```
 
 ## Merge
 ```{r}
 mensdates <- mensdates %>% 
-  mutate(ID = case_when(
-    str_detect(ID, "K") ~ str_replace(ID, "K", "K "),
-    TRUE ~ paste("P", ID)
-  ))
+  mutate(ID = as.numeric(str_match(ID, "(\\d+)")[,2]))
+
+marc <- marc %>% 
+  mutate(
+    KP = str_sub(ID, 1, 1),
+    ID = as.numeric(str_match(ID, "(\\d+)")[,2]))
+length(intersect(mensdates$ID, marc$ID))
+setdiff(mensdates$ID, marc$ID)
+setdiff(marc$ID, mensdates$ID)
 
 mensdates %>% filter(lh_surge_date > next_menstrual_onset |
                        lh_surge_date < last_menstrual_onset) %>% 
   select(ID, lh_surge_date, next_menstrual_onset, last_menstrual_onset)
+
 mensdates <- mensdates %>% group_by(ID) %>% 
   arrange(ID, last_menstrual_onset) %>% 
   mutate(cycle = row_number())
+nrow(mensdates)
+n_distinct(mensdates$ID)
+
+cycles <- mensdates %>% select(ID, cycle, cycle_length, LH_peak, last_menstrual_onset,
+                               next_menstrual_onset, lh_surge_date)
 
 merge_date_on_cycle <- mensdates %>% 
-  group_by(ID, cycle) %>% 
+  drop_na(last_menstrual_onset, next_menstrual_onset) %>% 
+  group_by(ID) %>% 
   expand(date = seq(from = last_menstrual_onset, 
                     to = next_menstrual_onset - lubridate::days(1),
                     by = 1)) %>% 
-  left_join(mensdates, by = c("ID", "cycle"))
+  left_join(cycles %>% select(ID, last_menstrual_onset, next_menstrual_onset, lh_surge_date), by = "ID")
 
-marc <- marc %>% left_join(merge_date_on_cycle, by = c("ID", "date"))
+marc <- marc %>% left_join(merge_date_on_cycle, by = c("ID", "date")) %>% 
+  left_join(cycles %>% select(ID, cycle, cycle_length), by = "ID")
 
 marc <- marc %>% 
   filter(date > "2015-02-12") %>% 
@@ -138,6 +241,9 @@ marc <- marc %>%
     bc_day = as.numeric(date - next_menstrual_onset),
     fc_day = as.numeric(date - last_menstrual_onset),
     lh_day = as.numeric(date - lh_surge_date))
+
+marc %>% filter(fc_day < 0) %>% select(ID, date, fc_day,last_menstrual_onset, next_menstrual_onset, bc_day, estradiol, progesterone)
+marc %>% filter(bc_day > -1) %>% select(ID, date, fc_day, bc_day, estradiol, progesterone)
 qplot(marc$date)
 print(range(marc$fc_day, na.rm =T))
 print(range(marc$bc_day, na.rm =T))
@@ -148,6 +254,14 @@ marc <- marc %>% group_by(ID) %>%
   mutate(
     lh_surge_date_2 = first(date[ which(str_detect(Meetings.x, "O")) ])
     )
+
+marc %>% filter(date < last_menstrual_onset | date > next_menstrual_onset)
+marc_without_cycle_phase <- marc %>% filter(is.na(last_menstrual_onset))
+marc_with_cycle_phase <- marc %>% filter(!is.na(last_menstrual_onset))
+n_distinct(marc_without_cycle_phase$id)
+n_distinct(marc_with_cycle_phase$id)
+setdiff(marc_without_cycle_phase$id, marc_with_cycle_phase$id) %>% sort
+102-n_distinct(marc_with_cycle_phase$id)
 
 # n_nonmissing(marc$lh_surge_date)
 # n_nonmissing(marc$lh_surge_date_2)
@@ -170,10 +284,20 @@ ggplot(marc, aes(lh_day, estradiol)) + geom_smooth() +
 
 marc <- marc %>% rename(id=ID)
 
+marc %>% group_by(id) %>% 
+  summarise(
+    prog = any(!is.na(progesterone)),
+    estr = any(!is.na(estradiol))
+) %>% summarise(sum(prog), sum(estr))
+
 marc %>% filter(Meetings.x != Meetings.y) %>% select(Meetings.x, Meetings.y)
 table(marc$Meetings.x==marc$Meetings.y)
 marc %>% select(id, cycle, contains("date"), bc_day, fc_day, lh_day, estradiol, estradiol_cens, progesterone, progesterone_cens, cycle_length, Meetings_E2 = Meetings.x, Meetings_P4 = Meetings.y) %>% 
 rio::export("data/marcinkowska/manual_clean/ula_merged.xlsx")
+```
+
+```{r}
+marc_check <- marc %>% select(id, date, cycle, last_menstrual_onset, next_menstrual_onset, lh_surge_date, bc_day, fc_day, lh_day, progesterone, estradiol, cycle_length)
 ```
 
 
@@ -201,10 +325,10 @@ Marcinkowska, U. M., Galbarczyk, A., & Jasienska, G. (2018). La donna è mobile?
 Marcinkowska, U. M., Kaminski, G., Little, A. C., & Jasienska, G. (2018). Average ovarian hormone levels, rather than daily values and their fluctuations, are related to facial preferences among women. Hormones and Behavior, 102, 114–119. https://doi.org/10.1016/j.yhbeh.2018.05.013", 
       LOD = 2.5,
       LOQ = 10,
-      CV_intra = "9%",
-      CV_inter = "23% for lower values (15 pmol/l) to 13% for higher values (50 pmol/l)",
+      CV_intra = "4.9%",
+      CV_inter = "14.1%",
       Procedure = "Participants were asked to collect saliva samples each morning starting from the first day of menstrual bleeding, until the end of the menstrual cycle (i.e., the day before the onset of the next menstrual bleeding). Women were verbally instructed by the principal investigator concerning collecting and storing the saliva and were given a set of 2-ml centrifuge tubes with the minimum amount of required saliva marked on a tube together with written instructions. Saliva samples were collected in the morning, preferably before eating, drinking, or smoking, or not earlier than 30 min after eating, drinking, or smoking. Immediately after collec- tion, samples were frozen in the participant’s home freezer. After the end of the cycle, samples were transported in portable freezers to the laboratory where hormonal assays for measure- ments of 17-b-estradiol (E2) and 17-a-hydroxy-progesterone (P) were conducted. Hormonal measurements were conducted using commercially available hormonal assays of DRG Inter- national, Inc. ELISA plates SLV4188 (sensitivity: 0.4 pg/ml, standard range: 1–100 pg/ml) for E2 and SLV3140 for P (sen- sitivity: 2.5 pg/ml, standard range: 10–5,000 pg/ml). All sam- ples were assayed in duplicates. The quality of hormonal measurements was monitored for each plate separately by including samples of known concentrations with low and high E2 and P levels. Inter-assay variability was 10.1%, intra-assay variability was 7.5% for E2 and 14.1% and 4.9% for P, which is within acceptable values for steroid sex hormones assays (Schultheiss & Stanton, 2009).",
-      Scheduling = "Whole cycle 'Participants were asked to collect saliva samples each morning starting from the first day of menstrual bleeding, until the end of the menstrual cycle (i.e., the day before the onset of the next menstrual bleeding).'",
+      Scheduling = "Whole cycle 'Participants were asked to collect saliva samples each morning starting from the first day of menstrual bleeding, until the end of the menstrual cycle (i.e., the day before the onset of the next menstrual bleeding). Due to financial restrictions on average 15 hormonal measurements were done per participant. For E centred around ovulation, for P last 15 days of the cycle.'",
         LH_test = "All participants received LH kits. Each kit consisted of sterilized urine cups and 10 LH tests. Women were instructed to conduct the tests from the 10th until the 20th day of the cycle or until a positive result was obtained.")
 
 df <- marc %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = estradiol, hormone_cens = estradiol_cens, cycle_length)
@@ -219,10 +343,10 @@ Marcinkowska, U. M., Galbarczyk, A., & Jasienska, G. (2018). La donna è mobile?
 Marcinkowska, U. M., Kaminski, G., Little, A. C., & Jasienska, G. (2018). Average ovarian hormone levels, rather than daily values and their fluctuations, are related to facial preferences among women. Hormones and Behavior, 102, 114–119. https://doi.org/10.1016/j.yhbeh.2018.05.013", 
       LOD = 0.4,
       LOQ = 1,
-      CV_intra = "9%",
-      CV_inter = "23% for lower values (15 pmol/l) to 13% for higher values (50 pmol/l)",
+      CV_intra = "7.5%",
+      CV_inter = "10.1%",
       Procedure = "Participants were asked to collect saliva samples each morning starting from the first day of menstrual bleeding, until the end of the menstrual cycle (i.e., the day before the onset of the next menstrual bleeding). Women were verbally instructed by the principal investigator concerning collecting and storing the saliva and were given a set of 2-ml centrifuge tubes with the minimum amount of required saliva marked on a tube together with written instructions. Saliva samples were collected in the morning, preferably before eating, drinking, or smoking, or not earlier than 30 min after eating, drinking, or smoking. Immediately after collec- tion, samples were frozen in the participant’s home freezer. After the end of the cycle, samples were transported in portable freezers to the laboratory where hormonal assays for measure- ments of 17-b-estradiol (E2) and 17-a-hydroxy-progesterone (P) were conducted. Hormonal measurements were conducted using commercially available hormonal assays of DRG Inter- national, Inc. ELISA plates SLV4188 (sensitivity: 0.4 pg/ml, standard range: 1–100 pg/ml) for E2 and SLV3140 for P (sen- sitivity: 2.5 pg/ml, standard range: 10–5,000 pg/ml). All sam- ples were assayed in duplicates. The quality of hormonal measurements was monitored for each plate separately by including samples of known concentrations with low and high E2 and P levels. Inter-assay variability was 10.1%, intra-assay variability was 7.5% for E2 and 14.1% and 4.9% for P, which is within acceptable values for steroid sex hormones assays (Schultheiss & Stanton, 2009).",
-      Scheduling = "Whole cycle 'Participants were asked to collect saliva samples each morning starting from the first day of menstrual bleeding, until the end of the menstrual cycle (i.e., the day before the onset of the next menstrual bleeding).'",
+      Scheduling = "Whole cycle 'Participants were asked to collect saliva samples each morning starting from the first day of menstrual bleeding, until the end of the menstrual cycle (i.e., the day before the onset of the next menstrual bleeding). Due to financial restrictions on average 15 hormonal measurements were done per participant. For E centred around ovulation, for P last 15 days of the cycle.'",
         LH_test = "All participants received LH kits. Each kit consisted of sterilized urine cups and 10 LH tests. Women were instructed to conduct the tests from the 10th until the 20th day of the cycle or until a positive result was obtained.")
 
 df <- marc %>% select(id, cycle, bc_day, fc_day, lh_day, estradiol, progesterone, cycle_length) %>% mutate(hormone_cens = "none")

@@ -1,12 +1,12 @@
 ---
 title: "Cycle Quest Data"
-author: "Lisa DeBruine"
+author: "Lisa DeBruine & Ruben Arslan"
 date: "10/02/2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
 library(tidyverse)
 ```
 

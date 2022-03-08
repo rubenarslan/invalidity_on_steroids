@@ -14,4 +14,4 @@ exclude:
 - renv
 - '*.xlsx'
 - '*.rds'
-
+- summaries

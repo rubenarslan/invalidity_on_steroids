@@ -5,7 +5,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
 library(tidyverse)
 ```
 
@@ -124,6 +124,18 @@ gol <- gol %>%
 
 gol <- gol %>% mutate(partner = recode(relationship_status, `-1` = 0L))
 saveRDS(gol, "gol2.rds")
+
+n_distinct(gol$id)
+gol_cycles <- gol %>% filter(is.na(cycle_length) | between(cycle_length, 20, 35))
+n_distinct(gol_cycles$id)
+gol_cycles_e <- gol_cycles %>% filter(!is.na(estradiol))
+n_distinct(gol_cycles_e$id)
+gol_cycles_p <- gol_cycles %>% filter(!is.na(progesterone))
+n_distinct(gol_cycles_p$id)
+
+gol %>% group_by(id) %>% filter(all(is.na(progesterone))) %>% select(id) %>% distinct()
+
+gol %>% summarise(sum(is.na(estradiol)), sum(is.na(progesterone)))
 ```
 
 ## Summarize

@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
 library(tidyverse)
 ```
 
@@ -57,7 +57,7 @@ gocd2 <- gocd2 %>% select(id = `VPN-Zahl`,
 gocd2 <- lab_only %>% left_join(gocd2, by = c("id", "date"), suffix = c("", "_diary"))
 relstatage <- lab_raw %>% mutate(partner = if_else(Relationship_status == 1, 0, 1)) %>%  select(id = `VPN-Zahl`, age = Age, partner) %>% distinct(id, .keep_all = TRUE)
 gocd2 <- gocd2 %>% left_join(relstatage, by = c("id"))
-gocd <- gocd2 %>% 
+gocd2 <- gocd2 %>% 
   # when we have a BC day from the online diary, we prefer it
   mutate(bc_day = coalesce(bc_day_diary, bc_day)) %>% 
   select(-bc_day_diary)
@@ -68,7 +68,17 @@ range(gocd2$bc_day, na.rm = T)
 table(!is.na(gocd2$bc_day))
 range(gocd2$lh_day, na.rm = T)
 table(!is.na(gocd2$lh_day))
-qplot(gocd2$lh_day)
+
+gocd2 <- gocd2 %>% 
+  mutate(bc_day = if_else(is.na(cycle_length) & bc_day < -35, NA_real_, bc_day))
+gocd2_u <- gocd2 %>% filter(is.na(cycle_length) | between(cycle_length, 25, 35))
+range(gocd2_u$fc_day, na.rm = T)
+table(!is.na(gocd2_u$fc_day))
+range(gocd2_u$bc_day, na.rm = T)
+table(!is.na(gocd2_u$bc_day))
+range(gocd2_u$lh_day, na.rm = T)
+table(!is.na(gocd2_u$lh_day))
+qplot(gocd2_u$lh_day)
 
 table( is.na(gocd2$progesterone), exclude = NULL)
 
