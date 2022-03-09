@@ -88,6 +88,67 @@ cycle_phase_plot <- function(summary, kind, custom_limits = NULL, size = 25) {
     ggtitle(summary$Dataset,subtitle = paste0("n = ", n_women, ", days = ",n_days))
 }
 
+cycle_phase_plot_ep <- function(model, Dataset, custom_limits = NULL, size = 20) {
+  Hormone_label <- "Estradiol"
+  kind = "ep_day_model"
+  n_days <- nrow(model$data)
+  n_women <- n_distinct(model$data$id)
+  
+  
+  df <- model$data
+  point_alpha <- 1 / nrow(df) * 150
+  point_alpha <- if_else(point_alpha > 1, 1, point_alpha)
+  
+  if(str_detect(Hormone_label, "Progesterone")) {
+    Hormone_label <- "Progesterone"
+    color <- '#587f6f05'
+    labels <- c(0.2, 1, 5, 10, 20, 50, 100, 200, 500, 1000, 1500, 10000, 25000)
+    breaks <- log(labels)
+    limits <- log(c(0.09, 28000))
+  } else {
+    color <- '#b85a5305'
+    labels <- c(0.1, 0.5, 1, 5, 10, 20, 30)
+    breaks <- log(labels)
+    limits <- log(c(0.09, 32))
+  }
+  
+  if(!is.null(custom_limits)) {
+    limits <- custom_limits
+  }
+  if(kind == "ep_day_model") {
+    x_axis <- scale_x_continuous("Day relative to estradiol peak", 
+                                 breaks = seq(-15, 15, by = 3))
+    coords <- coord_cartesian(xlim = c(-15, 15), ylim = limits)
+  } else if(kind == "bc_day_model") {
+    x_axis <- scale_x_continuous("Days until next menstrual onset", 
+                                 breaks = seq(-30, 0, by = 3))
+    coords <- coord_cartesian(xlim = c(-30, 0), ylim = limits) 
+  } else  if(kind == "fc_day_model") {
+    x_axis <- scale_x_continuous("Days since last menstrual onset", 
+                                 breaks = seq(0, 30, by = 3))
+    coords <-coord_cartesian(xlim = c(0, 30), ylim = limits)
+  }
+  
+  r2 <- sqrt(loo_R2(model, re_formula = NA))
+
+  plot(conditional_effects(model, 
+                           conditions = tibble(hormone_cens = c("none", "left")), 
+                           spaghetti = TRUE, ndraws = 200), 
+       points = TRUE, 
+       point_args = list(alpha = point_alpha),
+       spaghetti_args = list(alpha = 0.01, colour = color), 
+       line_args = list(size = 0), 
+       plot = FALSE)[[1]] +
+    facet_null() +
+    scale_y_continuous(paste0("Log(",Hormone_label,")"),
+                       breaks = breaks, labels = labels) +
+    x_axis +
+    coords +
+    theme_minimal(base_size = size) +
+    ggtitle(Dataset,subtitle = paste0("n = ", n_women, ", days = ",n_days, ", LOO-R = ", 
+                                      sprintf("%.2f [%.2f;%.2f]", r2[,"Estimate"], r2[,"Q2.5"], r2[,"Q97.5"])))
+}
+
 
 summarise_hormone <- function(df, 
                               Dataset, 

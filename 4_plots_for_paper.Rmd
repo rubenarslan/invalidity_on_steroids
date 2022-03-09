@@ -344,7 +344,7 @@ dat <- dat %>% group_by(id) %>%
 
 ```{r fig.width = 5, fig.height = 5}
 study_names <- c("BioCycle", "Roney 2013", "OCMATE Non-HC", "Marcinkowska 2020", "GOL2", "GOCD2", "Blake 2017", "Grebe et al. 2016")
-short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Jünger '18", "Stern '21", "Blake '17", "Grebe '16")
+short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Stern '21", "Jünger '18", "Blake '17", "Grebe '16")
 names(short_names) <- study_names
 all_stats$Dataset <- factor(as.character(short_names[all_stats$Dataset]), levels = short_names)
 rr_saliva <- all_stats %>% select(Hormone, Dataset, contains("_imputed_rr")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
@@ -466,15 +466,29 @@ trafos %>% group_by(Hormone, transformation) %>%
   mutate(max_diff = diff(range(mean, na.rm = T)))
 
 trafos %>% 
-  ggplot(aes(Dataset, estimate, ymin = conf.low, ymax = conf.high, color = transformation)) + geom_pointrange(position = position_dodge(width = .2)) + facet_grid(Hormone ~ cycle_phase) + coord_flip()
+  mutate(transformation = if_else(transformation == "", "none", transformation)) %>% 
+  mutate(transformation = factor(transformation, levels = rev(c("log_diff", "log", "diff", "none")))) %>% 
+  mutate(log = if_else(transformation %in% c("none", "diff"), "no", "yes")) %>% 
+  ggplot(aes(Dataset, estimate, ymin = conf.low, ymax = conf.high, color = transformation, shape = log)) + 
+  facet_grid(Hormone ~ cycle_phase) + 
+  geom_pointrange(position = position_dodge(0.4), size = 0.3) +
+  ggrepel::geom_text_repel(aes(label = sprintf("%.2f", estimate)), size = 2.5, position = position_dodge(0.4)) +
+  coord_flip() +
+  theme_bw() + 
+  scale_color_viridis_d(begin = 0.2, end = 0.8) +
+  scale_shape_manual(values = c("no" = 0, "yes" = 1), guide = "none") +
+  scale_y_continuous(expression(Estimated~r[PBFW][", "][Hormone]), limits = c(NA, 1)) +
+  theme(legend.position=c(0.9,0.1))
+ggsave("plots/S_Figure7.pdf", width = 14.22, height = 10, units = "in")
+ggsave("plots/S_Figure7.png", width = 14.22, height = 10, units = "in")
+
+
 trafos %>% 
   ggplot(aes(transformation, estimate, ymin = conf.low, ymax = conf.high, color = Dataset)) + geom_pointrange(position = position_dodge(width = .2)) + facet_grid(Hormone ~ cycle_phase) + coord_flip()
 ```
 
 
 ## Supplementary Figure 1
-
-## Figure 2
 Forward-counting for all datasets, including Grebe and Blake.
 
 ```{r fig.width = 14.22, fig.height = 10}
@@ -576,9 +590,11 @@ roney <- roney %>% filter(!is.na(estradiol) | !is.na(progesterone),
 
 marc <- marc %>% filter(!is.na(estradiol) | !is.na(progesterone), 
                       is.na(cycle_length) | between(cycle_length, 20,35))
+
 marc <- marc %>% group_by(id, cycle) %>% pipeline_e2_drop
 
 biocycle <- biocycle %>% group_by(id, cycle) %>% pipeline_e2_drop
+
 
 ggplot(biocycle, aes(ed_day, log(estradiol))) +
   geom_point(alpha = 0.1) +
@@ -594,6 +610,17 @@ ggplot(biocycle, aes(ep_day, log(estradiol))) +
   geom_point(alpha = 0.1) +
   geom_smooth(method = "gam") +
   xlim(-15, 15)
+
+ep_day_e2_model <- brm(log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1|id) + (1|id:cycle) , data = biocycle %>% mutate(lh_day = ep_day, hormone = estradiol, hormone_cens = estradiol_cens) %>% filter(between(lh_day, -15, 15)) ,
+                           control = list(adapt_delta = 0.99),
+                           file_refit = "on_change", file = "models/m_BioCycle_Estradiol_ep_day") %>% 
+         add_criterion("loo_R2", re_formula = NA) %>%
+         add_criterion("bayes_R2", re_formula = NA)
+
+sqrt(bayes_R2(ep_day_e2_model, re_formula = NA))
+sqrt(loo_R2(ep_day_e2_model, re_formula = NA))
+biocycle_ep <- cycle_phase_plot_ep(ep_day_e2_model, Dataset = "BioCycle")
+
 
 ggplot(biocycle, aes(ep_day, log(progesterone))) +
   geom_point(alpha = 0.1) +
@@ -637,6 +664,16 @@ ggplot(roney, aes(ep_day, log(estradiol))) +
   geom_smooth(method = "gam") +
   xlim(-15, 15)
 
+ep_day_e2_model <- brm(log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1|id) + (1|id:cycle) , data = roney %>% mutate(lh_day = ep_day, hormone = estradiol, hormone_cens = estradiol_cens) %>% filter(between(lh_day, -15, 15)) ,
+                           control = list(adapt_delta = 0.99),
+                           file_refit = "on_change", file = "models/m_Roney_Estradiol_ep_day") %>% 
+         add_criterion("loo_R2", re_formula = NA) %>%
+         add_criterion("bayes_R2", re_formula = NA)
+
+sqrt(bayes_R2(ep_day_e2_model, re_formula = NA))
+sqrt(loo_R2(ep_day_e2_model, re_formula = NA))
+roney_ep <- cycle_phase_plot_ep(ep_day_e2_model, Dataset = "Roney '13")
+
 ggplot(roney, aes(ep_day, log(progesterone))) +
   geom_point(alpha = 0.1) +
   geom_smooth(method = "gam") +
@@ -665,6 +702,30 @@ marc <- marc %>% group_by(id, cycle) %>%
 
 marc %>% filter(ed_day == 0) %>%  pull(bc_day) %>% qplot()
 
+biocycle %>%
+  ungroup() %>% 
+  select(id, cycle, lh_day, ep_day, ed_day, pr_day, bc_day, fc_day, lh_serum_day = DRLH_serum_surge, lh_peak_day = DRLH_serum_peak) %>% 
+  mutate(bc_day = bc_day + 15,
+         fc_day = fc_day - 13) %>% 
+  distinct() %>% 
+  pivot_longer(c(-id, -cycle, -lh_day), names_to = "method", values_to = "day") %>% 
+  mutate(day = day - lh_day) %>% 
+  group_by(method) %>% 
+  summarise(mean = mean(day, na.rm = T), sd = sd(day, na.rm = T)) %>% 
+  arrange(sd)
+
+marc %>%
+  ungroup() %>% 
+  select(id, lh_day, ep_day, ed_day, pr_day, bc_day, fc_day) %>% 
+  mutate(bc_day = bc_day + 15,
+         fc_day = fc_day - 13) %>% 
+  distinct() %>% 
+  pivot_longer(c(-id, -lh_day), names_to = "method", values_to = "day") %>% 
+  mutate(day = day - lh_day) %>% 
+  group_by(method) %>% 
+  summarise(mean = mean(day, na.rm = T), sd = sd(day, na.rm = T)) %>% 
+  arrange(sd)
+
 ggplot(marc, aes(ed_day, log(estradiol))) +
   geom_point(alpha = 0.1) +
   geom_smooth(method = "gam") +
@@ -679,6 +740,16 @@ ggplot(marc, aes(ep_day, log(estradiol))) +
   geom_point(alpha = 0.1) +
   geom_smooth(method = "gam") +
   xlim(-15, 15)
+
+ep_day_e2_model <- brm(log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1|id) + (1|id:cycle) , data = marc %>% mutate(lh_day = ep_day, hormone = estradiol, hormone_cens = estradiol_cens) %>% filter(between(lh_day, -15, 15)) ,
+                           control = list(adapt_delta = 0.99),
+                           file_refit = "on_change", file = "models/m_Marcinkowska_Estradiol_ep_day") %>% 
+         add_criterion("loo_R2", re_formula = NA) %>%
+         add_criterion("bayes_R2", re_formula = NA)
+
+sqrt(bayes_R2(ep_day_e2_model, re_formula = NA))
+sqrt(loo_R2(ep_day_e2_model, re_formula = NA))
+marc_ep <- cycle_phase_plot_ep(ep_day_e2_model, Dataset = "Marcinkowska '20")
 
 ggplot(marc, aes(ep_day, log(progesterone))) +
   geom_point(alpha = 0.1) +
@@ -702,17 +773,18 @@ ggplot(marc, aes(pr_day, log(progesterone))) +
 
 
 set.seed(05102019)
+n <- 80
 random_autocor <- tibble(
-  id = rep(1:200, each = 30)
+  id = rep(1:n, each = 30)
   ) %>% 
   group_by(id) %>% 
   mutate(
     fc_day = row_number() - 2,
-    estradiol = stats::filter(rnorm(30), filter=rep(1,5), circular=TRUE),
-    progesterone = stats::filter(rnorm(30), filter=rep(1,5), circular=TRUE)) %>% 
+    estradiol = rnorm(30)+stats::filter(rnorm(30), filter=rep(1,3), circular=TRUE),
+    progesterone = rnorm(30)+stats::filter(rnorm(30), filter=rep(1,3), circular=TRUE)) %>% 
   drop_na() %>% 
-  mutate(estradiol = exp(estradiol),
-         progesterone = exp(progesterone)) %>% 
+  mutate(estradiol = exp(estradiol/3),
+         progesterone = exp(progesterone/3)) %>% 
   group_by(id) %>% 
   pipeline_e2_drop()
 
@@ -736,6 +808,16 @@ ggplot(random_autocor, aes(ep_day, log(estradiol))) +
   geom_point(alpha = 0.1) +
   geom_smooth(method = "gam") +
   xlim(-15, 15)
+
+ep_day_e2_model <- brm(log(hormone) ~ s(lh_day) + (1|id) , data = random_autocor %>% mutate(lh_day = ep_day, hormone = estradiol) %>% filter(between(lh_day, -15, 15)) ,
+                           control = list(adapt_delta = 0.99),
+                           file_refit = "on_change", file = "models/m_Random_Estradiol_ep_day") %>% 
+         add_criterion("loo_R2", re_formula = NA) %>%
+         add_criterion("bayes_R2", re_formula = NA)
+
+sqrt(bayes_R2(ep_day_e2_model, re_formula = NA))
+sqrt(loo_R2(ep_day_e2_model, re_formula = NA))
+random_ep <- cycle_phase_plot_ep(ep_day_e2_model, Dataset = "Random Time Series")
 
 ggplot(random_autocor, aes(ep_day, log(progesterone))) +
   geom_point(alpha = 0.1) +
@@ -784,30 +866,12 @@ random_autocor %>% group_by(ed_day) %>% filter(between(ed_day, -15, 15)) %>%
   summarise(mean_p_marc = mean(log(progesterone), na.rm=T)), by = "ed_day") %>% 
   select(-ed_day) %>% 
   cor(use = 'p') %>% round(2)
-# 
-# plot_grid(nrow = 2, align = "hv", 
-#           labels = c("", "BioCycle Free E2", "", "OCMATE E2", "", "Roney '13 E2", "", "Jünger '18 E2", "", "Stern '21 E2", "", "Marcinkowska '20 E2", 
-# "", "BioCycle 2% P4", "", "OCMATE P4", "", "Roney '13 P4", "", "Jünger '18 P4", "", "Stern '21 P4", "", "Marcinkowska '20 P4"), 
-# label_y = 0.99, hjust = -0.3,
-# rel_widths = c(0.1, rep(c(1,-0.2), times = 6), 0.1, rep(c(1,-0.2))),
-# NULL,
-# cycle_phase_plot(e2_summaries[["BioCycle"]], "bc_day_model") + low_space, NULL,
-# cycle_phase_plot(e2_summaries[["OCMATE Non-HC"]], "bc_day_model") + low_space + remove_y_axis_e2, NULL,
-# cycle_phase_plot(e2_summaries[["Roney 2013"]], "bc_day_model") + low_space + remove_y_axis_e2, NULL,
-# cycle_phase_plot(e2_summaries[["GOL2"]], "bc_day_model") + low_space + remove_y_axis_e2, NULL,
-# cycle_phase_plot(e2_summaries[["GOCD2"]], "bc_day_model") + low_space + remove_y_axis_e2, NULL,
-# cycle_phase_plot(e2_summaries[["Marcinkowska 2020"]], "bc_day_model") + low_space + remove_y_axis_e2, 
-# 
-# NULL,
-# cycle_phase_plot(p4_summaries[["BioCycle"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space, NULL,
-# cycle_phase_plot(p4_summaries[["OCMATE Non-HC"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-# cycle_phase_plot(p4_summaries[["Roney 2013"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-# cycle_phase_plot(p4_summaries[["GOL2"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-# cycle_phase_plot(p4_summaries[["GOCD2"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-# cycle_phase_plot(p4_summaries[["Marcinkowska 2020"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4)
-# 
-# ggsave("plots/Supplementary_Figure3.pdf", width = 14.22, height = 10, units = "in")
-# ggsave("plots/Supplementary_Figure3.png", width = 14.22, height = 10, units = "in")
+
+plot_grid(nrow = 2, align = "hv",
+          biocycle_ep, roney_ep, marc_ep, random_ep)
+
+ggsave("plots/Supplementary_Figure3.pdf", width = 14, height = 8, units = "in")
+ggsave("plots/Supplementary_Figure3.png", width = 14, height = 8, units = "in")
 ```
 
 
@@ -815,7 +879,6 @@ random_autocor %>% group_by(ed_day) %>% filter(between(ed_day, -15, 15)) %>%
 ```{r}
 biocycle <- readRDS("biocycle.rds")
 
-source("0_summary_functions.R")
 
 
 serum_lh_surge_model <- brm(log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1|id) + (1|id:cycle) , data = biocycle %>% mutate(lh_day = DRLH_serum_surge, hormone = estradiol, hormone_cens = estradiol_cens) %>% filter(between(lh_day, -15, 15)) ,
@@ -905,7 +968,7 @@ cor.test(exp(mgd$est_estradiol_lh), mgd$`Mean Estradiol`)
 cor.test(exp(mgd$est_progesterone_lh), mgd$`Mean Progesterone`)
 cor.test(mgd$est_estradiol_lh, mgd$`Mean Estradiol`, method = "s")
 cor.test(mgd$est_progesterone_lh, mgd$`Mean Progesterone`, method = "s")
-cor.test(mgd$est_estradiol_lh, log(mgd$Median))
+cor.test(mgd$est_estradiol_lh, log(mgd$`Median Estradiol`))
 cor.test(mgd$est_progesterone_lh, log(mgd$`Median Progesterone`))
 
 cor.test(mgd$est_estradiol_lh_low, log(mgd$`Estradiol_5%`))
@@ -981,7 +1044,10 @@ lhd <- ggplot(lh_days, aes(lh_day, fertile_lh, label = round(fertile_lh,2))) +
   scale_y_continuous("Probability of being in fertile window") +
   ggrepel::geom_text_repel(force = 1, nudge_y = 0.03)
 
-plot_grid(fcd, bcd, lhd)
+fcd
+bcd
+lhd
+# plot_grid(fcd, bcd, lhd)
 ```
 
 
@@ -1037,14 +1103,17 @@ ggsave("plots/S_Figure5.pdf", width = 6, height = 3, units = "in")
 ggsave("plots/S_Figure5.png", width = 6, height = 3, units = "in")
 ```
 
+### E2
 
 ```{r}
 anov %>% filter(age <= 22) %>% ungroup() %>% summarise(mean(age), n())
 
-biocycle <- biocycle %>% filter(!is.na(hormone), 
+biocycle_e <- biocycle %>% filter(!is.na(estradiol), 
+                      is.na(cycle_length) | between(cycle_length, 20,35))
+biocycle_p <- biocycle %>% filter(!is.na(progesterone), 
                       is.na(cycle_length) | between(cycle_length, 20,35))
 
-young_lh_surge_model <- brm(log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1|id) + (1|id:cycle) , data = biocycle %>% filter(age <= 22) %>% mutate(hormone = estradiol, hormone_cens = estradiol_cens) %>% filter(between(lh_day, -15, 15)) ,
+young_lh_surge_model <- brm(log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1|id) + (1|id:cycle) , data = biocycle_e %>% filter(age <= 22) %>% mutate(hormone = estradiol, hormone_cens = estradiol_cens) %>% filter(between(lh_day, -15, 15)) ,
                            control = list(adapt_delta = 0.99),
                            file_refit = "on_change", file = "models/m_BioCycle_Estradiol_lh_surge_young") %>% 
          add_criterion("loo_R2", re_formula = NA) %>%
@@ -1054,7 +1123,7 @@ sqrt(bayes_R2(young_lh_surge_model, re_formula = NA))
 sqrt(loo_R2(young_lh_surge_model, re_formula = NA))
 
 
-young_bc_day_model <- brm(log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1|id) + (1|id:cycle) , data = biocycle %>% filter(age <= 22) %>% mutate(hormone = estradiol, hormone_cens = estradiol_cens) ,
+young_bc_day_model <- brm(log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1|id) + (1|id:cycle) , data = biocycle_e %>% filter(age <= 22) %>% mutate(hormone = estradiol, hormone_cens = estradiol_cens) ,
                            control = list(adapt_delta = 0.99),
                            file_refit = "on_change", file = "models/m_BioCycle_Estradiol_bc_day_young") %>% 
          add_criterion("loo_R2", re_formula = NA) %>%
@@ -1073,7 +1142,7 @@ e2_bc <- cycle_phase_plot(e2_bc_summary, "bc_day_model")
 
 ### P4
 ```{r}
-young_lh_surge_model <- brm(log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1|id) + (1|id:cycle) , data = biocycle %>% filter(age <= 22) %>% mutate(hormone = progesterone, hormone_cens = progesterone_cens) %>% filter(between(lh_day, -15, 15)) ,
+young_lh_surge_model <- brm(log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1|id) + (1|id:cycle) , data = biocycle_p %>% filter(age <= 22) %>% mutate(hormone = progesterone, hormone_cens = progesterone_cens) %>% filter(between(lh_day, -15, 15)) ,
                            control = list(adapt_delta = 0.99),
                            file_refit = "on_change", file = "models/m_BioCycle_Progesterone_lh_surge_young") %>% 
          add_criterion("loo_R2", re_formula = NA) %>%
@@ -1082,7 +1151,7 @@ young_lh_surge_model <- brm(log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1|i
 sqrt(bayes_R2(young_lh_surge_model, re_formula = NA))
 sqrt(loo_R2(young_lh_surge_model, re_formula = NA))
 
-young_bc_day_model <- brm(log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1|id) + (1|id:cycle) , data = biocycle %>% filter(age <= 22) %>% mutate(hormone = progesterone, hormone_cens = progesterone_cens) ,
+young_bc_day_model <- brm(log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1|id) + (1|id:cycle) , data = biocycle_p %>% filter(age <= 22) %>% mutate(hormone = progesterone, hormone_cens = progesterone_cens) ,
                            control = list(adapt_delta = 0.99),
                            file_refit = "on_change", file = "models/m_BioCycle_progesterone_bc_day_young") %>% 
          add_criterion("loo_R2", re_formula = NA) %>%
