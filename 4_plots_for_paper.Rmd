@@ -1,5 +1,5 @@
 ---
-title: "Tabular comparison"
+title: "Figures and Tables"
 author: "Ruben Arslan"
 output: 
   distill::distill_article:
@@ -26,11 +26,6 @@ library(patchwork)
 
 
 
-Tabular overview of studies (assay, available cycle phase measures, means, SDs, ranges, logmean/sd, missing/censored values.
-Perhaps a facet plot to better show associations and allow comparison of means with BC for all six except Grebe and Blake.
-Coefplots for whatever the best effect size measure is for E2 and P4.
-Maybe a stacked bar graph to compare variance decomposition? Or a coefplot for all model estimates across LH datasets?
-
 ```{r}
 summaries <- list.files("summaries", full.names = T)
 summaries <- summaries[!str_detect(summaries, "(empty|Ovulatory|OCMATE HC|BioCycle_Estradiol|Estradiol LCMS|BioCycle_Progesterone\\.rds)")]
@@ -48,7 +43,6 @@ names(p4_summaries) <- p4_summaries %>% map("Dataset") %>% unlist()
 ```
 
 
-Maybe a stacked bar graph to compare variance decomposition? Or a coefplot for all model estimates across LH datasets?
 
 ## Table 1
 Tabular overview of studies (assay, available cycle phase measures, means, SDs, ranges, logmean/sd, missing/censored values.
@@ -171,8 +165,6 @@ comp %>%
 
 
 ## Figure 1
-Cycle phase plot relative to LH for at least BioCycle, one LCMS/MS and one salivary IA.
-Cycle phase plot relative to LH for at least BioCycle, one LCMS/MS and one salivary IA.
 
 ```{r fig.width = 10, fig.height = 7.1}
 library(cowplot)
@@ -220,7 +212,6 @@ ggsave("plots/Figure1.png", width = 10, height = 7.1, units = "in")
 ```
 
 ## Figure 2
-Perhaps a facet plot to better show associations and allow comparison of means with BC for all six except Grebe and Blake.
 
 ```{r fig.width = 14.22, fig.height = 10}
 low_space <- list(
@@ -259,7 +250,6 @@ ggsave("plots/Figure2.png", width = 14.22, height = 10, units = "in")
 ```
 
 ## Figure 3
-Plot for GOL2 data for all kinds of cycle phase
 
 ```{r fig.width = 10, fig.height = 7}
 low_space <- list(
@@ -290,13 +280,18 @@ ggsave("plots/Figure3.png", width = 10, height = 7, units = "in")
 ```
 
 ## Figure 4
-Coefplots for whatever the best effect size measure is for E2 and P4.
 
 ### Mini simulation to show the assumption behind this.
-The assumption is that the DAG is
+The assumption is that the DAG resembles
 
 ```
 CP -> Serum -> Saliva
+```
+
+or
+
+```
+CP <- Serum -> Saliva
 ```
 
 If this assumptions holds, and there is no other `CP --> Saliva` path,
@@ -416,7 +411,7 @@ psych::describe(.$estimate)
 ```
 
 ## Statement 3
-In all salivary immunoassay datasets, the variance explained by cycle phase was much lower. The leave-one-out-adjusted r never exceeded .14, was indistinguishable from zero more often than not, and not systematically larger for more valid measures of cycle phase. 
+In all salivary immunoassay datasets, the variance explained by cycle phase was much lower. The leave-one-out-adjusted r never exceeded x, was indistinguishable from zero more often than not, and not systematically larger for more valid measures of cycle phase. 
 
 ```{r}
 loos <- all_stats %>% select(Hormone, Dataset, contains("loo")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
