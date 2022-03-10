@@ -16,25 +16,14 @@ knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
 
 What properties do different measures of estradiol and progesterone have?
 
+Below, you'll find a complete tabular summary of the methods and results for each of the datasets (columns).
 
-## Data summary
+- Here, you'll find the code generating the [figures and tables in the manuscript](4_plots_for_paper.html).
+- Here, you'll find the [code generating the imputations](2_impute_by_day.html).
 
-### Methods
-- All data sets were brought into the same standard format (one row per person and cycle day, indicator of cycle phase and hormones as columns) and analyzed using an identical pipeline.
-- The information about scheduling, LH testing, and steroid measures were taken from the respective publications, manufacturer reports and personal communication with authors.
-- All datasets had at least two measures per cycle. Most spanned more than one cycle.
-- Summary statistics are given untransformed and after log-transformation.
-- Reported limits of detection were used to model censoring. The LODs are reflected in graphs as solid lines, limits of quantitation as dashed lines. Using Bayesian multilevel regressions, values at or below the LOD were modelled as censored (i.e., "this value or lower"). `censored` values in the descriptive statistics are values at or below LOD.
-- `missing` are values that were missing for other reasons than censoring (e.g., insufficient sample volume, contamination, not assayed for this hormone, etc.).
-- `outliers` counts values more than 3*SD from the mean on the logged scale. They were not excluded from regression analyses.
-- All regressions were conducted on logged data.
-- Cycle days were calculated relative to the last menstrual onset (FC = forward-counted), next menstrual onset (BC = backward counted), or LH surge (LH).
-- In the validity section
-  - `r_fc/bc/lh` reflects the square root of variance by a spline over cycle day explained after marginalizing inter-individual and cycle-to-cycle variation in means.
-  - `r_loo_fc/bc/lh` reflect the same thing, but using approximative leave-one-out cross-validation, which is necessary because the splines can easily overfit to the data. When these yield NaN, this shows the explained variance veered negative, i.e. no LOO-robust explained variance.
-  - `r_fc/bc/lh_imputed` reflect a correlation of the raw steroid value with a value _imputed_ from the cycle phase using a model based on the BioCycle serum data.
-  - `r_fc/bc_stirn` reflect correlations with the imputed probability of being in the fertile window according to the method in Gangestad et al. 2016 (based on Stirnemann's data).
-  - `r_prob_lh` reflects correlations with the probability of being in the fertile window according to LH tests, based on the method in Stern et al. 2018 (supplement), which meta-analyzed various probabilities of conception relative to the day of ovulation.
+
+## Tabular summary of analyses
+
 
 ```{r, fig.width = 5, fig.height = 15}
 library(tidyverse)
@@ -363,14 +352,32 @@ summary_table("Estradiol")
 summary_table("Progesterone")
 ```
 
-### Estrogen & Progesterone (E2/P4)
+### Estradiol & Progesterone (E2/P4)
 
 ```{r layout='l-screen-inset'}
 ratio_summary_table()
 ```
 
 
-### Literature survey of estradiol assays
+### Methods / Table legend
+- All data sets were brought into the same standard format (one row per person and cycle day, indicator of cycle phase and hormones as columns) and analyzed using an identical pipeline.
+- The information about scheduling, LH testing, and steroid measures were taken from the respective publications, manufacturer reports and personal communication with authors.
+- All datasets had at least two measures per cycle. Most spanned more than one cycle.
+- Summary statistics are given untransformed and after log-transformation.
+- Reported limits of detection were used to model censoring. The LODs are reflected in graphs as solid lines, limits of quantitation as dashed lines. Using Bayesian multilevel regressions, values at or below the LOD were modelled as censored (i.e., "this value or lower"). `censored` values in the descriptive statistics are values at or below LOD.
+- `missing` are values that were missing for other reasons than censoring (e.g., insufficient sample volume, contamination, not assayed for this hormone, etc.).
+- `outliers` counts values more than 3*SD from the mean on the logged scale. They were not excluded from regression analyses.
+- All regressions were conducted on logged data.
+- Cycle days were calculated relative to the last menstrual onset (FC = forward-counted), next menstrual onset (BC = backward counted), or LH surge (LH).
+- In the validity section
+  - `r_fc/bc/lh` reflects the square root of variance by a spline over cycle day explained after marginalizing inter-individual and cycle-to-cycle variation in means.
+  - `r_loo_fc/bc/lh` reflect the same thing, but using approximative leave-one-out cross-validation, which is necessary because the splines can easily overfit to the data. When these yield NaN, this shows the explained variance veered negative, i.e. no LOO-robust explained variance.
+  - `r_fc/bc/lh_imputed` reflect a correlation of the raw steroid value with a value _imputed_ from the cycle phase using a model based on the BioCycle serum data.
+  - `r_fc/bc_stirn` reflect correlations with the imputed probability of being in the fertile window according to the method in Gangestad et al. 2016 (based on Stirnemann's data).
+  - `r_prob_lh` reflects correlations with the probability of being in the fertile window according to LH tests, based on the method in Stern et al. 2018 (supplement), which meta-analyzed various probabilities of conception relative to the day of ovulation.
+
+
+## Literature survey of estradiol assays
 
 We performed the following search on [SCOPUS](https://www.scopus.com/search/form.uri?sort=plf-f&src=s&st1=psychoneuroendocrinology&st2=hormones+AND+behavior&nlo=&nlr=&nls=&sid=4229b6ef70b022c42e94bc266d5c0572&sot=b&sdt=b&sl=135&s=%28SRCTITLE%28psychoneuroendocrinology%29+OR+SRCTITLE%28hormones+AND+behavior%29+AND+TITLE-ABS-KEY%28estradiol%29+AND+TITLE-ABS-KEY%28menstrual+cycle%29%29&display=edit&numOfFields=0&edit=t&partialQuery=&origin=resultslist&txGid=f33e53ad58ab589af4081327f62e4d89#basic). Journal: Psychoneuroendocrinology or Hormones and Behavior
 In Abstract Title or Keywords: Menstrual Cycle, Estradiol
@@ -424,7 +431,7 @@ lit %>% select(Authors, Title, `Source title`, DOI, `Menstrual Cycle`, `Body Flu
 
 </details>
 
-### Small re-analysis of urinary validity data
+## Small re-analysis of urinary validity data
 
 Roos et al. 2015 and Johnson et al. 2015 report aggregated data for E3g and Pdg in urine, as well as E2 and P4 in serum.
 

@@ -25,7 +25,7 @@ biocycle <- rio::import("../data/BioCycle_StudyItems/biocycle04202017.sas7bdat")
 biocycle_with_labels <- biocycle
 biocyclecsv <- rio::import("../data/BioCycle_StudyItems/biocycle04202017.csv")
 biocycle_between <- rio::import("../data/BioCycle_StudyItems/biocyclebaseline05022017.sas7bdat")
-biocycle_update <- rio::import("../data/BioCycle_StudyItems/biocycle_update.sas7bdat") # todo: is peak day really expressed as cday? I think so
+biocycle_update <- rio::import("../data/BioCycle_StudyItems/biocycle_update.sas7bdat")
 biocycle_sexdiary <- rio::import("../data/BioCycle_StudyItems/sex_nodates.sas7bdat")
 # add on update data with albumin and testosterone, urinary hormones and self-rep cycle length
 biocycle <- biocycle %>% left_join(biocycle_update %>% 
@@ -49,30 +49,29 @@ sum(biocycle$noserum)
 
 ## Limits of detection
 Here, I label values below the limit of detection as left-censored and impute them using the limit (not divided by √2, as I will proceed to use a model-based approach in brms).
-Sources for the limits of detection: BioCycle documentation of the IMMULITE 2000 assays where possible (E, P), lowest observed value + other online descriptions of IMMULITE assays (SHBG, ALBUMIN, T).
+Sources for the limits of detection: BioCycle documentation of the IMMULITE 2000 assays where possible (E, P), lowest observed value + other online descriptions of IMMULITE assays (SHBG, ALBUMIN, T) + personal communication with Sunni Mumford.
 
 ```{r}
 biocycle %>% select(ESTRGEN, Testo, PROGEST, SHBG, ALBUMN) %>% summarise_all(~sum(is.na(.)))
 
-biocycle %>% filter(ESTRGEN <= 20) %>% select(ESTRGEN)
+# biocycle %>% filter(ESTRGEN <= 20) %>% select(ESTRGEN)
 biocycle$ESTRGEN_cens <- if_else(biocyclecsv$ESTRGEN == "L" | biocycle$ESTRGEN < 20, "left", "none")
 
 table(is.na(biocycle$Testo))
 biocycle$Testo_cens <- if_else(biocycle$Testo < 3, "left", "none", NA_character_)
 
-biocycle %>% filter(PROGEST <= 0.2) %>% select(PROGEST)
+# biocycle %>% filter(PROGEST <= 0.2) %>% select(PROGEST)
 biocycle$PROGEST_cens <- if_else(biocyclecsv$PROGEST == "L" | biocycle$PROGEST < 0.2, "left", "none")
 
 # according to https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5754513/ the LOD for IMMULITE 2000 SHBG is 0.8nmol/L, but the lowest value measured here is 4.7 (and the reference is for a 2-site, this was 5-site I think)
-biocycle %>% arrange(SHBG) %>% select(SHBG, noserum) %>% head
-min(biocycle$SHBG, na.rm = T)
-table(biocyclecsv$SHBG[is.na(biocycle$SHBG)])
+# biocycle %>% arrange(SHBG) %>% select(SHBG, noserum) %>% head
+# min(biocycle$SHBG, na.rm = T)
+# table(biocyclecsv$SHBG[is.na(biocycle$SHBG)])
 biocycle$SHBG_cens <- if_else(biocyclecsv$SHBG == "L" | biocycle$SHBG < 2, "left", "none")
-table(is.na(biocycle$SHBG))
+# table(is.na(biocycle$SHBG))
 
-# could not find a source, so using lowest observed value
 biocycle %>% arrange(ALBUMN) %>% select(ALBUMN, noserum) %>% head
-table(is.na(biocycle$ALBUMN), biocycle$noserum)
+# table(is.na(biocycle$ALBUMN), biocycle$noserum)
 biocycle$ALBUMN_cens <- if_else(is.na(biocycle$ALBUMN) & !biocycle$noserum, "left", "none")
 
 biocycle <- biocycle %>% 
@@ -86,7 +85,7 @@ biocycle <- biocycle %>%
 biocycle %>% select(ESTRGEN, Testo, PROGEST, SHBG, ALBUMN) %>% summarise_all(~sum(is.na(.)))
 
 biocycle <- rescue_attributes(biocycle, biocycle_with_labels)
-var_label(biocycle$ESTRGEN)
+# var_label(biocycle$ESTRGEN)
 ```
 
 ## Add free hormone levels
@@ -97,16 +96,16 @@ rio::export(biocycle %>% select(SHBG, ALBUMN, Testo, ESTRGEN), "../data/BioCycle
 free_hormones <- readxl::read_xlsx("../data/BioCycle_StudyItems/hormone_converted_to_free.xlsx", skip = 1) %>% select(SHBG = shbg, ALBUMN = `Alb.`, Testo = `T...7`, ESTRGEN = E2, `Free T (ng/dL)`, `Free E2 (pg/mL)`)
 biocycle2 <- biocycle %>% inner_join(free_hormones)
 biocycle[, c("T_check", "E_check", "SHBG_check", "Free T (ng/dL)", "Free E2 (pg/mL)")] <- free_hormones %>% select(Testo, ESTRGEN, SHBG, `Free T (ng/dL)`, `Free E2 (pg/mL)`)
-identical(biocycle$Testo, biocycle$T_check)
-identical(biocycle$ESTRGEN, biocycle$E_check)
-identical(biocycle$SHBG, biocycle$SHBG_check)
+testthat::expect_true(identical(biocycle$Testo, biocycle$T_check))
+testthat::expect_true(identical(is.na(biocycle$Testo), is.na(biocycle$`Free T (ng/dL)`)))
+testthat::expect_true(identical(as.numeric(biocycle$ESTRGEN), as.numeric(biocycle$E_check)))
+testthat::expect_true(identical(is.na(biocycle$ESTRGEN), is.na(biocycle$`Free E2 (pg/mL)`)))
+testthat::expect_true(identical(as.numeric(biocycle$SHBG), as.numeric(biocycle$SHBG_check)))
 biocycle <- biocycle %>% select(-T_check, -E_check, -SHBG_check)
 
 ## Sartorius formula
 biocycle <- biocycle %>% 
   mutate(free_t_empirical = 24.00314 * Testo / log10(SHBG) - 0.04599 * Testo^2)
-
-biocycle %>% select(Testo, `Free T (ng/dL)`, free_t_empirical) %>% cor(use='p') %>% round(2)
 ```
 
 ## Check free hormone levels
@@ -132,17 +131,6 @@ ggstatsplot::ggscatterstats(biocycle, Testo, `Free T (ng/dL)`)
 # convert nanogram to picogram for progesterone
 biocycle <- biocycle %>% mutate(E_P = ESTRGEN/(PROGEST*1000))
 biocycle <- biocycle %>% group_by(id) %>% mutate(E_P_ws = E_P - mean(E_P,na.rm=T))
-qplot(biocycle$E_P,biocycle$E_P_ws)
-qplot(biocycle$E_P)
-qplot(biocycle$E_P_ws)
-
-biocycle %>% group_by(id) %>% mutate(E_P = (scale((E_P)))) %>% pull(E_P) %>% qplot
-biocycle %>% group_by(id) %>% mutate(ESTRGEN = (scale((ESTRGEN)))) %>% pull(ESTRGEN) %>% qplot
-biocycle %>% group_by(id) %>% mutate(ESTRGEN = (scale(log10(ESTRGEN)))) %>% pull(ESTRGEN) %>% qplot
-biocycle %>% group_by(id) %>% mutate(PROGEST = (scale(log10(PROGEST)))) %>% pull(PROGEST) %>% qplot
-biocycle %>% group_by(id) %>% mutate(PROGEST = (scale((PROGEST)))) %>% pull(PROGEST) %>% qplot
-biocycle %>% group_by(id) %>% mutate(PROGEST = (scale(PROGEST,scale=F))) %>% pull(PROGEST) %>% qplot
-biocycle %>% group_by(id) %>% mutate(PROGEST = (scale(ESTRGEN,scale=F))) %>% pull(PROGEST) %>% qplot
 ```
 
 ## Remove one woman with empty rows in one cycle
@@ -227,201 +215,17 @@ biocycle <- biocycle %>%
     DRLH_serum_peak = cday - serum_LH_peak_day,
     standardized_day = 28*(FCD+1)/cycle_length) %>% 
   ungroup()
-
-xtabs(~ is.na(serum_LH_surge_day), biocycle)
-xtabs(~ is.na(peak_day), biocycle)
-xtabs(~ is.na(serum_LH_surge_day) + is.na(peak_day), biocycle)
-xtabs(~ is.na(serum_LH_surge_day) + is.na(serum_LH_peak_day), biocycle)
-xtabs(~ is.na(serum_LH_surge_day) + is.na(peak_day), biocycle)
-
-
-# biocycle %>% select(id, cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, peak_day) %>% distinct() %>% head
-biocycle %>% filter(cycle ==1) %>% select(id, cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak,serum_LH_peak_day, serum_LH_surge_day, peak_day) %>% summarise_all(mean,na.rm=T)
-biocycle %>% filter(cycle ==1) %>% select(id, cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak,serum_LH_peak_day, serum_LH_surge_day, peak_day) %>% summarise_all(sd,na.rm=T)
-biocycle %>% select(id, cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, serum_LH_peak_day, peak_day) %>% distinct() %>% cor(use='p') %>% .[c(-1,-2),c(-1,-2)] %>% round(2)
-```
-
-## Urine validity
-```{r}
-table(is.na(biocycle$peak_day))
-table((biocycle$peak_day))
-options(pillar.sigfig = 2)
-biocycle %>% filter(between(peak_day - cday, -5, 5)) %>% 
-  group_by(peak_day - cday) %>% 
-  summarise(
-  cor(ESTRGEN, E3g_monitor_peak),
-  cor(ESTRGEN, E3g_monitor_peak, method = "s"),
-  cor(log(ESTRGEN), log(E3g_monitor_peak)),
-  n_E=  cor.test(ESTRGEN, E3g_monitor_peak)$parameter + 2,
-  cor(LH, LH_monitor_peak),
-  cor(LH, LH_monitor_peak, method = "s"),
-  cor(log(LH), log(LH_monitor_peak)),
-  n_LH =  cor.test(LH, LH_monitor_peak)$parameter + 2
-)
-```
-
-
-## Anovulatory cycles vs. rest
-
-```{r}
-biocycle %>% group_by(anovulatory) %>% 
-  summarise(mean_cl = mean(cycle_length, na.rm = T),
-            min_cl = min(cycle_length, na.rm = T),
-            max_cl =max(cycle_length, na.rm = T),
-            sd_cl = sd(cycle_length, na.rm = T),
-            mean(log(ESTRGEN), na.rm = T),
-            mean(log(PROGEST), na.rm = T)
-            )
-```
-
-
-## Which day do the different methods get as the day of ovulation?
-```{r}
-biocycle %>% #filter(cycle == 1) %>% 
-  select(id, cycle, cycle_start_day, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, peak_day) %>% 
-  distinct() %>% 
-  mutate_at(vars(ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, peak_day), ~ . - cycle_start_day) %>%
-  select(cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, ovulation_day_LH_urine = peak_day) %>% 
-  pivot_longer(cols = c("ovulation_day_planned", "ovulation_day_LH_serum", "ovulation_day_LH_serum_peak", "ovulation_day_LH_urine"), names_to = "method", values_to = "day") %>% 
-  group_by(method, cycle) %>% 
-  summarise(mean = mean(day, na.rm = T), sd = sd(day, na.rm = T)) %>% left_join(
-  
-    biocycle %>% #filter(cycle == 1) %>% 
-  select(id, cycle, cycle_end_day, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, peak_day) %>% 
-  distinct() %>% 
-  mutate_at(vars(ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, peak_day), ~ . - cycle_end_day) %>%
-  select(cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, ovulation_day_LH_urine = peak_day) %>% 
-  pivot_longer(cols = c("ovulation_day_planned", "ovulation_day_LH_serum", "ovulation_day_LH_serum_peak", "ovulation_day_LH_urine"), names_to = "method", values_to = "day") %>% 
-  group_by(method, cycle) %>% 
-  summarise(mean = mean(day, na.rm = T), sd = sd(day, na.rm = T)),
-  by = c("method", "cycle"), suffix = c("_fc", "_bc"))
 ```
 
 
 ```{r}
-cor(biocycle %>% select(DRLH, DRLH_serum_peak, DRLH_serum_surge), use = 'p')
-
-biocycle = biocycle %>%
-  mutate(
-        RCD_std = case_when(
-          visit == "M1" ~ -28,
-          RCD > -24 ~ RCD,
-          (cycle_length - abs(RCD)) < 6 ~ (cycle_length - abs(RCD))/cycle_length*29 - 29
-        ),
-        RCD_squished = if_else(
-          cycle_length - FCD < 14,
-          29 - (cycle_length - FCD),
-          ((FCD/ (cycle_length - 14) ) * 15)),
-        RCD_squished = if_else(RCD_squished < 1, 1, RCD_squished),
-        RCD_squished = if_else(RCD_squished > 29, 29, RCD_squished),
-        RCD_squished = if_else(RCD < -40, NA_real_, RCD_squished) - 30,
-        RCD_squished = round(RCD_squished)
-        )
-
-table(biocycle$RCD_squished)
-ggplot(biocycle, aes(RCD, RCD_std, color = cycle_length)) + geom_point(alpha = 0.1)
-
-anov_cycles <- biocycle %>% group_by(id, cycle) %>% mutate(max_LH = max(LH, na.rm=T), max_PROGEST = max(PROGEST, na.rm = T)) %>%  select(id, cycle, anovulatory, max_LH, max_PROGEST) %>% distinct() 
-anov_cycles %>% ungroup() %>% select(anovulatory) %>% table()
-# View(anov_cycles)
- 
-
-cor(biocycle$DRLH, biocycle$DRLH_planned, use = 'pair')
-table(biocycle$ovulation_day_LH_serum, exclude = NULL)
-table(biocycle$ovulation_day_planned, exclude = NULL)
-table(biocycle$FCD, exclude = NULL)
-table(biocycle$RCD, exclude = NULL)
-table(biocycle$DRLH, exclude = NULL)
 library(testthat)
 expect_equal(biocycle$cycle_length, biocycle$cycle_length_mine)
-# biocycle %>%
-#   select(id, cycle, cycle_length, cycle_length_mine, cycle_start_day, cycle_end_day, starts_with("mense")) %>%
-#   distinct() %>%
-#   mutate(equal = identical(cycle_length, cycle_length_mine)) %>%
-#   View()
-  
-# biocycle %>% 
-#   filter(round(cor(day, standardized_day),1) != 1) %>% 
-#   select( cycle_length, cycle_length_mine, FCD, day, standardized_day) %>% View()
-  biocycle %>% select(FCD, RCD, day, standardized_day) %>% cor(use = 'na.or.complete')
-table(biocycle$RCD)
 ```
 
 ```{r}
 biocycle$progesterone_pgml <- biocycle$PROGEST * 1000
 ```
-
-
-```{r}
-ggplot(biocycle %>% filter(between(cycle_length, 20, 35)) %>% group_by(id) %>% 
-         mutate(logP = log(progesterone_pgml),
-                logP = logP - mean(logP, na.rm = T)), aes(RCD, logP)) + geom_point(alpha = 0.1) + geom_smooth()
-```
-
-```{r}
-qplot(biocycle$BMI, biocycle$ESTRGEN) + geom_smooth()
-qplot(biocycle$BMI, log(biocycle$ESTRGEN)) + geom_smooth()
-qplot(biocycle$BMI, log(biocycle$`Free E2 (pg/mL)`)) + geom_smooth()
-qplot(biocycle$BMI, biocycle$SHBG) + geom_smooth()
-qplot(biocycle$BMI, log(biocycle$SHBG)) + geom_smooth(method = 'lm')
-cor(biocycle$BMI, biocycle$SHBG, use = 'p')
-cor(biocycle$BMI, biocycle$ESTRGEN, use = 'p')
-cor(biocycle$BMI, log(biocycle$SHBG), use = 'p')
-cor(biocycle$BMI, log(biocycle$ESTRGEN), use = 'p')
-cor(biocycle$BMI, log(biocycle$`Free E2 (pg/mL)`), use = 'p')
-```
-
-```{r}
-ggplot(biocycle, aes(DRLH, Testo)) + geom_point() + geom_smooth()
-```
-
-
-## ICCs
-```{r}
-summary(m_icc_shbg <- lme4::lmer(SHBG ~ (1|id) + (1|id:cycle), biocycle))
-performance::icc(m_icc_shbg)
-summary(m_icc_shbg <- lme4::lmer(SHBG ~ (1|id), biocycle))
-performance::icc(m_icc_shbg)
-
-summary(m_icc_shbg <- lme4::lmer(log(SHBG) ~ (1|id) + (1|id:cycle), biocycle))
-performance::icc(m_icc_shbg)
-summary(m_icc_shbg <- lme4::lmer(log(SHBG) ~ (1|id), biocycle))
-performance::icc(m_icc_shbg)
-
-summary(m_icc_albumin <- lme4::lmer(ALBUMN ~ (1|id) + (1|id:cycle), biocycle))
-performance::icc(m_icc_albumin)
-
-summary(m_icc_albumin <- lme4::lmer(log(ALBUMN) ~ (1|id) + (1|id:cycle), biocycle))
-performance::icc(m_icc_albumin)
-
-summary(m_icc_testosterone <- lme4::lmer(log(Testo) ~ (1|id) + (1|id:cycle), biocycle))
-performance::icc(m_icc_testosterone)
-
-
-summary(m_icc_estrogen <- lme4::lmer(log(ESTRGEN) ~ (1|id) + (1|id:cycle), biocycle))
-performance::icc(m_icc_estrogen)
-summary(m_icc_estrogen <- lme4::lmer(log(ESTRGEN) ~ (1|id), biocycle))
-performance::icc(m_icc_estrogen)
-
-summary(m_icc_free_estrogen <- lme4::lmer(log(`Free E2 (pg/mL)`) ~ (1|id) + (1|id:cycle), biocycle))
-performance::icc(m_icc_free_estrogen)
-summary(m_icc_free_estrogen <- lme4::lmer(log(`Free E2 (pg/mL)`) ~ (1|id), biocycle))
-performance::icc(m_icc_free_estrogen)
-
-
-summary(m_icc_progesterone <- lme4::lmer(log(PROGEST) ~ (1|id) + (1|id:cycle), biocycle))
-performance::icc(m_icc_progesterone)
-summary(m_icc_progesterone <- lme4::lmer(log(PROGEST) ~ (1|id), biocycle))
-performance::icc(m_icc_progesterone)
-
-
-
-summary(m_icc_free_testosterone <- lme4::lmer(log(`Free T (ng/dL)`) ~ (1|id) + (1|id:cycle), biocycle))
-performance::icc(m_icc_free_testosterone)
-summary(m_icc_free_testosterone <- lme4::lmer(log(`Free T (ng/dL)`) ~ (1|id), biocycle))
-performance::icc(m_icc_free_testosterone)
-```
-
 
 
 ## Save data

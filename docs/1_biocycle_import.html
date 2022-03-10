@@ -1501,7 +1501,7 @@ x dplyr::lag()    masks stats::lag()</code></pre>
 <span class='va'>biocycle_with_labels</span> <span class='op'>&lt;-</span> <span class='va'>biocycle</span>
 <span class='va'>biocyclecsv</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/rio/man/import.html'>import</a></span><span class='op'>(</span><span class='st'>"../data/BioCycle_StudyItems/biocycle04202017.csv"</span><span class='op'>)</span>
 <span class='va'>biocycle_between</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/rio/man/import.html'>import</a></span><span class='op'>(</span><span class='st'>"../data/BioCycle_StudyItems/biocyclebaseline05022017.sas7bdat"</span><span class='op'>)</span>
-<span class='va'>biocycle_update</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/rio/man/import.html'>import</a></span><span class='op'>(</span><span class='st'>"../data/BioCycle_StudyItems/biocycle_update.sas7bdat"</span><span class='op'>)</span> <span class='co'># todo: is peak day really expressed as cday? I think so</span>
+<span class='va'>biocycle_update</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/rio/man/import.html'>import</a></span><span class='op'>(</span><span class='st'>"../data/BioCycle_StudyItems/biocycle_update.sas7bdat"</span><span class='op'>)</span>
 <span class='va'>biocycle_sexdiary</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/rio/man/import.html'>import</a></span><span class='op'>(</span><span class='st'>"../data/BioCycle_StudyItems/sex_nodates.sas7bdat"</span><span class='op'>)</span>
 <span class='co'># add on update data with albumin and testosterone, urinary hormones and self-rep cycle length</span>
 <span class='va'>biocycle</span> <span class='op'>&lt;-</span> <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>left_join</span><span class='op'>(</span><span class='va'>biocycle_update</span> <span class='op'>%&gt;%</span> 
@@ -1557,7 +1557,7 @@ day   CL  F1  L1  L2  M1  O1  O2  O3
 <pre><code>[1] 14</code></pre>
 </div>
 <h2 id="limits-of-detection">Limits of detection</h2>
-<p>Here, I label values below the limit of detection as left-censored and impute them using the limit (not divided by √2, as I will proceed to use a model-based approach in brms). Sources for the limits of detection: BioCycle documentation of the IMMULITE 2000 assays where possible (E, P), lowest observed value + other online descriptions of IMMULITE assays (SHBG, ALBUMIN, T).</p>
+<p>Here, I label values below the limit of detection as left-censored and impute them using the limit (not divided by √2, as I will proceed to use a model-based approach in brms). Sources for the limits of detection: BioCycle documentation of the IMMULITE 2000 assays where possible (E, P), lowest observed value + other online descriptions of IMMULITE assays (SHBG, ALBUMIN, T) + personal communication with Sunni Mumford.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>ESTRGEN</span>, <span class='va'>Testo</span>, <span class='va'>PROGEST</span>, <span class='va'>SHBG</span>, <span class='va'>ALBUMN</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>summarise_all</span><span class='op'>(</span><span class='op'>~</span><span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
@@ -1566,23 +1566,8 @@ day   CL  F1  L1  L2  M1  O1  O2  O3
 <pre><code>  ESTRGEN Testo PROGEST SHBG ALBUMN
 1     102    47     161   22     16</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>ESTRGEN</span> <span class='op'>&lt;=</span> <span class='fl'>20</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>ESTRGEN</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>   ESTRGEN
-1      6.9
-2     20.0
-3     20.0
-4     20.0
-5     20.0
-6     20.0
-7     20.0
-8     20.0
-9     20.0
-10    20.0
-11    20.0</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN_cens</span> <span class='op'>&lt;-</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>biocyclecsv</span><span class='op'>$</span><span class='va'>ESTRGEN</span> <span class='op'>==</span> <span class='st'>"L"</span> <span class='op'>|</span> <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span> <span class='op'>&lt;</span> <span class='fl'>20</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># biocycle %&gt;% filter(ESTRGEN &lt;= 20) %&gt;% select(ESTRGEN)</span>
+<span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN_cens</span> <span class='op'>&lt;-</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>biocyclecsv</span><span class='op'>$</span><span class='va'>ESTRGEN</span> <span class='op'>==</span> <span class='st'>"L"</span> <span class='op'>|</span> <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span> <span class='op'>&lt;</span> <span class='fl'>20</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>
 
 <span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>Testo</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
@@ -1593,193 +1578,16 @@ FALSE  TRUE
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>Testo_cens</span> <span class='op'>&lt;-</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>Testo</span> <span class='op'>&lt;</span> <span class='fl'>3</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span>, <span class='cn'>NA_character_</span><span class='op'>)</span>
 
-<span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>PROGEST</span> <span class='op'>&lt;=</span> <span class='fl'>0.2</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>    PROGEST
-1       0.2
-2       0.2
-3       0.2
-4       0.2
-5       0.2
-6       0.2
-7       0.2
-8       0.2
-9       0.2
-10      0.2
-11      0.2
-12      0.2
-13      0.2
-14      0.2
-15      0.2
-16      0.2
-17      0.2
-18      0.2
-19      0.2
-20      0.2
-21      0.2
-22      0.2
-23      0.2
-24      0.2
-25      0.2
-26      0.2
-27      0.2
-28      0.2
-29      0.2
-30      0.2
-31      0.2
-32      0.2
-33      0.2
-34      0.2
-35      0.2
-36      0.2
-37      0.2
-38      0.2
-39      0.2
-40      0.2
-41      0.2
-42      0.2
-43      0.2
-44      0.2
-45      0.2
-46      0.2
-47      0.2
-48      0.2
-49      0.2
-50      0.2
-51      0.2
-52      0.2
-53      0.2
-54      0.2
-55      0.2
-56      0.2
-57      0.2
-58      0.2
-59      0.2
-60      0.2
-61      0.2
-62      0.2
-63      0.2
-64      0.2
-65      0.2
-66      0.2
-67      0.2
-68      0.2
-69      0.2
-70      0.2
-71      0.2
-72      0.2
-73      0.2
-74      0.2
-75      0.2
-76      0.2
-77      0.2
-78      0.2
-79      0.2
-80      0.2
-81      0.2
-82      0.2
-83      0.2
-84      0.2
-85      0.2
-86      0.2
-87      0.2
-88      0.2
-89      0.2
-90      0.2
-91      0.2
-92      0.2
-93      0.2
-94      0.2
-95      0.2
-96      0.2
-97      0.2
-98      0.2
-99      0.2
-100     0.2
-101     0.2
-102     0.2
-103     0.2
-104     0.2
-105     0.2
-106     0.2
-107     0.2
-108     0.2
-109     0.2
-110     0.2
-111     0.2
-112     0.2
-113     0.2
-114     0.2
-115     0.2
-116     0.2
-117     0.2
-118     0.2
-119     0.2
-120     0.2
-121     0.2
-122     0.2
-123     0.2
-124     0.2
-125     0.2
-126     0.2
-127     0.2
-128     0.2
-129     0.2
-130     0.2
-131     0.2
-132     0.2
-133     0.2
-134     0.2
-135     0.2
-136     0.2
-137     0.2
-138     0.2
-139     0.2
-140     0.2
-141     0.2
-142     0.2
-143     0.2
-144     0.2
-145     0.2
-146     0.2
-147     0.2</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>PROGEST_cens</span> <span class='op'>&lt;-</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>biocyclecsv</span><span class='op'>$</span><span class='va'>PROGEST</span> <span class='op'>==</span> <span class='st'>"L"</span> <span class='op'>|</span> <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>PROGEST</span> <span class='op'>&lt;</span> <span class='fl'>0.2</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>
+<span class='co'># biocycle %&gt;% filter(PROGEST &lt;= 0.2) %&gt;% select(PROGEST)</span>
+<span class='va'>biocycle</span><span class='op'>$</span><span class='va'>PROGEST_cens</span> <span class='op'>&lt;-</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>biocyclecsv</span><span class='op'>$</span><span class='va'>PROGEST</span> <span class='op'>==</span> <span class='st'>"L"</span> <span class='op'>|</span> <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>PROGEST</span> <span class='op'>&lt;</span> <span class='fl'>0.2</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>
 
 <span class='co'># according to https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5754513/ the LOD for IMMULITE 2000 SHBG is 0.8nmol/L, but the lowest value measured here is 4.7 (and the reference is for a 2-site, this was 5-site I think)</span>
-<span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>arrange</span><span class='op'>(</span><span class='va'>SHBG</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>SHBG</span>, <span class='va'>noserum</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>head</span>
-</code></pre>
-</div>
-<pre><code>  SHBG noserum
-1  4.7   FALSE
-2  5.0   FALSE
-3  5.0   FALSE
-4  5.1   FALSE
-5  5.1   FALSE
-6  5.6   FALSE</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>[1] 4.7</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>biocyclecsv</span><span class='op'>$</span><span class='va'>SHBG</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>
-    L  M 
-14  4  4 </code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG_cens</span> <span class='op'>&lt;-</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>biocyclecsv</span><span class='op'>$</span><span class='va'>SHBG</span> <span class='op'>==</span> <span class='st'>"L"</span> <span class='op'>|</span> <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span> <span class='op'>&lt;</span> <span class='fl'>2</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>
-FALSE  TRUE 
- 3893    22 </code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># could not find a source, so using lowest observed value</span>
+<span class='co'># biocycle %&gt;% arrange(SHBG) %&gt;% select(SHBG, noserum) %&gt;% head</span>
+<span class='co'># min(biocycle$SHBG, na.rm = T)</span>
+<span class='co'># table(biocyclecsv$SHBG[is.na(biocycle$SHBG)])</span>
+<span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG_cens</span> <span class='op'>&lt;-</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>biocyclecsv</span><span class='op'>$</span><span class='va'>SHBG</span> <span class='op'>==</span> <span class='st'>"L"</span> <span class='op'>|</span> <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span> <span class='op'>&lt;</span> <span class='fl'>2</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>
+<span class='co'># table(is.na(biocycle$SHBG))</span>
+
 <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>arrange</span><span class='op'>(</span><span class='va'>ALBUMN</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>ALBUMN</span>, <span class='va'>noserum</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>head</span>
 </code></pre>
 </div>
@@ -1791,21 +1599,14 @@ FALSE  TRUE
 5    3.1   FALSE
 6    3.1   FALSE</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ALBUMN</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>noserum</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>       
-        FALSE TRUE
-  FALSE  3895    4
-  TRUE      6   10</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ALBUMN_cens</span> <span class='op'>&lt;-</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ALBUMN</span><span class='op'>)</span> <span class='op'>&amp;</span> <span class='op'>!</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>noserum</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># table(is.na(biocycle$ALBUMN), biocycle$noserum)</span>
+<span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ALBUMN_cens</span> <span class='op'>&lt;-</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ALBUMN</span><span class='op'>)</span> <span class='op'>&amp;</span> <span class='op'>!</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>noserum</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>
 
 <span class='va'>biocycle</span> <span class='op'>&lt;-</span> <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> 
   <span class='fu'>mutate</span><span class='op'>(</span>
     ESTRGEN <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>ESTRGEN_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>20</span>, <span class='va'>ESTRGEN</span><span class='op'>)</span>,
     Testo <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>Testo_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>3</span>, <span class='va'>Testo</span><span class='op'>)</span>,
-    <span class='va'>PROGEST</span> <span class='op'>&lt;-</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>PROGEST_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>0.2</span>, <span class='va'>PROGEST</span><span class='op'>)</span>,
+    PROGEST <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>PROGEST_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>0.2</span>, <span class='va'>PROGEST</span><span class='op'>)</span>,
     SHBG <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>SHBG_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>2</span>, <span class='va'>SHBG</span><span class='op'>)</span>,
     ALBUMN <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>ALBUMN_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>1.7</span>, <span class='va'>ALBUMN</span><span class='op'>)</span>
   <span class='op'>)</span>
@@ -1813,13 +1614,12 @@ FALSE  TRUE
 </code></pre>
 </div>
 <pre><code>  ESTRGEN Testo PROGEST SHBG ALBUMN
-1      14    47     161   18     10</code></pre>
+1      14    47      14   18     10</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/codebook/man/rescue_attributes.html'>rescue_attributes</a></span><span class='op'>(</span><span class='va'>biocycle</span>, <span class='va'>biocycle_with_labels</span><span class='op'>)</span>
-<span class='fu'><a href='http://larmarange.github.io/labelled/reference/var_label.html'>var_label</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span><span class='op'>)</span>
+<span class='co'># var_label(biocycle$ESTRGEN)</span>
 </code></pre>
 </div>
-<pre><code>[1] &quot;Estradiol (pg/mL) numeric&quot;</code></pre>
 </div>
 <h2 id="add-free-hormone-levels">Add free hormone levels</h2>
 <p>Ugly: requires exporting and manual copy-pasting to an Excel sheet received from Tom Fiers.</p>
@@ -1843,34 +1643,18 @@ FALSE  TRUE
 <pre><code>Joining, by = c(&quot;ESTRGEN&quot;, &quot;SHBG&quot;, &quot;ALBUMN&quot;, &quot;Testo&quot;)</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"T_check"</span>, <span class='st'>"E_check"</span>, <span class='st'>"SHBG_check"</span>, <span class='st'>"Free T (ng/dL)"</span>, <span class='st'>"Free E2 (pg/mL)"</span><span class='op'>)</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='va'>free_hormones</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>Testo</span>, <span class='va'>ESTRGEN</span>, <span class='va'>SHBG</span>, <span class='va'>`Free T (ng/dL)`</span>, <span class='va'>`Free E2 (pg/mL)`</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>Testo</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>T_check</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>[1] FALSE</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>E_check</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>[1] FALSE</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG_check</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>[1] FALSE</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>&lt;-</span> <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='op'>-</span><span class='va'>T_check</span>, <span class='op'>-</span><span class='va'>E_check</span>, <span class='op'>-</span><span class='va'>SHBG_check</span><span class='op'>)</span>
+<span class='fu'>testthat</span><span class='fu'>::</span><span class='fu'><a href='https://testthat.r-lib.org/reference/logical-expectations.html'>expect_true</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>Testo</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>T_check</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'>testthat</span><span class='fu'>::</span><span class='fu'><a href='https://testthat.r-lib.org/reference/logical-expectations.html'>expect_true</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>Testo</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>`Free T (ng/dL)`</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'>testthat</span><span class='fu'>::</span><span class='fu'><a href='https://testthat.r-lib.org/reference/logical-expectations.html'>expect_true</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>E_check</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'>testthat</span><span class='fu'>::</span><span class='fu'><a href='https://testthat.r-lib.org/reference/logical-expectations.html'>expect_true</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>`Free E2 (pg/mL)`</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'>testthat</span><span class='fu'>::</span><span class='fu'><a href='https://testthat.r-lib.org/reference/logical-expectations.html'>expect_true</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG_check</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>biocycle</span> <span class='op'>&lt;-</span> <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='op'>-</span><span class='va'>T_check</span>, <span class='op'>-</span><span class='va'>E_check</span>, <span class='op'>-</span><span class='va'>SHBG_check</span><span class='op'>)</span>
 
 <span class='co'>## Sartorius formula</span>
 <span class='va'>biocycle</span> <span class='op'>&lt;-</span> <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> 
   <span class='fu'>mutate</span><span class='op'>(</span>free_t_empirical <span class='op'>=</span> <span class='fl'>24.00314</span> <span class='op'>*</span> <span class='va'>Testo</span> <span class='op'>/</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log10</a></span><span class='op'>(</span><span class='va'>SHBG</span><span class='op'>)</span> <span class='op'>-</span> <span class='fl'>0.04599</span> <span class='op'>*</span> <span class='va'>Testo</span><span class='op'>^</span><span class='fl'>2</span><span class='op'>)</span>
-
-<span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>Testo</span>, <span class='va'>`Free T (ng/dL)`</span>, <span class='va'>free_t_empirical</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span>use<span class='op'>=</span><span class='st'>'p'</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fl'>2</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>                 Testo Free T (ng/dL) free_t_empirical
-Testo             1.00           0.71             0.84
-Free T (ng/dL)    0.71           1.00             0.93
-free_t_empirical  0.84           0.93             1.00</code></pre>
 </div>
 <h2 id="check-free-hormone-levels">Check free hormone levels</h2>
 <div class="layout-chunk" data-layout="l-body">
@@ -1878,12 +1662,12 @@ free_t_empirical  0.84           0.93             1.00</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>`Free E2 (pg/mL)`</span><span class='op'>/</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>[1] 0.01816731</code></pre>
+<pre><code>[1] 0.01816759</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>`Free T (ng/dL)`</span><span class='op'>/</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>Testo</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>[1] 0.01590279</code></pre>
+<pre><code>[1] 0.01590617</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>qplot</span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>`Free E2 (pg/mL)`</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>scale_x_log10</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
@@ -1901,13 +1685,13 @@ free_t_empirical  0.84           0.93             1.00</code></pre>
     Pearson&#39;s product-moment correlation
 
 data:  biocycle$`Free E2 (pg/mL)` and biocycle$ESTRGEN
-t = 265.1, df = 3899, p-value &lt; 2.2e-16
+t = 265.06, df = 3899, p-value &lt; 2.2e-16
 alternative hypothesis: true correlation is not equal to 0
 95 percent confidence interval:
- 0.9716626 0.9749648
+ 0.9716531 0.9749563
 sample estimates:
       cor 
-0.9733641 
+0.9733551 
 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggstatsplot</span><span class='fu'>::</span><span class='fu'><a href='https://indrajeetpatil.github.io/ggstatsplot/reference/ggscatterstats.html'>ggscatterstats</a></span><span class='op'>(</span><span class='va'>biocycle</span>, <span class='va'>ESTRGEN</span>, <span class='va'>`Free E2 (pg/mL)`</span><span class='op'>)</span>
@@ -1927,13 +1711,13 @@ sample estimates:
     Pearson&#39;s product-moment correlation
 
 data:  biocycle$`Free T (ng/dL)` and biocycle$Testo
-t = 62.754, df = 3866, p-value &lt; 2.2e-16
+t = 62.627, df = 3866, p-value &lt; 2.2e-16
 alternative hypothesis: true correlation is not equal to 0
 95 percent confidence interval:
- 0.6943919 0.7256326
+ 0.6936460 0.7249506
 sample estimates:
-     cor 
-0.710362 
+      cor 
+0.7096484 
 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggstatsplot</span><span class='fu'>::</span><span class='fu'><a href='https://indrajeetpatil.github.io/ggstatsplot/reference/ggscatterstats.html'>ggscatterstats</a></span><span class='op'>(</span><span class='va'>biocycle</span>, <span class='va'>Testo</span>, <span class='va'>`Free T (ng/dL)`</span><span class='op'>)</span>
@@ -1948,74 +1732,8 @@ sample estimates:
 <pre class="sourceCode r"><code class="sourceCode r"><span class='co'># convert nanogram to picogram for progesterone</span>
 <span class='va'>biocycle</span> <span class='op'>&lt;-</span> <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>E_P <span class='op'>=</span> <span class='va'>ESTRGEN</span><span class='op'>/</span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>*</span><span class='fl'>1000</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>biocycle</span> <span class='op'>&lt;-</span> <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>E_P_ws <span class='op'>=</span> <span class='va'>E_P</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>E_P</span>,na.rm<span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span><span class='op'>)</span>
-<span class='fu'>qplot</span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>E_P</span>,<span class='va'>biocycle</span><span class='op'>$</span><span class='va'>E_P_ws</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>Warning: Removed 161 rows containing missing values (geom_point).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-8-1.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>qplot</span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>E_P</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 161 rows containing non-finite values (stat_bin).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-8-2.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>qplot</span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>E_P_ws</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 161 rows containing non-finite values (stat_bin).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-8-3.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>E_P <span class='op'>=</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='op'>(</span><span class='va'>E_P</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>pull</span><span class='op'>(</span><span class='va'>E_P</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>qplot</span>
-</code></pre>
-</div>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 161 rows containing non-finite values (stat_bin).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-8-4.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>ESTRGEN <span class='op'>=</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='op'>(</span><span class='va'>ESTRGEN</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>pull</span><span class='op'>(</span><span class='va'>ESTRGEN</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>qplot</span>
-</code></pre>
-</div>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 14 rows containing non-finite values (stat_bin).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-8-5.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>ESTRGEN <span class='op'>=</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log10</a></span><span class='op'>(</span><span class='va'>ESTRGEN</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>pull</span><span class='op'>(</span><span class='va'>ESTRGEN</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>qplot</span>
-</code></pre>
-</div>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 14 rows containing non-finite values (stat_bin).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-8-6.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>PROGEST <span class='op'>=</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log10</a></span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>pull</span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>qplot</span>
-</code></pre>
-</div>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 161 rows containing non-finite values (stat_bin).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-8-7.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>PROGEST <span class='op'>=</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>pull</span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>qplot</span>
-</code></pre>
-</div>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 161 rows containing non-finite values (stat_bin).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-8-8.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>PROGEST <span class='op'>=</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='va'>PROGEST</span>,scale<span class='op'>=</span><span class='cn'>F</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>pull</span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>qplot</span>
-</code></pre>
-</div>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 161 rows containing non-finite values (stat_bin).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-8-9.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>PROGEST <span class='op'>=</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='va'>ESTRGEN</span>,scale<span class='op'>=</span><span class='cn'>F</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>pull</span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>qplot</span>
-</code></pre>
-</div>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 14 rows containing non-finite values (stat_bin).</code></pre>
-<p><img src="1_biocycle_import_files/figure-html5/unnamed-chunk-8-10.png" width="624" /></p>
 </div>
 <h2 id="remove-one-woman-with-empty-rows-in-one-cycle">Remove one woman with empty rows in one cycle</h2>
 <div class="layout-chunk" data-layout="l-body">
@@ -2036,6 +1754,49 @@ sample estimates:
 </code></pre>
 </div>
 <pre><code>[1] 3911</code></pre>
+</div>
+<h2 id="recompute-anovul-rate">Recompute anovul rate</h2>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>missing</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/colSums.html'>rowSums</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>missing</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>missing
+   0    1    2    3    4    5    6    7    8    9   10   11   12   13 
+ 198 2048  176  127  804  119   50  177   47   53   14   50   17    2 
+  14   15   16   18   28   32   34   35   36   37 
+   1   14    2    1    1    4    1    3    1    1 </code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># get denominator right</span>
+<span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='op'>!</span><span class='va'>noserum</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+  <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='fu'>n</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>&gt;=</span> <span class='fl'>7</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+<span class='fu'>summarise</span><span class='op'>(</span>p<span class='op'>=</span><span class='fl'>1</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+<span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+<span class='fu'>summarise</span><span class='op'>(</span><span class='fu'>n</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code># A tibble: 1 × 1
+  `n()`
+  &lt;int&gt;
+1   481</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># get numerator</span>
+<span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='op'>!</span><span class='va'>noserum</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+  <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='fu'>n</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>&gt;=</span> <span class='fl'>7</span>, <span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>cycle_length_bl</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+<span class='fu'>summarise</span><span class='op'>(</span>anov <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/all.html'>all</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>peak_day</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+<span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+<span class='fu'>summarise</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>anov</span><span class='op'>)</span>, <span class='fu'>n</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code># A tibble: 1 × 2
+  `sum(anov)` `n()`
+        &lt;int&gt; &lt;int&gt;
+1         140   479</code></pre>
 </div>
 <h2 id="reverse-cycle-days">Reverse cycle days</h2>
 <div class="layout-chunk" data-layout="l-body">
@@ -2087,240 +1848,10 @@ sample estimates:
     DRLH_serum_peak <span class='op'>=</span> <span class='va'>cday</span> <span class='op'>-</span> <span class='va'>serum_LH_peak_day</span>,
     standardized_day <span class='op'>=</span> <span class='fl'>28</span><span class='op'>*</span><span class='op'>(</span><span class='va'>FCD</span><span class='op'>+</span><span class='fl'>1</span><span class='op'>)</span><span class='op'>/</span><span class='va'>cycle_length</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
   <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span>
-
-<span class='co'># biocycle %&gt;% select(id, cycle, ovulation_day_planned, ovulation_day_LH_serum, ovulation_day_LH_serum_peak, peak_day) %&gt;% distinct() %&gt;% head</span>
-<span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>cycle</span> <span class='op'>==</span><span class='fl'>1</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>ovulation_day_planned</span>, <span class='va'>ovulation_day_LH_serum</span>, <span class='va'>ovulation_day_LH_serum_peak</span>,<span class='va'>serum_LH_peak_day</span>, <span class='va'>serum_LH_surge_day</span>, <span class='va'>peak_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>summarise_all</span><span class='op'>(</span><span class='va'>mean</span>,na.rm<span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 1 × 8
-     id cycle ovulation_day_planned ovulation_day_LH… ovulation_day_L…
-  &lt;dbl&gt; &lt;dbl&gt;                 &lt;dbl&gt;             &lt;dbl&gt;            &lt;dbl&gt;
-1 1486.     1                  16.8              16.5             17.1
-# … with 3 more variables: serum_LH_peak_day &lt;dbl&gt;,
-#   serum_LH_surge_day &lt;dbl&gt;, peak_day &lt;dbl&gt;</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>cycle</span> <span class='op'>==</span><span class='fl'>1</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>ovulation_day_planned</span>, <span class='va'>ovulation_day_LH_serum</span>, <span class='va'>ovulation_day_LH_serum_peak</span>,<span class='va'>serum_LH_peak_day</span>, <span class='va'>serum_LH_surge_day</span>, <span class='va'>peak_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>summarise_all</span><span class='op'>(</span><span class='va'>sd</span>,na.rm<span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># A tibble: 1 × 8
-     id cycle ovulation_day_planned ovulation_day_LH… ovulation_day_L…
-  &lt;dbl&gt; &lt;dbl&gt;                 &lt;dbl&gt;             &lt;dbl&gt;            &lt;dbl&gt;
-1  294.     0                  2.92              3.57             4.87
-# … with 3 more variables: serum_LH_peak_day &lt;dbl&gt;,
-#   serum_LH_surge_day &lt;dbl&gt;, peak_day &lt;dbl&gt;</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>ovulation_day_planned</span>, <span class='va'>ovulation_day_LH_serum</span>, <span class='va'>ovulation_day_LH_serum_peak</span>, <span class='va'>serum_LH_peak_day</span>, <span class='va'>peak_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>distinct</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span>use<span class='op'>=</span><span class='st'>'p'</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='va'>.</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>1</span>,<span class='op'>-</span><span class='fl'>2</span><span class='op'>)</span>,<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>1</span>,<span class='op'>-</span><span class='fl'>2</span><span class='op'>)</span><span class='op'>]</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fl'>2</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>                            ovulation_day_planned
-ovulation_day_planned                        1.00
-ovulation_day_LH_serum                       0.99
-ovulation_day_LH_serum_peak                  0.99
-serum_LH_peak_day                            0.99
-peak_day                                     0.99
-                            ovulation_day_LH_serum
-ovulation_day_planned                         0.99
-ovulation_day_LH_serum                        1.00
-ovulation_day_LH_serum_peak                   1.00
-serum_LH_peak_day                             1.00
-peak_day                                      1.00
-                            ovulation_day_LH_serum_peak
-ovulation_day_planned                              0.99
-ovulation_day_LH_serum                             1.00
-ovulation_day_LH_serum_peak                        1.00
-serum_LH_peak_day                                  1.00
-peak_day                                           0.99
-                            serum_LH_peak_day peak_day
-ovulation_day_planned                    0.99     0.99
-ovulation_day_LH_serum                   1.00     1.00
-ovulation_day_LH_serum_peak              1.00     0.99
-serum_LH_peak_day                        1.00     0.99
-peak_day                                 0.99     1.00</code></pre>
-</div>
-<h2 id="anovulatory-cycles-vs.-rest">Anovulatory cycles vs. rest</h2>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>anovulatory</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>summarise</span><span class='op'>(</span>mean_cl <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>cycle_length</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>,
-            min_cl <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>cycle_length</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>,
-            max_cl <span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>cycle_length</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>,
-            sd_cl <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>cycle_length</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>,
-            <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>ESTRGEN</span><span class='op'>)</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>,
-            <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>)</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>
-            <span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># A tibble: 2 × 7
-  anovulatory mean_cl min_cl max_cl sd_cl `mean(log(ESTRGEN), na.rm =…
-  &lt;lgl&gt;         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;                        &lt;dbl&gt;
-1 FALSE          28.8     13     44  3.51                         4.47
-2 TRUE           31.2     19     58  9.05                         3.93
-# … with 1 more variable: mean(log(PROGEST), na.rm = T) &lt;dbl&gt;</code></pre>
-</div>
-<h2 id="which-day-do-the-different-methods-get-as-the-day-of-ovulation">Which day do the different methods get as the day of ovulation?</h2>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='co'>#filter(cycle == 1) %&gt;% </span>
-  <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>cycle_start_day</span>, <span class='va'>ovulation_day_planned</span>, <span class='va'>ovulation_day_LH_serum</span>, <span class='va'>ovulation_day_LH_serum_peak</span>, <span class='va'>peak_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>distinct</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>mutate_at</span><span class='op'>(</span><span class='fu'>vars</span><span class='op'>(</span><span class='va'>ovulation_day_planned</span>, <span class='va'>ovulation_day_LH_serum</span>, <span class='va'>ovulation_day_LH_serum_peak</span>, <span class='va'>peak_day</span><span class='op'>)</span>, <span class='op'>~</span> <span class='va'>.</span> <span class='op'>-</span> <span class='va'>cycle_start_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>select</span><span class='op'>(</span><span class='va'>cycle</span>, <span class='va'>ovulation_day_planned</span>, <span class='va'>ovulation_day_LH_serum</span>, <span class='va'>ovulation_day_LH_serum_peak</span>, ovulation_day_LH_urine <span class='op'>=</span> <span class='va'>peak_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>pivot_longer</span><span class='op'>(</span>cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ovulation_day_planned"</span>, <span class='st'>"ovulation_day_LH_serum"</span>, <span class='st'>"ovulation_day_LH_serum_peak"</span>, <span class='st'>"ovulation_day_LH_urine"</span><span class='op'>)</span>, names_to <span class='op'>=</span> <span class='st'>"method"</span>, values_to <span class='op'>=</span> <span class='st'>"day"</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>method</span>, <span class='va'>cycle</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>summarise</span><span class='op'>(</span>mean <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>day</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>, sd <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>day</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>left_join</span><span class='op'>(</span>
-  
-    <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='co'>#filter(cycle == 1) %&gt;% </span>
-  <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>cycle_end_day</span>, <span class='va'>ovulation_day_planned</span>, <span class='va'>ovulation_day_LH_serum</span>, <span class='va'>ovulation_day_LH_serum_peak</span>, <span class='va'>peak_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>distinct</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>mutate_at</span><span class='op'>(</span><span class='fu'>vars</span><span class='op'>(</span><span class='va'>ovulation_day_planned</span>, <span class='va'>ovulation_day_LH_serum</span>, <span class='va'>ovulation_day_LH_serum_peak</span>, <span class='va'>peak_day</span><span class='op'>)</span>, <span class='op'>~</span> <span class='va'>.</span> <span class='op'>-</span> <span class='va'>cycle_end_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>select</span><span class='op'>(</span><span class='va'>cycle</span>, <span class='va'>ovulation_day_planned</span>, <span class='va'>ovulation_day_LH_serum</span>, <span class='va'>ovulation_day_LH_serum_peak</span>, ovulation_day_LH_urine <span class='op'>=</span> <span class='va'>peak_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>pivot_longer</span><span class='op'>(</span>cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ovulation_day_planned"</span>, <span class='st'>"ovulation_day_LH_serum"</span>, <span class='st'>"ovulation_day_LH_serum_peak"</span>, <span class='st'>"ovulation_day_LH_urine"</span><span class='op'>)</span>, names_to <span class='op'>=</span> <span class='st'>"method"</span>, values_to <span class='op'>=</span> <span class='st'>"day"</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>method</span>, <span class='va'>cycle</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>summarise</span><span class='op'>(</span>mean <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>day</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>, sd <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>day</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span><span class='op'>)</span>,
-  by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"method"</span>, <span class='st'>"cycle"</span><span class='op'>)</span>, suffix <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"_fc"</span>, <span class='st'>"_bc"</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>`summarise()` has grouped output by &#39;method&#39;. You can override using the `.groups` argument.
-`summarise()` has grouped output by &#39;method&#39;. You can override using the `.groups` argument.</code></pre>
-<pre><code># A tibble: 8 × 6
-# Groups:   method [4]
-  method                      cycle mean_fc sd_fc mean_bc sd_bc
-  &lt;chr&gt;                       &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
-1 ovulation_day_LH_serum          1    15.4  3.57   -13.5  2.47
-2 ovulation_day_LH_serum          2    15.7  3.26   -13.3  2.34
-3 ovulation_day_LH_serum_peak     1    16.0  4.87   -13.1  3.87
-4 ovulation_day_LH_serum_peak     2    16.0  3.78   -12.9  2.69
-5 ovulation_day_LH_urine          1    15.4  3.29   -13.2  2.92
-6 ovulation_day_LH_urine          2    15.4  3.34   -13.4  2.96
-7 ovulation_day_planned           1    15.8  2.96   -13.2  4.04
-8 ovulation_day_planned           2    15.7  3.11   -13.1  3.28</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>DRLH</span>, <span class='va'>DRLH_serum_peak</span>, <span class='va'>DRLH_serum_surge</span><span class='op'>)</span>, use <span class='op'>=</span> <span class='st'>'p'</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>                      DRLH DRLH_serum_peak DRLH_serum_surge
-DRLH             1.0000000       0.9377206        0.9684680
-DRLH_serum_peak  0.9377206       1.0000000        0.9979972
-DRLH_serum_surge 0.9684680       0.9979972        1.0000000</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span> <span class='op'>=</span> <span class='va'>biocycle</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>mutate</span><span class='op'>(</span>
-        RCD_std <span class='op'>=</span> <span class='fu'>case_when</span><span class='op'>(</span>
-          <span class='va'>visit</span> <span class='op'>==</span> <span class='st'>"M1"</span> <span class='op'>~</span> <span class='op'>-</span><span class='fl'>28</span>,
-          <span class='va'>RCD</span> <span class='op'>&gt;</span> <span class='op'>-</span><span class='fl'>24</span> <span class='op'>~</span> <span class='va'>RCD</span>,
-          <span class='op'>(</span><span class='va'>cycle_length</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>abs</a></span><span class='op'>(</span><span class='va'>RCD</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>&lt;</span> <span class='fl'>6</span> <span class='op'>~</span> <span class='op'>(</span><span class='va'>cycle_length</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>abs</a></span><span class='op'>(</span><span class='va'>RCD</span><span class='op'>)</span><span class='op'>)</span><span class='op'>/</span><span class='va'>cycle_length</span><span class='op'>*</span><span class='fl'>29</span> <span class='op'>-</span> <span class='fl'>29</span>
-        <span class='op'>)</span>,
-        RCD_squished <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span>
-          <span class='va'>cycle_length</span> <span class='op'>-</span> <span class='va'>FCD</span> <span class='op'>&lt;</span> <span class='fl'>14</span>,
-          <span class='fl'>29</span> <span class='op'>-</span> <span class='op'>(</span><span class='va'>cycle_length</span> <span class='op'>-</span> <span class='va'>FCD</span><span class='op'>)</span>,
-          <span class='op'>(</span><span class='op'>(</span><span class='va'>FCD</span><span class='op'>/</span> <span class='op'>(</span><span class='va'>cycle_length</span> <span class='op'>-</span> <span class='fl'>14</span><span class='op'>)</span> <span class='op'>)</span> <span class='op'>*</span> <span class='fl'>15</span><span class='op'>)</span><span class='op'>)</span>,
-        RCD_squished <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>RCD_squished</span> <span class='op'>&lt;</span> <span class='fl'>1</span>, <span class='fl'>1</span>, <span class='va'>RCD_squished</span><span class='op'>)</span>,
-        RCD_squished <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>RCD_squished</span> <span class='op'>&gt;</span> <span class='fl'>29</span>, <span class='fl'>29</span>, <span class='va'>RCD_squished</span><span class='op'>)</span>,
-        RCD_squished <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>RCD</span> <span class='op'>&lt;</span> <span class='op'>-</span><span class='fl'>40</span>, <span class='cn'>NA_real_</span>, <span class='va'>RCD_squished</span><span class='op'>)</span> <span class='op'>-</span> <span class='fl'>30</span>,
-        RCD_squished <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='va'>RCD_squished</span><span class='op'>)</span>
-        <span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>RCD_squished</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>
--29 -28 -27 -26 -25 -24 -23 -22 -21 -20 -19 -18 -17 -16 -15 -14 -13 
-280 101  57  48  66  96 104 147  80 111 109 140 161 236 240 204 182 
--12 -11 -10  -9  -8  -7  -6  -5  -4  -3  -2  -1 
-130 152 106 122 119 106 108 102 114  99  86  32 </code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>biocycle</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>RCD</span>, <span class='va'>RCD_std</span>, color <span class='op'>=</span> <span class='va'>cycle_length</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>0.1</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Warning: Removed 403 rows containing missing values (geom_point).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-13-1.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>anov_cycles</span> <span class='op'>&lt;-</span> <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>max_LH <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>LH</span>, na.rm<span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span>, max_PROGEST <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>PROGEST</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>  <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>anovulatory</span>, <span class='va'>max_LH</span>, <span class='va'>max_PROGEST</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>distinct</span><span class='op'>(</span><span class='op'>)</span> 
-<span class='va'>anov_cycles</span> <span class='op'>%&gt;%</span> <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>anovulatory</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>.
-FALSE  TRUE 
-  466    43 </code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># View(anov_cycles)</span>
- 
-
-<span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>DRLH</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>DRLH_planned</span>, use <span class='op'>=</span> <span class='st'>'pair'</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>[1] 0.9548818</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ovulation_day_LH_serum</span>, exclude <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>
-   3    7   10   11   12   13   14   15   16   17   18   19   20   21 
-   6    8    8   22   53   78   98  266  221  142  107   87   28   40 
-  23   24   25   26   27   28   29   30   32   35   36   37   38   39 
-   8   32    8    8    8   16    8    8   16    8   15   40   32   31 
-  40   41   42   43   44   45   46   47   48   49   50   51   52   53 
-  85   94   78  100  149  100   77   54   62   38   64   21   29   16 
-  54   55   56   58   59   61   63   66   71   72   75   76   79   80 
-  16   24    8    8   16    8    8    8   23   16   16   15    8    8 
-  82   83   96   98  103  152  188 &lt;NA&gt; 
-   8   16    7    8    8    8    8 1297 </code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ovulation_day_planned</span>, exclude <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>
-  11   12   13   14   15   16   17   18   19   20   21   22   23   24 
-  24   60   95  211  321  317  251  228  144   86   92   42   38   37 
-  25   26   29   32   33   34   35   36   37   38   39   40   41   42 
-  16    7    5    8    8    8   39   16   55   87   72   62  164   91 
-  43   44   45   46   47   48   49   50   51   52   53   54   55   56 
-  95  170  149  131   82   51   71   84   51   24    7   37   15   24 
-  57   58   59   60   61   64   68   69   71   72   73   74   75   76 
-  24   16   20   16    8    8    8    8   16    7   16   24    7    8 
-  78   81   82   83   84   85   93   97  100  102  151  170  171  184 
-   8    8   16    8    8    7    7    7    8    8    8    8    8    7 
- 188 &lt;NA&gt; 
-   8   26 </code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>FCD</span>, exclude <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>
-   0    1    2    3    4    5    6    7    8    9   10   11   12   13 
-  46  280  106   54   36   74  142  143   96   93  110  162  160  223 
-  14   15   16   17   18   19   20   21   22   23   24   25   26   27 
- 234  210  195  177  168  126  140  139  123  126  126  101   77   71 
-  28   29   30   31   32   33   34 &lt;NA&gt; 
-  74   46   16    8   12    1    1   15 </code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>RCD</span>, exclude <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>
- -57  -51  -48  -46  -44  -43  -42  -40  -39  -38  -37  -36  -35  -34 
-   1    1    1    1    1    1    1    2    3    3    4    7    7    7 
- -33  -32  -31  -30  -29  -28  -27  -26  -25  -24  -23  -22  -21  -20 
-  18   20   21   33   47   68   70   85   88   86   98  105  110  128 
- -19  -18  -17  -16  -15  -14  -13  -12  -11  -10   -9   -8   -7   -6 
-  93   99  133  178  223  240  204  182  130  152  106  122  119  106 
-  -5   -4   -3   -2   -1 &lt;NA&gt; 
- 108  102  114   99  118  266 </code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>DRLH</span>, exclude <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>
- -27  -23  -22  -21  -20  -19  -18  -17  -16  -15  -14  -13  -12  -11 
-   1    1    1    9    6   10   10   18   21   31   44   47   73   52 
- -10   -9   -8   -7   -6   -5   -4   -3   -2   -1    0    1    2    3 
-  57   83   76   75   77   76   74   80  114  119  282  262  127   56 
-   4    5    6    7    8    9   10   11   12   13   14   15   16   17 
-  66  116   86   62   77   98   74   62   71   59   48   19    1    1 
-  18   19   20 &lt;NA&gt; 
-   2    1    2 1184 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://testthat.r-lib.org'>testthat</a></span><span class='op'>)</span>
 </code></pre>
@@ -2341,624 +1872,14 @@ Attaching package: &#39;testthat&#39;</code></pre>
     matches</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://testthat.r-lib.org/reference/equality-expectations.html'>expect_equal</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>cycle_length</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>cycle_length_mine</span><span class='op'>)</span>
-<span class='co'># biocycle %&gt;%</span>
-<span class='co'>#   select(id, cycle, cycle_length, cycle_length_mine, cycle_start_day, cycle_end_day, starts_with("mense")) %&gt;%</span>
-<span class='co'>#   distinct() %&gt;%</span>
-<span class='co'>#   mutate(equal = identical(cycle_length, cycle_length_mine)) %&gt;%</span>
-<span class='co'>#   View()</span>
-  
-<span class='co'># biocycle %&gt;% </span>
-<span class='co'>#   filter(round(cor(day, standardized_day),1) != 1) %&gt;% </span>
-<span class='co'>#   select( cycle_length, cycle_length_mine, FCD, day, standardized_day) %&gt;% View()</span>
-  <span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>FCD</span>, <span class='va'>RCD</span>, <span class='va'>day</span>, <span class='va'>standardized_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span>use <span class='op'>=</span> <span class='st'>'na.or.complete'</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>                       FCD       RCD       day standardized_day
-FCD              1.0000000 0.8679758 0.9408742        0.9594645
-RCD              0.8679758 1.0000000 0.8734255        0.9561304
-day              0.9408742 0.8734255 1.0000000        0.9387325
-standardized_day 0.9594645 0.9561304 0.9387325        1.0000000</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>RCD</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>
--57 -51 -48 -46 -44 -43 -42 -40 -39 -38 -37 -36 -35 -34 -33 -32 -31 
-  1   1   1   1   1   1   1   2   3   3   4   7   7   7  18  20  21 
--30 -29 -28 -27 -26 -25 -24 -23 -22 -21 -20 -19 -18 -17 -16 -15 -14 
- 33  47  68  70  85  88  86  98 105 110 128  93  99 133 178 223 240 
--13 -12 -11 -10  -9  -8  -7  -6  -5  -4  -3  -2  -1 
-204 182 130 152 106 122 119 106 108 102 114  99 118 </code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>progesterone_pgml</span> <span class='op'>&lt;-</span> <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>PROGEST</span> <span class='op'>*</span> <span class='fl'>1000</span>
 </code></pre>
 </div>
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>biocycle</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='fu'>between</span><span class='op'>(</span><span class='va'>cycle_length</span>, <span class='fl'>20</span>, <span class='fl'>35</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-         <span class='fu'>mutate</span><span class='op'>(</span>logP <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>progesterone_pgml</span><span class='op'>)</span>,
-                logP <span class='op'>=</span> <span class='va'>logP</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>logP</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span><span class='op'>)</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>RCD</span>, <span class='va'>logP</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span>alpha <span class='op'>=</span> <span class='fl'>0.1</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 136 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 136 rows containing missing values (geom_point).</code></pre>
-<p><img src="1_biocycle_import_files/figure-html5/unnamed-chunk-15-1.png" width="624" /></p>
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>qplot</span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>BMI</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 10 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 10 rows containing missing values (geom_point).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-16-1.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>qplot</span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>BMI</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 10 rows containing non-finite values (stat_smooth).
-
-Warning: Removed 10 rows containing missing values (geom_point).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-16-2.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>qplot</span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>BMI</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>`Free E2 (pg/mL)`</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 10 rows containing non-finite values (stat_smooth).
-
-Warning: Removed 10 rows containing missing values (geom_point).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-16-3.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>qplot</span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>BMI</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 14 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 14 rows containing missing values (geom_point).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-16-4.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>qplot</span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>BMI</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span>method <span class='op'>=</span> <span class='st'>'lm'</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>`geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
-<pre><code>Warning: Removed 14 rows containing non-finite values (stat_smooth).
-
-Warning: Removed 14 rows containing missing values (geom_point).</code></pre>
-<img src="1_biocycle_import_files/figure-html5/unnamed-chunk-16-5.png" width="624" />
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>BMI</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span>, use <span class='op'>=</span> <span class='st'>'p'</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>[1] -0.2530885</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>BMI</span>, <span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span>, use <span class='op'>=</span> <span class='st'>'p'</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>[1] 0.01439422</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>BMI</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>SHBG</span><span class='op'>)</span>, use <span class='op'>=</span> <span class='st'>'p'</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>[1] -0.2840897</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>BMI</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>ESTRGEN</span><span class='op'>)</span>, use <span class='op'>=</span> <span class='st'>'p'</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>[1] 0.02615477</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>BMI</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>biocycle</span><span class='op'>$</span><span class='va'>`Free E2 (pg/mL)`</span><span class='op'>)</span>, use <span class='op'>=</span> <span class='st'>'p'</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>[1] 0.09856212</code></pre>
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>biocycle</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>DRLH</span>, <span class='va'>Testo</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1209 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 1209 rows containing missing values (geom_point).</code></pre>
-<p><img src="1_biocycle_import_files/figure-html5/unnamed-chunk-17-1.png" width="624" /></p>
-</div>
-<h2 id="iccs">ICCs</h2>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_shbg</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='va'>SHBG</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>:</span><span class='va'>cycle</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: SHBG ~ (1 | id) + (1 | id:cycle)
-   Data: biocycle
-
-REML criterion at convergence: 27870.7
-
-Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--7.4453 -0.4394 -0.0443  0.3909  7.9405 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id:cycle (Intercept)  31.92    5.650  
- id       (Intercept) 421.29   20.525  
- Residual              48.05    6.932  
-Number of obs: 3897, groups:  id:cycle, 509; id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)   48.017      1.305    36.8</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_shbg</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.904
-  Conditional ICC: 0.904</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_shbg</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='va'>SHBG</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: SHBG ~ (1 | id)
-   Data: biocycle
-
-REML criterion at convergence: 28516.2
-
-Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--6.7745 -0.4662 -0.0291  0.4308  7.4114 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id       (Intercept) 437.14   20.908  
- Residual              64.94    8.059  
-Number of obs: 3897, groups:  id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)   48.000      1.306   36.76</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_shbg</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.871
-  Conditional ICC: 0.871</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_shbg</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>SHBG</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>:</span><span class='va'>cycle</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(SHBG) ~ (1 | id) + (1 | id:cycle)
-   Data: biocycle
-
-REML criterion at convergence: -1539.8
-
-Scaled residuals: 
-     Min       1Q   Median       3Q      Max 
--18.6023  -0.4144  -0.0014   0.4386   7.9681 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id:cycle (Intercept) 0.01231  0.1110  
- id       (Intercept) 0.20222  0.4497  
- Residual             0.02597  0.1612  
-Number of obs: 3897, groups:  id:cycle, 509; id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)   3.7612     0.0285     132</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_shbg</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.892
-  Conditional ICC: 0.892</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_shbg</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>SHBG</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(SHBG) ~ (1 | id)
-   Data: biocycle
-
-REML criterion at convergence: -1119.7
-
-Scaled residuals: 
-     Min       1Q   Median       3Q      Max 
--17.6054  -0.4558   0.0197   0.5068   7.4464 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id       (Intercept) 0.20866  0.4568  
- Residual             0.03237  0.1799  
-Number of obs: 3897, groups:  id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)  3.76071    0.02853   131.8</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_shbg</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.866
-  Conditional ICC: 0.866</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_albumin</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='va'>ALBUMN</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>:</span><span class='va'>cycle</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: ALBUMN ~ (1 | id) + (1 | id:cycle)
-   Data: biocycle
-
-REML criterion at convergence: -1427.9
-
-Scaled residuals: 
-     Min       1Q   Median       3Q      Max 
--13.0807  -0.5178   0.0032   0.5734   5.0175 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id:cycle (Intercept) 0.001961 0.04428 
- id       (Intercept) 0.037483 0.19361 
- Residual             0.032603 0.18056 
-Number of obs: 3905, groups:  id:cycle, 509; id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)  4.00657    0.01254   319.6</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_albumin</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.547
-  Conditional ICC: 0.547</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_albumin</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>ALBUMN</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>:</span><span class='va'>cycle</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(ALBUMN) ~ (1 | id) + (1 | id:cycle)
-   Data: biocycle
-
-REML criterion at convergence: -11198.7
-
-Scaled residuals: 
-     Min       1Q   Median       3Q      Max 
--16.2692  -0.4332   0.0251   0.5142   3.8131 
-
-Random effects:
- Groups   Name        Variance  Std.Dev.
- id:cycle (Intercept) 0.0001303 0.01141 
- id       (Intercept) 0.0024149 0.04914 
- Residual             0.0027236 0.05219 
-Number of obs: 3905, groups:  id:cycle, 509; id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept) 1.385453   0.003209   431.8</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_albumin</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.483
-  Conditional ICC: 0.483</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_testosterone</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Testo</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>:</span><span class='va'>cycle</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(Testo) ~ (1 | id) + (1 | id:cycle)
-   Data: biocycle
-
-REML criterion at convergence: 610.1
-
-Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--6.8759 -0.5998  0.0379  0.6089  5.0127 
-
-Random effects:
- Groups   Name        Variance  Std.Dev.
- id:cycle (Intercept) 0.0009976 0.03159 
- id       (Intercept) 0.1166329 0.34152 
- Residual             0.0536865 0.23170 
-Number of obs: 3868, groups:  id:cycle, 509; id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)   3.3248     0.0216   153.9</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_testosterone</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.687
-  Conditional ICC: 0.687</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_estrogen</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>ESTRGEN</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>:</span><span class='va'>cycle</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>boundary (singular) fit: see ?isSingular</code></pre>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(ESTRGEN) ~ (1 | id) + (1 | id:cycle)
-   Data: biocycle
-
-REML criterion at convergence: 8810.4
-
-Scaled residuals: 
-     Min       1Q   Median       3Q      Max 
--2.38910 -0.75631 -0.02573  0.72852  2.77817 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id:cycle (Intercept) 0.00000  0.0000  
- id       (Intercept) 0.08007  0.2830  
- Residual             0.51669  0.7188  
-Number of obs: 3901, groups:  id:cycle, 509; id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)  4.42334    0.02105   210.1
-optimizer (nloptwrap) convergence code: 0 (OK)
-boundary (singular) fit: see ?isSingular</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_estrogen</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Warning: Can&#39;t compute random effect variances. Some variance components equal
-  zero. Your model may suffer from singulariy.
-  Solution: Respecify random structure! You may also decrease the
-  &#39;tolerance&#39; level to enforce the calculation of random effect
-  variances.</code></pre>
-<pre><code>[1] NA</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_estrogen</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>ESTRGEN</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(ESTRGEN) ~ (1 | id)
-   Data: biocycle
-
-REML criterion at convergence: 8810.4
-
-Scaled residuals: 
-     Min       1Q   Median       3Q      Max 
--2.38910 -0.75631 -0.02573  0.72852  2.77817 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id       (Intercept) 0.08007  0.2830  
- Residual             0.51669  0.7188  
-Number of obs: 3901, groups:  id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)  4.42334    0.02105   210.1</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_estrogen</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.134
-  Conditional ICC: 0.134</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_free_estrogen</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>`Free E2 (pg/mL)`</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>:</span><span class='va'>cycle</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>boundary (singular) fit: see ?isSingular</code></pre>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(`Free E2 (pg/mL)`) ~ (1 | id) + (1 | id:cycle)
-   Data: biocycle
-
-REML criterion at convergence: 9573.5
-
-Scaled residuals: 
-     Min       1Q   Median       3Q      Max 
--2.55055 -0.75679 -0.05221  0.71244  2.84074 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id:cycle (Intercept) 0.00000  0.0000  
- id       (Intercept) 0.07071  0.2659  
- Residual             0.63761  0.7985  
-Number of obs: 3901, groups:  id:cycle, 509; id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)  0.39927    0.02093   19.07
-optimizer (nloptwrap) convergence code: 0 (OK)
-boundary (singular) fit: see ?isSingular</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_free_estrogen</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Warning: Can&#39;t compute random effect variances. Some variance components equal
-  zero. Your model may suffer from singulariy.
-  Solution: Respecify random structure! You may also decrease the
-  &#39;tolerance&#39; level to enforce the calculation of random effect
-  variances.</code></pre>
-<pre><code>[1] NA</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_free_estrogen</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>`Free E2 (pg/mL)`</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(`Free E2 (pg/mL)`) ~ (1 | id)
-   Data: biocycle
-
-REML criterion at convergence: 9573.5
-
-Scaled residuals: 
-     Min       1Q   Median       3Q      Max 
--2.55055 -0.75679 -0.05221  0.71244  2.84074 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id       (Intercept) 0.07071  0.2659  
- Residual             0.63761  0.7985  
-Number of obs: 3901, groups:  id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)  0.39927    0.02093   19.07</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_free_estrogen</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.100
-  Conditional ICC: 0.100</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_progesterone</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>:</span><span class='va'>cycle</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>boundary (singular) fit: see ?isSingular</code></pre>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(PROGEST) ~ (1 | id) + (1 | id:cycle)
-   Data: biocycle
-
-REML criterion at convergence: 12742
-
-Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--1.8359 -0.7934 -0.2625  0.9315  2.3031 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id:cycle (Intercept) 0.00000  0.0000  
- id       (Intercept) 0.08892  0.2982  
- Residual             1.67532  1.2943  
-Number of obs: 3754, groups:  id:cycle, 509; id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)  0.40437    0.02818   14.35
-optimizer (nloptwrap) convergence code: 0 (OK)
-boundary (singular) fit: see ?isSingular</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_progesterone</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Warning: Can&#39;t compute random effect variances. Some variance components equal
-  zero. Your model may suffer from singulariy.
-  Solution: Respecify random structure! You may also decrease the
-  &#39;tolerance&#39; level to enforce the calculation of random effect
-  variances.</code></pre>
-<pre><code>[1] NA</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_progesterone</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>PROGEST</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(PROGEST) ~ (1 | id)
-   Data: biocycle
-
-REML criterion at convergence: 12742
-
-Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--1.8359 -0.7934 -0.2625  0.9315  2.3031 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id       (Intercept) 0.08892  0.2982  
- Residual             1.67532  1.2943  
-Number of obs: 3754, groups:  id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)  0.40437    0.02818   14.35</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_progesterone</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.050
-  Conditional ICC: 0.050</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_free_testosterone</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>`Free T (ng/dL)`</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>:</span><span class='va'>cycle</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(`Free T (ng/dL)`) ~ (1 | id) + (1 | id:cycle)
-   Data: biocycle
-
-REML criterion at convergence: 1738.4
-
-Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--5.0466 -0.6006  0.0136  0.6075  5.6082 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id:cycle (Intercept) 0.004727 0.06875 
- id       (Intercept) 0.150647 0.38813 
- Residual             0.070413 0.26535 
-Number of obs: 3906, groups:  id:cycle, 509; id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept) -0.86582    0.02469  -35.07</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_free_testosterone</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.688
-  Conditional ICC: 0.688</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>m_icc_free_testosterone</span> <span class='op'>&lt;-</span> <span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>`Free T (ng/dL)`</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span>, <span class='va'>biocycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
-Formula: log(`Free T (ng/dL)`) ~ (1 | id)
-   Data: biocycle
-
-REML criterion at convergence: 1761
-
-Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--5.1953 -0.6037  0.0185  0.6140  5.4585 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- id       (Intercept) 0.15307  0.3912  
- Residual             0.07289  0.2700  
-Number of obs: 3906, groups:  id, 259
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept)  -0.8655     0.0247  -35.04</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>performance</span><span class='fu'>::</span><span class='fu'><a href='https://easystats.github.io/performance/reference/icc.html'>icc</a></span><span class='op'>(</span><span class='va'>m_icc_free_testosterone</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code># Intraclass Correlation Coefficient
-
-     Adjusted ICC: 0.677
-  Conditional ICC: 0.677</code></pre>
 </div>
 <h2 id="save-data">Save data</h2>
 <div class="layout-chunk" data-layout="l-body">
@@ -3006,7 +1927,7 @@ Fixed effects:
 </code></pre>
 </div>
 </div>
-<div class="sourceCode" id="cb143"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

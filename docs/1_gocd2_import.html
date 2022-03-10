@@ -1868,11 +1868,7 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
 <pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
 <pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Progesterone_icc_id.rds&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.
 
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
@@ -2064,7 +2060,7 @@ $r_diff_bc_imputed
 [1] &quot; 0.68 [ 0.63; 0.72]&quot;
 
 $sd_bc_imputed
-[1] &quot;1.23 (102%)&quot;
+[1] &quot;1.27 (101%)&quot;
 
 $r_diff_bc_imputed_rr
 [1] &quot; 0.68 [ 0.63; 0.72]&quot;
@@ -2075,7 +2071,7 @@ $imputed_bc_vs_measured_graph</code></pre>
 <p><img src="1_gocd2_import_files/figure-html5/unnamed-chunk-4-2.png" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
-[1] &quot; 1.10&quot;
+[1] &quot; 1.09&quot;
 
 $fc_day_model
  Family: gaussian 
@@ -2121,7 +2117,7 @@ $r_fc
 [1] &quot;0.71 [0.68;0.74]&quot;
 
 $rmse_fc
-[1] &quot;1.50 [1.40;1.63]&quot;
+[1] &quot;1.50 [1.39;1.62]&quot;
 
 $r_loo_fc
 [1] &quot;0.70 [0.64;0.74]&quot;
@@ -2139,16 +2135,16 @@ $r_log_diff_fc_stirn
 [1] &quot;-0.60 [-0.67;-0.53]&quot;
 
 $r_fc_imputed
-[1] &quot; 0.64 [ 0.57; 0.69]&quot;
+[1] &quot; 0.67 [ 0.61; 0.72]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.57 [ 0.50; 0.64]&quot;
+[1] &quot; 0.61 [ 0.54; 0.67]&quot;
 
 $sd_fc_imputed
-[1] &quot;0.96 (74%)&quot;
+[1] &quot;1.05 (81%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.63 [ 0.56; 0.69]&quot;
+[1] &quot; 0.65 [ 0.58; 0.71]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 170 rows containing missing values (geom_smooth).</code></pre>
@@ -2156,7 +2152,7 @@ $imputed_fc_vs_measured_graph</code></pre>
 <p><img src="1_gocd2_import_files/figure-html5/unnamed-chunk-4-3.png" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
-[1] &quot; 1.32&quot;
+[1] &quot; 1.21&quot;
 
 $lh_day_model
  Family: gaussian 
@@ -2202,7 +2198,7 @@ $r_lh
 [1] &quot;0.70 [0.67;0.73]&quot;
 
 $rmse_lh
-[1] &quot;1.57 [1.45;1.68]&quot;
+[1] &quot;1.57 [1.46;1.68]&quot;
 
 $r_loo_lh
 [1] &quot;0.69 [0.63;0.74]&quot;
@@ -2226,10 +2222,10 @@ $r_diff_lh_imputed
 [1] &quot; 0.64 [ 0.58; 0.70]&quot;
 
 $sd_lh_imputed
-[1] &quot;1.06 (68%)&quot;
+[1] &quot;1.09 (66%)&quot;
 
 $r_diff_lh_imputed_rr
-[1] &quot; 0.71 [ 0.66; 0.76]&quot;
+[1] &quot; 0.72 [ 0.66; 0.77]&quot;
 
 $imputed_lh_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 125 rows containing missing values (geom_smooth).</code></pre>
@@ -2237,7 +2233,7 @@ $imputed_lh_vs_measured_graph</code></pre>
 <p><img src="1_gocd2_import_files/figure-html5/unnamed-chunk-4-4.png" width="624" /></p>
 <pre><code>
 $rmse_lh_imputed
-[1] &quot; 1.28&quot;</code></pre>
+[1] &quot; 1.29&quot;</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>gocd2</span><span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>estradiol</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_cens</span>, <span class='va'>cycle_length</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span>
 
@@ -2258,14 +2254,7 @@ $rmse_lh_imputed
 <pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
 <pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Estradiol_icc_id.rds&#39;</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
 
 Warning: Rows containing NAs were excluded from the model.</code></pre>
@@ -2454,10 +2443,10 @@ $r_log_diff_bc_stirn
 [1] &quot;-0.04 [-0.12; 0.05]&quot;
 
 $r_bc_imputed
-[1] &quot; 0.11 [ 0.03; 0.19]&quot;
+[1] &quot; 0.11 [ 0.02; 0.19]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.15 [ 0.07; 0.23]&quot;
+[1] &quot; 0.15 [ 0.06; 0.23]&quot;
 
 $sd_bc_imputed
 [1] &quot;0.40 (41%)&quot;
@@ -2517,7 +2506,7 @@ $r_fc
 [1] &quot;0.18 [0.07;0.27]&quot;
 
 $rmse_fc
-[1] &quot;0.76 [0.71;0.82]&quot;
+[1] &quot;0.76 [0.70;0.82]&quot;
 
 $r_loo_fc
 [1] &quot;NaN [NaN;0.13]&quot;
@@ -2535,23 +2524,23 @@ $r_log_diff_fc_stirn
 [1] &quot;-0.03 [-0.13; 0.07]&quot;
 
 $r_fc_imputed
-[1] &quot; 0.08 [-0.02; 0.18]&quot;
+[1] &quot; 0.11 [ 0.01; 0.21]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.14 [ 0.04; 0.24]&quot;
+[1] &quot; 0.16 [ 0.06; 0.26]&quot;
 
 $sd_fc_imputed
-[1] &quot;0.30 (40%)&quot;
+[1] &quot;0.31 (36%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.22 [ 0.07; 0.37]&quot;
+[1] &quot; 0.26 [ 0.10; 0.40]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 176 rows containing missing values (geom_smooth).</code></pre>
 <pre><code>Warning: Removed 176 rows containing missing values (geom_point).</code></pre>
 <pre><code>
 $rmse_fc_imputed
-[1] &quot; 0.63&quot;
+[1] &quot; 0.64&quot;
 
 $lh_day_model</code></pre>
 <pre><code>Warning: There were 4 divergent transitions after warmup.
@@ -2619,13 +2608,13 @@ $r_log_diff_prob_lh
 [1] &quot;-0.01 [-0.10; 0.09]&quot;
 
 $r_lh_imputed
-[1] &quot; 0.05 [-0.04; 0.15]&quot;
+[1] &quot; 0.06 [-0.04; 0.15]&quot;
 
 $r_diff_lh_imputed
 [1] &quot; 0.00 [-0.09; 0.10]&quot;
 
 $sd_lh_imputed
-[1] &quot;0.43 (42%)&quot;
+[1] &quot;0.43 (43%)&quot;
 
 $r_diff_lh_imputed_rr
 [1] &quot; 0.01 [-0.14; 0.15]&quot;
@@ -2658,14 +2647,7 @@ $rmse_lh_imputed
 <pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
 <pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Estradiol LCMS_icc_id.rds&#39;</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
 
 Warning: Rows containing NAs were excluded from the model.</code></pre>
@@ -2841,7 +2823,7 @@ $r_bc
 [1] &quot;0.29 [0.05;0.53]&quot;
 
 $rmse_bc
-[1] &quot;3.91 [3.28;4.68]&quot;
+[1] &quot;3.91 [3.28;4.69]&quot;
 
 $r_loo_bc
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -2862,7 +2844,7 @@ $r_bc_imputed
 [1] &quot;-0.01 [-0.09; 0.08]&quot;
 
 $r_diff_bc_imputed
-[1] &quot;-0.01 [-0.09; 0.08]&quot;
+[1] &quot;-0.00 [-0.09; 0.08]&quot;
 
 $sd_bc_imputed
 [1] &quot;0.40 (41%)&quot;
@@ -2922,7 +2904,7 @@ $r_fc
 [1] &quot;0.47 [0.14;0.63]&quot;
 
 $rmse_fc
-[1] &quot;4.20 [3.34;5.26]&quot;
+[1] &quot;4.21 [3.36;5.28]&quot;
 
 $r_loo_fc
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -2940,23 +2922,23 @@ $r_log_diff_fc_stirn
 [1] &quot; 0.04 [-0.06; 0.14]&quot;
 
 $r_fc_imputed
-[1] &quot; 0.08 [-0.02; 0.18]&quot;
+[1] &quot; 0.10 [ 0.00; 0.20]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.10 [-0.01; 0.19]&quot;
+[1] &quot; 0.09 [-0.01; 0.19]&quot;
 
 $sd_fc_imputed
-[1] &quot;0.30 (40%)&quot;
+[1] &quot;0.31 (36%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.15 [-0.01; 0.30]&quot;
+[1] &quot; 0.15 [-0.02; 0.31]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 177 rows containing missing values (geom_smooth).</code></pre>
 <pre><code>Warning: Removed 177 rows containing missing values (geom_point).</code></pre>
 <pre><code>
 $rmse_fc_imputed
-[1] &quot; 1.06&quot;
+[1] &quot; 1.08&quot;
 
 $lh_day_model</code></pre>
 <pre><code>Warning: There were 2 divergent transitions after warmup.
@@ -3006,7 +2988,7 @@ $r_lh
 [1] &quot;0.29 [0.05;0.49]&quot;
 
 $rmse_lh
-[1] &quot;4.07 [3.31;5.03]&quot;
+[1] &quot;4.06 [3.31;5.02]&quot;
 
 $r_loo_lh
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -3030,10 +3012,10 @@ $r_diff_lh_imputed
 [1] &quot; 0.08 [-0.01; 0.18]&quot;
 
 $sd_lh_imputed
-[1] &quot;0.43 (42%)&quot;
+[1] &quot;0.43 (43%)&quot;
 
 $r_diff_lh_imputed_rr
-[1] &quot; 0.13 [-0.02; 0.26]&quot;
+[1] &quot; 0.12 [-0.02; 0.26]&quot;
 
 $imputed_lh_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 125 rows containing missing values (geom_smooth).</code></pre>
@@ -3312,7 +3294,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_lh
 [1] &quot;0.62 [0.55;0.67]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb143"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb135"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

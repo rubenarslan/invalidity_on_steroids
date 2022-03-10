@@ -1761,13 +1761,6 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>           &gt; matched rows     1,121</code></pre>
 <pre><code>           &gt;                 =======</code></pre>
 <pre><code>           &gt; rows total       1,121</code></pre>
-<pre><code>group_by: one grouping variable (id)</code></pre>
-<pre><code>summarise: now 42 rows and 2 columns, ungrouped</code></pre>
-<pre><code>summarise: now one row and 2 columns, ungrouped</code></pre>
-<pre><code>group_by: 2 grouping variables (id, cycle)</code></pre>
-<pre><code>summarise: now 90 rows and 3 columns, one group variable remaining (id)</code></pre>
-<pre><code>ungroup: no grouping variables</code></pre>
-<pre><code>summarise: now one row and 2 columns, ungrouped</code></pre>
 <pre><code>left_join: added 22 columns (conception_risk_lh, fertile_lh, est_estradiol_lh, est_estradiol_lh_se, est_estradiol_lh_low, …)</code></pre>
 <pre><code>           &gt; rows only in x   1,121</code></pre>
 <pre><code>           &gt; rows only in y  (   31)</code></pre>
@@ -1778,11 +1771,7 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>filter (grouped): removed 150 rows (13%), 971 rows remaining</code></pre>
 <pre><code>group_by: one grouping variable (id)</code></pre>
 <pre><code>filter (grouped): no rows removed</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_Roney 2013_Progesterone_icc_id.rds&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.
 
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
@@ -1882,10 +1871,10 @@ $usable_n_women
 [1] 42
 
 $no_lh_surge_woman
-[1] &quot;42 (100%)&quot;
+[1] &quot;NA&quot;
 
 $no_lh_surge_cycle
-[1] &quot;90 (100%)&quot;
+[1] &quot;NA&quot;
 
 $var_id_loo
 [1] &quot;0.09 [0.06;0.12]&quot;
@@ -1964,16 +1953,16 @@ $r_log_diff_bc_stirn
 [1] &quot;-0.40 [-0.45;-0.35]&quot;
 
 $r_bc_imputed
-[1] &quot; 0.45 [ 0.40; 0.49]&quot;
+[1] &quot; 0.44 [ 0.40; 0.49]&quot;
 
 $r_diff_bc_imputed
 [1] &quot; 0.51 [ 0.47; 0.56]&quot;
 
 $sd_bc_imputed
-[1] &quot;1.15 (90%)&quot;
+[1] &quot;1.20 (91%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.53 [ 0.49; 0.58]&quot;
+[1] &quot; 0.53 [ 0.48; 0.57]&quot;
 
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 58 rows containing missing values (geom_smooth).</code></pre>
@@ -1981,7 +1970,7 @@ $imputed_bc_vs_measured_graph</code></pre>
 <p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-2.png" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
-[1] &quot; 1.49&quot;
+[1] &quot; 1.56&quot;
 
 $fc_day_model
  Family: gaussian 
@@ -2045,16 +2034,16 @@ $r_log_diff_fc_stirn
 [1] &quot;-0.35 [-0.41;-0.30]&quot;
 
 $r_fc_imputed
-[1] &quot; 0.46 [ 0.41; 0.51]&quot;
+[1] &quot; 0.48 [ 0.44; 0.53]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.51 [ 0.47; 0.55]&quot;
+[1] &quot; 0.53 [ 0.49; 0.57]&quot;
 
 $sd_fc_imputed
-[1] &quot;1.02 (84%)&quot;
+[1] &quot;1.06 (82%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.54 [ 0.50; 0.59]&quot;
+[1] &quot; 0.57 [ 0.53; 0.61]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 4 rows containing missing values (geom_smooth).</code></pre>
@@ -2062,7 +2051,7 @@ $imputed_fc_vs_measured_graph</code></pre>
 <p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-3.png" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
-[1] &quot; 1.24&quot;</code></pre>
+[1] &quot; 1.36&quot;</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>estradiol</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_cens</span>, <span class='va'>cycle_length</span><span class='op'>)</span>
 </code></pre>
@@ -2103,13 +2092,6 @@ $rmse_fc_imputed
 <pre><code>           &gt; matched rows     1,091</code></pre>
 <pre><code>           &gt;                 =======</code></pre>
 <pre><code>           &gt; rows total       1,091</code></pre>
-<pre><code>group_by: one grouping variable (id)</code></pre>
-<pre><code>summarise: now 42 rows and 2 columns, ungrouped</code></pre>
-<pre><code>summarise: now one row and 2 columns, ungrouped</code></pre>
-<pre><code>group_by: 2 grouping variables (id, cycle)</code></pre>
-<pre><code>summarise: now 88 rows and 3 columns, one group variable remaining (id)</code></pre>
-<pre><code>ungroup: no grouping variables</code></pre>
-<pre><code>summarise: now one row and 2 columns, ungrouped</code></pre>
 <pre><code>left_join: added 22 columns (conception_risk_lh, fertile_lh, est_estradiol_lh, est_estradiol_lh_se, est_estradiol_lh_low, …)</code></pre>
 <pre><code>           &gt; rows only in x   1,091</code></pre>
 <pre><code>           &gt; rows only in y  (   31)</code></pre>
@@ -2121,11 +2103,7 @@ $rmse_fc_imputed
 <pre><code>group_by: one grouping variable (id)</code></pre>
 <pre><code>filter (grouped): no rows removed</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_Roney 2013_Estradiol_icc_id.rds&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
@@ -2224,10 +2202,10 @@ $usable_n_women
 [1] 42
 
 $no_lh_surge_woman
-[1] &quot;42 (100%)&quot;
+[1] &quot;NA&quot;
 
 $no_lh_surge_cycle
-[1] &quot;88 (100%)&quot;
+[1] &quot;NA&quot;
 
 $var_id_loo
 [1] &quot;0.23 [0.18;0.27]&quot;
@@ -2369,7 +2347,7 @@ $r_fc
 [1] &quot;0.22 [0.17;0.26]&quot;
 
 $rmse_fc
-[1] &quot;0.53 [0.51;0.56]&quot;
+[1] &quot;0.53 [0.52;0.56]&quot;
 
 $r_loo_fc
 [1] &quot;0.14 [NaN;0.21]&quot;
@@ -2387,16 +2365,16 @@ $r_log_diff_fc_stirn
 [1] &quot; 0.03 [-0.03; 0.09]&quot;
 
 $r_fc_imputed
-[1] &quot; 0.19 [ 0.13; 0.25]&quot;
-
-$r_diff_fc_imputed
 [1] &quot; 0.21 [ 0.15; 0.26]&quot;
 
+$r_diff_fc_imputed
+[1] &quot; 0.22 [ 0.16; 0.28]&quot;
+
 $sd_fc_imputed
-[1] &quot;0.44 (87%)&quot;
+[1] &quot;0.48 (87%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.22 [ 0.16; 0.28]&quot;
+[1] &quot; 0.23 [ 0.17; 0.29]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 4 rows containing missing values (geom_smooth).</code></pre>
@@ -2404,7 +2382,7 @@ $imputed_fc_vs_measured_graph</code></pre>
 <p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-6.png" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
-[1] &quot; 0.55&quot;</code></pre>
+[1] &quot; 0.59&quot;</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span>, <span class='va'>cycle_length</span><span class='op'>)</span>
 </code></pre>
@@ -2625,7 +2603,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_fc
 [1] &quot;0.35 [0.30;0.40]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb205"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb187"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

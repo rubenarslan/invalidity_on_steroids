@@ -414,7 +414,7 @@ psych::describe(.$estimate)
 In all salivary immunoassay datasets, the variance explained by cycle phase was much lower. The leave-one-out-adjusted r never exceeded x, was indistinguishable from zero more often than not, and not systematically larger for more valid measures of cycle phase. 
 
 ```{r}
-loos <- all_stats %>% select(Hormone, Dataset, contains("loo")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
+loos <- all_stats %>% select(Hormone, Dataset, contains("r_loo")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
   mutate(name = str_replace(name, "^r_loo_", "")) %>% 
   rename(cycle_phase = name) %>% 
   extract(value, into = c("estimate", "conf.low", "conf.high"), regex = "([^\\[]+) \\[([^;]+);([^(]+)\\]",
@@ -422,9 +422,27 @@ loos <- all_stats %>% select(Hormone, Dataset, contains("loo")) %>% pivot_longer
   mutate(Hormone = str_replace(Hormone, "Free ", "")) %>% 
   mutate(Hormone = str_replace(Hormone, ".02", ""))
 
+
 loos %>% 
   filter(Hormone == "Estradiol", Dataset != "BioCycle") %>% 
-  arrange(desc(estimate))
+  arrange(desc(estimate)) %>% 
+  knitr::kable()
+
+loos %>% 
+  filter(Hormone == "Progesterone", Dataset != "BioCycle") %>% 
+  arrange(desc(estimate)) %>% 
+  knitr::kable()
+
+
+all_stats %>% select(Hormone, Dataset, matches("(cycle|id)_loo")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
+  rename(cycle_phase = name) %>% 
+  extract(value, into = c("estimate", "conf.low", "conf.high"), regex = "([^\\[]+) \\[([^;]+);([^(]+)\\]",
+          convert = TRUE) %>% 
+  mutate(Hormone = str_replace(Hormone, "Free ", "")) %>% 
+  mutate(Hormone = str_replace(Hormone, ".02", "")) %>% 
+  # arrange(estimate) %>% 
+  knitr::kable()
+
 
 imps <- all_stats %>% select(Hormone, Dataset, contains("_imputed_rr")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
   mutate(name = str_replace(name, "^r_diff_", ""),
