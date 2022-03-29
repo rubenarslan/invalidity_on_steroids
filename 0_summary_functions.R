@@ -42,11 +42,16 @@ cycle_phase_plot <- function(summary, kind, custom_limits = NULL, size = 25) {
     labels <- c(0.2, 1, 5, 10, 20, 50, 100, 200, 500, 1000, 1500, 10000, 25000)
     breaks <- log(labels)
     limits <- log(c(0.09, 28000))
-  } else {
+  } else if(str_detect(Hormone_label, "Estradiol")) {
     color <- '#b85a5305'
     labels <- c(0.1, 0.5, 1, 5, 10, 20, 30)
     breaks <- log(labels)
     limits <- log(c(0.09, 32))
+  } else if(str_detect(Hormone_label, "Testosterone")) {
+    color <- '#b85a5305'
+    labels <- c(0.1, 0.5, 1, 5, 10, 20, 30, 100, 150, 200, 250)
+    breaks <- log(labels)
+    limits <- log(c(0.09, 260))
   }
   
   if(!is.null(custom_limits)) {
@@ -401,8 +406,10 @@ summarise_hormone <- function(df,
     }
   }
   
-  Hormone_name <- if_else(str_detect(Hormone, "Estradiol"), 
-                          "free_estradiol", "progesterone")
+  Hormone_name <- case_when(
+    str_detect(Hormone, "Estradiol") ~ "free_estradiol", 
+    str_detect(Hormone, "Progesterone") ~ "progesterone", 
+    str_detect(Hormone, "Testosterone") ~ "free_testosterone")
   
   if(n_nonmissing(df$bc_day)>20) {
     results$bc_day_model <- bc_day_model

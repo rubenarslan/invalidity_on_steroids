@@ -77,10 +77,16 @@ gol <- gol %>% left_join(gol_dates, by = c("Person", "Session"))
 gol <- gol %>% left_join(gol_otherhormones, by = c("Person", "Session" = "SessionNr"))
 
 gol %>% 
-  mutate(logE = log(`estradiol pg/ml`), logP =  log(`progesterone pg/ml`), logE_P = logE-logP) %>% 
+  mutate(logE = log(`estradiol pg/ml`), 
+         logP =  log(`progesterone pg/ml`), logE_P = logE-logP) %>% 
   group_by(Person) %>% 
   ungroup() %>% 
-  select(conception_risk, logE, logP, logE_P, estradiol = `estradiol pg/ml`, progesterone = `progesterone pg/ml`, E_P) %>% cor(use = "pairwise") %>% round(2)
+  select(conception_risk, logE, logP, logE_P, 
+         estradiol = `estradiol pg/ml`, 
+         progesterone = `progesterone pg/ml`, 
+         E_P) %>% 
+  cor(use = "pairwise") %>% 
+  round(2)
 
 range(gol$lh_day, na.rm = T)
 range(gol$bc_day, na.rm = T)

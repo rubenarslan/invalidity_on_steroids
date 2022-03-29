@@ -28,6 +28,8 @@ lab_only <- lab_raw %>%
          estradiol = `IBL_Estradiol pg/ml`,
          progesterone = `Progesterone pg/ml`, 
          estradiol_lcms = `Estradiol pg/ml`, 
+         testosterone = `Testosterone pg/ml`,
+         cortisol = `Cortisol nmol/l`,
          date = `Datum Lab Session`,
          date_lh = `Date LH surge`,
          date_mens = `Menstrual Onset`) %>% 
