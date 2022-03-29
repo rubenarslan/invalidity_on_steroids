@@ -9,17 +9,18 @@ library(tidylog)
 ### Hormones
 ```{r}
 m_e2 <- rio::import("data/marcinkowska/manual_clean/estradiolALL.xlsx") %>% tibble()
-n_distinct(m_e2$ID)
-
+n_distinct(na.omit(m_e2$ID))
 m_e2 <- m_e2 %>% filter(is.na(Notes) | Notes != "control")
+
 e2_dfs <- list.files("data/marcinkowska/manual_clean/", pattern = "estradiol ", full.names = T) %>% map(rio::import) %>% map(tibble)
 names(e2_dfs) <- list.files("data/marcinkowska/manual_clean/", pattern = "estradiol ")
 m_e2_2 <- e2_dfs %>% map(. %>% select(ID, data, `pg/ml`, Meetings)) %>% bind_rows(.id = "batch")
-n_distinct(m_e2_2$ID)
+n_distinct(na.omit(m_e2_2$ID))
 
 p4_dfs <- list.files("data/marcinkowska/manual_clean/", pattern = "progesteron", full.names = T) %>% map(rio::import) %>% map(tibble)
 names(p4_dfs) <- list.files("data/marcinkowska/manual_clean/", pattern = "progesteron")
 m_p4 <- p4_dfs %>% map(. %>% select(ID, data, `pg/ml`, Meetings)) %>% bind_rows(.id = "batch")
+n_distinct(na.omit(m_p4$ID))
 
 m_p4 <- m_p4 %>% filter(!str_detect(data, "brak")) %>% filter(!str_detect(data, "BRAK")) %>% 
   mutate(date = lubridate::dmy(data)) %>% 
@@ -36,21 +37,22 @@ m_e2_2 <- m_e2_2 %>% filter(!str_detect(data, "brak")) %>% filter(!str_detect(da
 
 ### Dates in right order?
 ```{r}
-m_e2_2 %>% group_by(ID) %>% mutate(date_o = date[order(date)]) %>% filter(date != date_o) %>% select(ID, date, date_o) %>% nrow
-m_p4 %>% group_by(ID) %>% mutate(date_o = date[order(date)]) %>% filter(date != date_o) %>% select(ID, date, date_o) %>% nrow
-m_e2 %>% group_by(ID) %>% mutate(date_o = date[order(date)]) %>% filter(date != date_o) %>% select(ID, date, date_o) %>% nrow
 
 m_e2 %>% group_by(ID, date) %>% filter(n()> 1)
-m_e2_2 %>% group_by(ID, date) %>% filter(n()> 1)
+m_e2_2 %>% arrange(ID, date) %>% group_by(ID, date) %>% filter(n()> 1)
 m_p4 %>% group_by(ID, date) %>% filter(n()> 1)
+m_p4 <- m_p4 %>% group_by(ID, date) %>% filter(row_number()== 1) %>% ungroup()
+
+testthat::expect_equal(0, m_e2_2 %>% group_by(ID) %>% mutate(date_o = date[order(date)]) %>% filter(date != date_o) %>% select(ID, date, date_o, batch) %>% nrow())
+testthat::expect_equal(0, m_p4 %>% group_by(ID) %>% mutate(date_o = date[order(date)]) %>% filter(date != date_o) %>% select(ID, date, date_o) %>% nrow)
+testthat::expect_equal(0, m_e2 %>% group_by(ID) %>% mutate(date_o = date[order(date)]) %>% filter(date != date_o) %>% select(ID, date, date_o) %>% nrow)
 ```
 
 
 ### Checks
 ```{r}
 # cor/rank order avrg pg/ml
-cor.test(m_e2$Avrg, m_e2$`pg/ml`)
-cor.test(m_e2$Avrg, m_e2$`pg/ml`, method = "s")
+# m_e2 %>% group_by(Batch) %>% summarise(cor(Avrg, `pg/ml`, method = "s", use = "p"))
 ```
 
 ### Collect IDs
@@ -80,7 +82,7 @@ setdiff(union(m_e2$ID, m_e2_2$ID), m_p4$ID)
 
 ### Bind E2 files
 ```{r}
-m_e2 <- bind_rows(m_e2, m_e2_2 %>% anti_join(m_e2, by = "ID") %>% select(ID, data, `pg/ml`, Meetings, date))
+m_e2 <- m_e2_2
 n_distinct(m_e2$ID)
 nrow(m_e2)
 ```
@@ -123,25 +125,45 @@ EL66: pink # bg_colors[90]
 
 ```{r}
 ## STRATEGY A
-mensdates_orig <- rio::import("data/marcinkowska/manual_clean/Calendar.xlsx") %>% 
-  slice(1:102) %>% 
-  rename(cycle_length = `Cycle length`) %>% 
-  mutate(LH_peak = case_when(
-    `LH+When` %in% c("x", "--", "-") ~ NA_real_,
-    TRUE ~ as.numeric(`LH+When`)),
-    cycle_length = as.numeric(cycle_length))
 
-n_distinct(mensdates_orig$ID)
+mensdates_orig <- rio::import("data/marcinkowska/manual_clean/KalendarzPróbekRubenNew_3.xlsx") %>% 
+  rename(cycle_length = Cykl,
+         LH_peak = LHPeakWhen) %>% 
+  mutate_all(as.character) %>% 
+  mutate(
+    LH_peak = coalesce(as.numeric(WeakLinesWhen), as.numeric(LH_peak)),
+    cycle_length = as.numeric(cycle_length)) %>% 
+  pivot_longer(-c(ID, cycle_length, LH_peak, LHpeakPresent, WeakLinesPresent, WeakLinesWhen)) %>% 
+  mutate(date = as.Date(as.numeric(name), origin = "1899-12-30"))
+# mensdates_orig_2 %>% filter(str_detect(value, "[0-9:.O]+", negate = T)) %>% View
+
+# validate <- mensdates_orig_2 %>% 
+#   group_by(ID, cycle_length) %>% 
+#   drop_na(value) %>% 
+#   mutate(days = n(), last_date = last(date)) %>% 
+#   filter(value == 1) %>% 
+#   summarise(n = n(), 
+#             cycle_length_2 = first(days) - n + 1, 
+#             cycle_length_3 = as.numeric(coalesce(date[2], last_date) - first(date)))
+# qplot(validate$cycle_length-validate$cycle_length_2)
+# table(validate$cycle_length == validate$cycle_length_2)
+# table(validate$cycle_length == validate$cycle_length_3)
+# validate %>% distinct() %>% filter(cycle_length != cycle_length_3) %>% mutate(diff=cycle_length - cycle_length_3) %>% arrange(abs(diff)) %>% View
+# testthat::expect_true(identical(validate$cycle_length,validate$`first(days)` - validate$n+1))
+# 
+# mensdates_orig <- rio::import("data/marcinkowska/manual_clean/Calendar.xlsx") %>% 
+#   slice(1:102) %>% 
+#   rename(cycle_length = `Cycle length`) %>% 
+#   mutate(LH_peak = case_when(
+#     `LH+When` %in% c("x", "--", "-") ~ NA_real_,
+#     TRUE ~ as.numeric(`LH+When`)),
+#     cycle_length = as.numeric(cycle_length))
+
+n_distinct(na.omit(mensdates_orig$ID))
 intersect(mensdates_orig$ID, m_e2$ID)
 setdiff(mensdates_orig$ID, m_e2$ID)
 setdiff(m_e2$ID, mensdates_orig$ID)
 mensdates <- mensdates_orig %>%   
-  select(ID, LH_peak, cycle_length, `42185`:`42424`) %>% 
-  mutate_all(as.character) %>% 
-  pivot_longer(-c(ID, LH_peak, cycle_length)) %>% 
-  mutate(date = as.Date(as.numeric(name), origin = "1899-12-30"),
-         cycle_length = as.numeric(cycle_length),
-         LH_peak = as.numeric(LH_peak)) %>% 
   filter(value == 1) %>% 
   group_by(ID) %>% 
   arrange(date) %>% 
@@ -154,12 +176,12 @@ mensdates <- mensdates_orig %>%
 nrow(mensdates)
 n_distinct(mensdates$ID)
 
-mensdates <- mensdates_orig %>% select(ID, cycle_length, LH_peak) %>% 
+cycle_days <- mensdates_orig %>% select(ID, date, cycle_length, LH_peak) %>% 
   full_join(mensdates)
-nrow(mensdates)
-n_distinct(mensdates$ID)
+nrow(cycle_days)
+n_distinct(cycle_days$ID)
 
-rio::export(mensdates, "data/marcinkowska/manual_clean/Calendar_dates.xlsx")
+rio::export(cycle_days, "data/marcinkowska/manual_clean/Calendar_dates.xlsx")
 
 # ## STRATEGY B (abandoned)
 # library(tidyxl)
@@ -199,43 +221,43 @@ rio::export(mensdates, "data/marcinkowska/manual_clean/Calendar_dates.xlsx")
 
 ## Merge
 ```{r}
-mensdates <- mensdates %>% 
+cycle_days <- cycle_days %>% 
   mutate(ID = as.numeric(str_match(ID, "(\\d+)")[,2]))
 
 marc <- marc %>% 
   mutate(
     KP = str_sub(ID, 1, 1),
     ID = as.numeric(str_match(ID, "(\\d+)")[,2]))
-length(intersect(mensdates$ID, marc$ID))
-setdiff(mensdates$ID, marc$ID)
-setdiff(marc$ID, mensdates$ID)
+length(intersect(cycle_days$ID, marc$ID))
+setdiff(cycle_days$ID, marc$ID)
+setdiff(marc$ID, cycle_days$ID)
 
-mensdates %>% filter(lh_surge_date > next_menstrual_onset |
+cycle_days %>% filter(lh_surge_date > next_menstrual_onset |
                        lh_surge_date < last_menstrual_onset) %>% 
   select(ID, lh_surge_date, next_menstrual_onset, last_menstrual_onset)
 
-mensdates <- mensdates %>% group_by(ID) %>% 
-  arrange(ID, last_menstrual_onset) %>% 
-  mutate(cycle = row_number())
-nrow(mensdates)
-n_distinct(mensdates$ID)
+nrow(cycle_days)
+n_distinct(na.omit(mensdates$ID))
 
-cycles <- mensdates %>% select(ID, cycle, cycle_length, LH_peak, last_menstrual_onset,
-                               next_menstrual_onset, lh_surge_date)
+cycles <- mensdates %>% select(ID, cycle_length, LH_peak, LHpeakPresent, last_menstrual_onset,  next_menstrual_onset, lh_surge_date) %>% mutate(cycle = 1)
 
-merge_date_on_cycle <- mensdates %>% 
-  drop_na(last_menstrual_onset, next_menstrual_onset) %>% 
-  group_by(ID) %>% 
-  expand(date = seq(from = last_menstrual_onset, 
-                    to = next_menstrual_onset - lubridate::days(1),
-                    by = 1)) %>% 
-  left_join(cycles %>% select(ID, last_menstrual_onset, next_menstrual_onset, lh_surge_date), by = "ID")
+cycle_days %>% group_by(ID) %>% filter(n_distinct(last_menstrual_onset)>1)
 
-marc <- marc %>% left_join(merge_date_on_cycle, by = c("ID", "date")) %>% 
-  left_join(cycles %>% select(ID, cycle, cycle_length), by = "ID")
+# merge_date_on_cycle <- cycle_days %>% 
+#   drop_na(ID, last_menstrual_onset, next_menstrual_onset) %>% 
+#   group_by(ID) %>% 
+#   expand(date = seq(from = last_menstrual_onset, 
+#                     to = next_menstrual_onset - lubridate::days(1),
+#                     by = 1)) %>% 
+#   left_join(cycles %>% select(ID, last_menstrual_onset, next_menstrual_onset, lh_surge_date), by = "ID")
 
+cycle_days <- cycle_days %>% mutate(cycle = 1)
+marc <- marc %>% left_join(cycle_days, by = c("ID", "date"))
+```
+
+## Cycle days
+```{r}
 marc <- marc %>% 
-  filter(date > "2015-02-12") %>% 
   group_by(ID) %>% 
   mutate(
     bc_day = as.numeric(date - next_menstrual_onset),
@@ -243,7 +265,8 @@ marc <- marc %>%
     lh_day = as.numeric(date - lh_surge_date))
 
 marc %>% filter(fc_day < 0) %>% select(ID, date, fc_day,last_menstrual_onset, next_menstrual_onset, bc_day, estradiol, progesterone)
-marc %>% filter(bc_day > -1) %>% select(ID, date, fc_day, bc_day, estradiol, progesterone)
+marc %>% filter(bc_day > -1) %>% select(ID, date, fc_day, bc_day, estradiol, progesterone) %>% nrow()
+marc <- marc %>% filter(bc_day < 0, fc_day >= 0)
 qplot(marc$date)
 print(range(marc$fc_day, na.rm =T))
 print(range(marc$bc_day, na.rm =T))
@@ -256,6 +279,7 @@ marc <- marc %>% group_by(ID) %>%
     )
 
 marc %>% filter(date < last_menstrual_onset | date > next_menstrual_onset)
+
 marc_without_cycle_phase <- marc %>% filter(is.na(last_menstrual_onset))
 marc_with_cycle_phase <- marc %>% filter(!is.na(last_menstrual_onset))
 n_distinct(marc_without_cycle_phase$id)
@@ -267,7 +291,10 @@ setdiff(marc_without_cycle_phase$id, marc_with_cycle_phase$id) %>% sort
 # n_nonmissing(marc$lh_surge_date_2)
 table(marc$lh_surge_date == marc$lh_surge_date_2, exclude=NULL)
 marc %>% filter(lh_surge_date != lh_surge_date_2) %>% select(ID, lh_surge_date, lh_surge_date_2, date, Meetings.x)
+```
 
+## Validate again
+```{r}
 ggplot(marc, aes(fc_day, progesterone)) + geom_smooth() +
   geom_pointrange(stat = 'summary') + xlim(0, 30)
 ggplot(marc, aes(bc_day, progesterone)) + geom_smooth() +
