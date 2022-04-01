@@ -1620,7 +1620,7 @@ Fixed effects:
              Estimate Std. Error t value
 (Intercept) -0.002983   0.150750   -0.02</code></pre>
 </div>
-<h2 id="summarize">Summarize</h2>
+<h2 id="export">Export</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span>
@@ -1635,7 +1635,13 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>The following object is masked from &#39;package:stats&#39;:
 
     ar</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>export_anon</span><span class='op'>(</span><span class='st'>"grebe2016"</span>, <span class='va'>grebe</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='op'>-</span><span class='va'>bc_day</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
 </div>
+<pre><code>Warning: Unknown columns: `bc_day`, `lh_day`</code></pre>
+</div>
+<h2 id="summarize">Summarize</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>fc_day</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>cycle_length</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span><span class='op'>)</span>
@@ -1971,7 +1977,7 @@ $no_lh_surge_cycle
 [1] &quot;NA&quot;
 
 $var_id_loo
-[1] &quot;0.23 [-0.03;0.41]&quot;
+[1] &quot;0.23 [0.01;0.40]&quot;
 
 $var_id
 [1] &quot;0.31 [0.15;0.46] (48%)&quot;
@@ -2021,7 +2027,7 @@ $r_fc
 [1] &quot;0.18 [0.03;0.35]&quot;
 
 $rmse_fc
-[1] &quot;0.55 [0.46;0.67]&quot;
+[1] &quot;0.55 [0.46;0.66]&quot;
 
 $r_loo_fc
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -2179,7 +2185,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_fc
 [1] &quot;NaN [NaN;0.36]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb64"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

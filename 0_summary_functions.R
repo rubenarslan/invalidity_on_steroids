@@ -757,7 +757,7 @@ export_anon <- function(filename, data) {
     progesterone = "Salivary progesterone in pg/ml",
     progesterone_cens = "Whether progesterone reached the limit of detection (left) or not (none)"
   )
-  var_label(shareable) <- var_nam[names(shareable)]
+  labelled::var_label(shareable) <- var_nam[names(shareable)]
   
   rio::export(shareable, paste0("osf_data/", filename, ".tsv"))
   rio::export(shareable, paste0("osf_data/", filename, ".rds"))

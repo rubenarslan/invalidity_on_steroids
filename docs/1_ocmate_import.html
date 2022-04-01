@@ -3128,7 +3128,7 @@ Please use a list of either functions or lambdas:
 <pre><code>drop_na (grouped): removed 520 rows (17%), 2,560 rows remaining</code></pre>
 <p><img src="1_ocmate_import_files/figure-html5/unnamed-chunk-6-2.png" width="624" /></p>
 </div>
-<h2 id="summarize">Summarize</h2>
+<h2 id="export">Export</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span>
@@ -3143,7 +3143,16 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>The following object is masked from &#39;package:stats&#39;:
 
     ar</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>export_anon</span><span class='op'>(</span><span class='st'>"ocmate"</span>, <span class='va'>ocmate</span><span class='op'>)</span>
+</code></pre>
 </div>
+<pre><code>Warning: Unknown columns: `lh_day`</code></pre>
+<pre><code>select: dropped 27 variables (block, age, ethnicity, sexpref, date, …)</code></pre>
+<pre><code>ungroup: no grouping variables</code></pre>
+<pre><code>mutate: converted &#39;id&#39; from character to factor (0 new NA)</code></pre>
+</div>
+<h2 id="summarize">Summarize</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>ocmate</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>pill</span> <span class='op'>==</span> <span class='fl'>0</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span>, <span class='va'>cycle_length</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span>
@@ -3661,12 +3670,7 @@ Saliva samples were frozen immediately and stored at −32° C until being shipp
 <pre><code>filter (grouped): removed 393 rows (24%), 1,271 rows remaining</code></pre>
 <pre><code>group_by: one grouping variable (id)</code></pre>
 <pre><code>filter (grouped): removed 36 rows (2%), 1,628 rows remaining</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_OCMATE Non-HC_Estradiol_icc_id.rds&#39;</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
 
 Warning: Results may not be meaningful for censored models.</code></pre>
@@ -4015,12 +4019,7 @@ Saliva samples were frozen immediately and stored at −32° C until being shipp
 <pre><code>filter (grouped): removed 393 rows (24%), 1,271 rows remaining</code></pre>
 <pre><code>group_by: one grouping variable (id)</code></pre>
 <pre><code>filter (grouped): removed 36 rows (2%), 1,628 rows remaining</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_OCMATE Non-HC_Progesterone_icc_id.rds&#39;</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
 
 Warning: Results may not be meaningful for censored models.</code></pre>
@@ -4353,12 +4352,7 @@ $rmse_fc_imputed
 <pre><code>filter (grouped): removed 264 rows (23%), 880 rows remaining</code></pre>
 <pre><code>group_by: one grouping variable (id)</code></pre>
 <pre><code>filter (grouped): removed 25 rows (2%), 1,119 rows remaining</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_OCMATE HC_Estradiol_icc_id.rds&#39;</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
 
 Warning: Results may not be meaningful for censored models.</code></pre>
@@ -4699,12 +4693,7 @@ $rmse_fc_imputed
 <pre><code>filter (grouped): removed 264 rows (23%), 880 rows remaining</code></pre>
 <pre><code>group_by: one grouping variable (id)</code></pre>
 <pre><code>filter (grouped): removed 25 rows (2%), 1,119 rows remaining</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_OCMATE HC_Progesterone_icc_id.rds&#39;</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
 
 Warning: Results may not be meaningful for censored models.</code></pre>
@@ -4817,7 +4806,7 @@ $no_lh_surge_cycle
 [1] &quot;NA&quot;
 
 $var_id_loo
-[1] &quot;0.58 [0.54;0.61]&quot;
+[1] &quot;0.58 [0.53;0.62]&quot;
 
 $var_cycle_loo
 [1] &quot;0.60 [0.56;0.64]&quot;
@@ -5000,7 +4989,7 @@ $imputed_fc_vs_measured_graph</code></pre>
 $rmse_fc_imputed
 [1] &quot; 1.83&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb541"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb525"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

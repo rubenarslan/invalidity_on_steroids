@@ -1540,10 +1540,16 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span class='va'>gol</span> <span class='op'>&lt;-</span> <span class='va'>gol</span> <span class='op'>%&gt;%</span> <span class='fu'>left_join</span><span class='op'>(</span><span class='va'>gol_otherhormones</span>, by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Person"</span>, <span class='st'>"Session"</span> <span class='op'>=</span> <span class='st'>"SessionNr"</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='va'>gol</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>mutate</span><span class='op'>(</span>logE <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>`estradiol pg/ml`</span><span class='op'>)</span>, logP <span class='op'>=</span>  <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>`progesterone pg/ml`</span><span class='op'>)</span>, logE_P <span class='op'>=</span> <span class='va'>logE</span><span class='op'>-</span><span class='va'>logP</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+  <span class='fu'>mutate</span><span class='op'>(</span>logE <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>`estradiol pg/ml`</span><span class='op'>)</span>, 
+         logP <span class='op'>=</span>  <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>`progesterone pg/ml`</span><span class='op'>)</span>, logE_P <span class='op'>=</span> <span class='va'>logE</span><span class='op'>-</span><span class='va'>logP</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
   <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>Person</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
   <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>select</span><span class='op'>(</span><span class='va'>conception_risk</span>, <span class='va'>logE</span>, <span class='va'>logP</span>, <span class='va'>logE_P</span>, estradiol <span class='op'>=</span> <span class='va'>`estradiol pg/ml`</span>, progesterone <span class='op'>=</span> <span class='va'>`progesterone pg/ml`</span>, <span class='va'>E_P</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span>use <span class='op'>=</span> <span class='st'>"pairwise"</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fl'>2</span><span class='op'>)</span>
+  <span class='fu'>select</span><span class='op'>(</span><span class='va'>conception_risk</span>, <span class='va'>logE</span>, <span class='va'>logP</span>, <span class='va'>logE_P</span>, 
+         estradiol <span class='op'>=</span> <span class='va'>`estradiol pg/ml`</span>, 
+         progesterone <span class='op'>=</span> <span class='va'>`progesterone pg/ml`</span>, 
+         <span class='va'>E_P</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+  <span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span>use <span class='op'>=</span> <span class='st'>"pairwise"</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
+  <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fl'>2</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>                conception_risk logE  logP logE_P estradiol
@@ -1826,7 +1832,7 @@ estradiol pg/ml            -0.02                 0.13            1.00</code></pr
                     &lt;int&gt;                      &lt;int&gt;
 1                       1                        160</code></pre>
 </div>
-<h2 id="summarize">Summarize</h2>
+<h2 id="export">Export</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span>
@@ -1841,7 +1847,12 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>The following object is masked from &#39;package:stats&#39;:
 
     ar</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>export_anon</span><span class='op'>(</span><span class='st'>"stern2020"</span>, <span class='va'>gol</span><span class='op'>)</span>
+</code></pre>
 </div>
+</div>
+<h2 id="summarize">Summarize</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gol2</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/rio/man/import.html'>import</a></span><span class='op'>(</span><span class='st'>"gol2.rds"</span><span class='op'>)</span>
@@ -2190,7 +2201,7 @@ $r_lh
 [1] &quot;0.69 [0.65;0.71]&quot;
 
 $rmse_lh
-[1] &quot;1.42 [1.33;1.51]&quot;
+[1] &quot;1.42 [1.34;1.51]&quot;
 
 $r_loo_lh
 [1] &quot;0.68 [0.62;0.73]&quot;

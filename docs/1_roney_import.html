@@ -1705,7 +1705,7 @@ Warning: Removed 1221 rows containing missing values (geom_point).</code></pre>
 </div>
 <pre><code>[1]  0 49</code></pre>
 </div>
-<h2 id="summarize">Summarize</h2>
+<h2 id="export">Export</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span>
@@ -1720,7 +1720,15 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>The following object is masked from &#39;package:stats&#39;:
 
     ar</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>export_anon</span><span class='op'>(</span><span class='st'>"roney2013"</span>, <span class='va'>roney</span><span class='op'>)</span>
+</code></pre>
 </div>
+<pre><code>select: columns reordered (id, cycle, cycle_length, fc_day, bc_day, …)</code></pre>
+<pre><code>ungroup: no grouping variables</code></pre>
+<pre><code>mutate: converted &#39;id&#39; from double to factor (0 new NA)</code></pre>
+</div>
+<h2 id="summarize">Summarize</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>cycle_length</span><span class='op'>)</span>
@@ -2347,7 +2355,7 @@ $r_fc
 [1] &quot;0.22 [0.17;0.26]&quot;
 
 $rmse_fc
-[1] &quot;0.53 [0.52;0.56]&quot;
+[1] &quot;0.53 [0.51;0.56]&quot;
 
 $r_loo_fc
 [1] &quot;0.14 [NaN;0.21]&quot;
@@ -2603,7 +2611,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_fc
 [1] &quot;0.35 [0.30;0.40]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb187"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb190"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

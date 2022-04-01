@@ -1795,7 +1795,7 @@ is.na(estradiol) FALSE TRUE
 </code></pre>
 </div>
 </div>
-<h2 id="summarize">Summarize</h2>
+<h2 id="export">Export</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span>
@@ -1810,7 +1810,15 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>The following object is masked from &#39;package:stats&#39;:
 
     ar</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>export_anon</span><span class='op'>(</span><span class='st'>"blake2017"</span>, <span class='va'>blake_long</span><span class='op'>)</span>
+</code></pre>
 </div>
+<pre><code>select: dropped 2 variables (age, partner)</code></pre>
+<pre><code>ungroup: no grouping variables</code></pre>
+<pre><code>mutate: converted &#39;id&#39; from double to factor (0 new NA)</code></pre>
+</div>
+<h2 id="summarize">Summarize</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>blake</span> <span class='op'>&lt;-</span> <span class='va'>blake_long</span>
@@ -1876,12 +1884,6 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>filter (grouped): removed 24 rows (21%), 90 rows remaining</code></pre>
 <pre><code>group_by: one grouping variable (id)</code></pre>
 <pre><code>filter (grouped): removed 2 rows (2%), 112 rows remaining</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are slightly high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_Blake 2017_Progesterone_icc_id.rds&#39;</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Some Pareto k diagnostic values are slightly high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
 
 Warning: Results may not be meaningful for censored models.</code></pre>
@@ -1995,7 +1997,7 @@ $no_lh_surge_cycle
 [1] &quot;0/103 (0%)&quot;
 
 $var_id_loo
-[1] &quot;-0.01 [-0.06;0.04]&quot;
+[1] &quot;-0.00 [-0.06;0.04]&quot;
 
 $var_cycle_loo
 [1] &quot;-0.01 [-0.07;0.03]&quot;
@@ -2057,7 +2059,7 @@ $r_bc
 [1] &quot;0.26 [0.08;0.41]&quot;
 
 $rmse_bc
-[1] &quot;1.19 [1.03;1.37]&quot;
+[1] &quot;1.19 [1.03;1.39]&quot;
 
 $r_loo_bc
 [1] &quot;NaN [NaN;0.23]&quot;
@@ -2325,14 +2327,7 @@ $rmse_lh_imputed
 <pre><code>group_by: one grouping variable (id)</code></pre>
 <pre><code>filter (grouped): removed 2 rows (2%), 112 rows remaining</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Some Pareto k diagnostic values are slightly high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Automatically saving the model object in &#39;models/m_Blake 2017_Estradiol_icc_id.rds&#39;</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Some Pareto k diagnostic values are slightly high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
 <pre><code>filter: removed 25 rows (22%), 89 rows remaining</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
@@ -2507,7 +2502,7 @@ $r_bc
 [1] &quot;0.17 [0.03;0.30]&quot;
 
 $rmse_bc
-[1] &quot;0.78 [0.67;0.91]&quot;
+[1] &quot;0.78 [0.67;0.92]&quot;
 
 $r_loo_bc
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -2672,7 +2667,7 @@ $r_lh
 [1] &quot;0.18 [0.03;0.33]&quot;
 
 $rmse_lh
-[1] &quot;0.74 [0.61;0.90]&quot;
+[1] &quot;0.74 [0.62;0.90]&quot;
 
 $r_loo_lh
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -3011,7 +3006,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_lh
 [1] &quot;NaN [NaN;0.33]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb301"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb297"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

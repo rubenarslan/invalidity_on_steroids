@@ -1503,6 +1503,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
          estradiol <span class='op'>=</span> <span class='va'>`IBL_Estradiol pg/ml`</span>,
          progesterone <span class='op'>=</span> <span class='va'>`Progesterone pg/ml`</span>, 
          estradiol_lcms <span class='op'>=</span> <span class='va'>`Estradiol pg/ml`</span>, 
+         testosterone <span class='op'>=</span> <span class='va'>`Testosterone pg/ml`</span>,
+         cortisol <span class='op'>=</span> <span class='va'>`Cortisol nmol/l`</span>,
          date <span class='op'>=</span> <span class='va'>`Datum Lab Session`</span>,
          date_lh <span class='op'>=</span> <span class='va'>`Date LH surge`</span>,
          date_mens <span class='op'>=</span> <span class='va'>`Menstrual Onset`</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
@@ -1835,7 +1837,7 @@ sample estimates:
 <pre><code>Warning: Removed 32 rows containing missing values (geom_point).</code></pre>
 <p><img src="1_gocd2_import_files/figure-html5/unnamed-chunk-2-2.png" width="624" /></p>
 </div>
-<h2 id="summarize">Summarize</h2>
+<h2 id="export">Export</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span>
@@ -1850,7 +1852,12 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>The following object is masked from &#39;package:stats&#39;:
 
     ar</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>export_anon</span><span class='op'>(</span><span class='st'>"juenger2018"</span>, <span class='va'>gocd2</span><span class='op'>)</span>
+</code></pre>
 </div>
+</div>
+<h2 id="summarize">Summarize</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>gocd2</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>cycle_length</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span>
@@ -2506,7 +2513,7 @@ $r_fc
 [1] &quot;0.18 [0.07;0.27]&quot;
 
 $rmse_fc
-[1] &quot;0.76 [0.70;0.82]&quot;
+[1] &quot;0.76 [0.71;0.82]&quot;
 
 $r_loo_fc
 [1] &quot;NaN [NaN;0.13]&quot;
@@ -2823,7 +2830,7 @@ $r_bc
 [1] &quot;0.29 [0.05;0.53]&quot;
 
 $rmse_bc
-[1] &quot;3.91 [3.28;4.69]&quot;
+[1] &quot;3.92 [3.27;4.72]&quot;
 
 $r_loo_bc
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -2904,7 +2911,7 @@ $r_fc
 [1] &quot;0.47 [0.14;0.63]&quot;
 
 $rmse_fc
-[1] &quot;4.21 [3.36;5.28]&quot;
+[1] &quot;4.20 [3.33;5.26]&quot;
 
 $r_loo_fc
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -2988,7 +2995,7 @@ $r_lh
 [1] &quot;0.29 [0.05;0.49]&quot;
 
 $rmse_lh
-[1] &quot;4.06 [3.31;5.02]&quot;
+[1] &quot;4.06 [3.28;5.01]&quot;
 
 $r_loo_lh
 [1] &quot;NaN [NaN;NaN]&quot;
