@@ -127,11 +127,13 @@ xtabs(~ is.na(estradiol) + is.na(progesterone), blake_long)
 saveRDS(blake_long, "blake2017.rds")
 ```
 
-
-## Summarize
+## Export
 ```{r}
 source("0_summary_functions.R")
+export_anon("blake2017", blake_long)
 ```
+
+## Summarize
 
 ```{r}
 blake <- blake_long

@@ -442,11 +442,14 @@ ocmate %>% group_by(pill, id) %>%
   facet_wrap(~ name, scales = 'free_y')
 ```
 
-
-## Summarize
+## Export
 ```{r}
 source("0_summary_functions.R")
+export_anon("ocmate", ocmate)
 ```
+
+
+## Summarize
 
 ```{r}
 df <- ocmate %>% filter(pill == 0) %>% select(id, cycle, bc_day, fc_day, estradiol, progesterone, cycle_length, age, partner)

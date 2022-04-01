@@ -69,11 +69,14 @@ range(roney$bc_day, na.rm =T)
 range(roney$fc_day, na.rm =T)
 ```
 
-
-## Summarize
+## Export
 ```{r}
 source("0_summary_functions.R")
+export_anon("roney2013", roney)
 ```
+
+
+## Summarize
 
 ```{r}
 df <- roney %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = progesterone, hormone_cens = progesterone_cens, cycle_length)

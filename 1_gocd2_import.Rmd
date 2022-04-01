@@ -123,10 +123,14 @@ cor.test(log(gocd2$estradiol), log(gocd2$estradiol_lcms))
 ggplot(gocd2, aes(estradiol, estradiol_lcms)) + scale_x_log10() + scale_y_log10() + geom_point()
 ```
 
-## Summarize
+## Export
 ```{r}
 source("0_summary_functions.R")
+export_anon("juenger2018", gocd2)
 ```
+
+## Summarize
+
 
 ```{r}
 df <- gocd2 %>% select(id, cycle, bc_day, fc_day, lh_day, hormone = progesterone, hormone_cens = progesterone_cens, cycle_length, age, partner)

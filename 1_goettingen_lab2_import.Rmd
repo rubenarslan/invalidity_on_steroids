@@ -144,11 +144,13 @@ gol %>% group_by(id) %>% filter(all(is.na(progesterone))) %>% select(id) %>% dis
 gol %>% summarise(sum(is.na(estradiol)), sum(is.na(progesterone)))
 ```
 
-## Summarize
+## Export
 ```{r}
 source("0_summary_functions.R")
+export_anon("stern2020", gol)
 ```
 
+## Summarize
 
 ```{r}
 gol2 <- rio::import("gol2.rds")

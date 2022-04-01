@@ -323,15 +323,19 @@ marc %>% select(id, cycle, contains("date"), bc_day, fc_day, lh_day, estradiol, 
 rio::export("data/marcinkowska/manual_clean/ula_merged.xlsx")
 ```
 
+
+## Export
 ```{r}
+source("0_summary_functions.R")
+
 marc_check <- marc %>% select(id, date, cycle, last_menstrual_onset, next_menstrual_onset, lh_surge_date, bc_day, fc_day, lh_day, progesterone, estradiol, cycle_length)
+export_anon("marcinkowska2020", marc)
 ```
 
 
 
 ## Summarize
 ```{r}
-source("0_summary_functions.R")
 ```
 
 ```{r}

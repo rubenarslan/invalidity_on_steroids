@@ -55,10 +55,13 @@ summary(lme4::lmer(scale(log(estradiol)) ~ (1|id), grebe))
 summary(lme4::lmer(scale(log(progesterone)) ~ (1|id), grebe))
 ```
 
-## Summarize
+## Export
 ```{r}
 source("0_summary_functions.R")
+export_anon("grebe2016", grebe %>% select(-bc_day))
 ```
+
+## Summarize
 
 ```{r}
 df <- grebe %>% select(id, fc_day, hormone = progesterone, hormone_cens = progesterone_cens, cycle_length, cycle, bc_day)

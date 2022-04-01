@@ -409,7 +409,8 @@ summarise_hormone <- function(df,
   Hormone_name <- case_when(
     str_detect(Hormone, "Estradiol") ~ "free_estradiol", 
     str_detect(Hormone, "Progesterone") ~ "progesterone", 
-    str_detect(Hormone, "Testosterone") ~ "free_testosterone")
+    str_detect(Hormone, "Testosterone") ~ "free_testosterone",
+    TRUE ~ "free_estradiol")
   
   if(n_nonmissing(df$bc_day)>20) {
     results$bc_day_model <- bc_day_model
@@ -735,3 +736,30 @@ summarise_hormones <- function(df, Dataset, Method = "Salivary Immunoassay") {
 }
 
 
+export_anon <- function(filename, data) {
+  set.seed(05102019)
+  shareable <- data %>% select(id, cycle, cycle_length, fc_day, one_of("bc_day", "lh_day"), estradiol, estradiol_cens, progesterone, progesterone_cens) %>% 
+    ungroup() %>% 
+    arrange(rnorm(n())) %>% 
+    mutate(id = factor(as.numeric(forcats::fct_inorder(factor(id))))) %>% 
+    arrange(id, cycle, fc_day)
+  
+  
+  var_nam <- list(
+    id = "Random Participant ID",
+    cycle = "Cycle number, incrementing within-subject",
+    cycle_length = "Cycle length in days",
+    fc_day = "Forward-counted cycle day. Counted from last (recalled) menstrual onset, starting at zero.",
+    bc_day = "Backward-counted cycle day. Counted from next observed menstrual onset (0), beginning with -1.",
+    lh_day = "Day relative to LH surge",
+    estradiol = "Salivary estradiol in pg/ml",
+    estradiol_cens = "Whether estradiol reached the limit of detection (left) or not (none)",
+    progesterone = "Salivary progesterone in pg/ml",
+    progesterone_cens = "Whether progesterone reached the limit of detection (left) or not (none)"
+  )
+  var_label(shareable) <- var_nam[names(shareable)]
+  
+  rio::export(shareable, paste0("osf_data/", filename, ".tsv"))
+  rio::export(shareable, paste0("osf_data/", filename, ".rds"))
+  rio::export(shareable, paste0("osf_data/", filename, ".sav"))
+}
