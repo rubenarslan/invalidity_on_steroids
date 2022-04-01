@@ -15,3 +15,5 @@ exclude:
 - '*.xlsx'
 - '*.rds'
 - summaries
+- osf_data
+- plots
