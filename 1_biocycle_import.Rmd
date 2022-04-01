@@ -16,22 +16,35 @@ Blood collection and handling protocols were designed to minimize variability (W
 ```{r}
 library(tidyverse)
 library(codebook)
+library(tidylog)
 fool_renv <- function(){ library(DT); library(ufs) }
 ```
 
 ## Load various datasets
 ```{r}
 biocycle <- rio::import("../data/BioCycle_StudyItems/biocycle04202017.sas7bdat")
+nrow(biocycle)
+n_distinct(biocycle$id)
+n_distinct(biocycle$id, biocycle$cycle)
 biocycle_with_labels <- biocycle
 biocyclecsv <- rio::import("../data/BioCycle_StudyItems/biocycle04202017.csv")
 biocycle_between <- rio::import("../data/BioCycle_StudyItems/biocyclebaseline05022017.sas7bdat")
 biocycle_update <- rio::import("../data/BioCycle_StudyItems/biocycle_update.sas7bdat")
+nrow(biocycle_update)
+n_distinct(biocycle_update$idnum)
+n_distinct(biocycle_update$idnum, biocycle_update$cycle)
+biocycle_lh_problems <- rio::import("../data/BioCycle_StudyItems/lh_problems.tsv")
 biocycle_sexdiary <- rio::import("../data/BioCycle_StudyItems/sex_nodates.sas7bdat")
 # add on update data with albumin and testosterone, urinary hormones and self-rep cycle length
-biocycle <- biocycle %>% left_join(biocycle_update %>% 
-                                     select(id = idnum, cycle, day, visit, ALBUMN, Testo, cycle_length_bl, LH_monitor_peak, E3g_monitor_peak, peak_day))
-biocycle <- full_join(biocycle, biocycle_between, by = c("id" = "idnum"))
+# biocycle %>% select(id, cycle, day) %>% anti_join(biocycle_update %>% 
+#                                      select(id = idnum, cycle, day))
 
+biocycle <- biocycle %>% left_join(biocycle_update %>% 
+                                     select(id = idnum, cycle, day, visit, ALBUMN, Testo, cycle_length_bl, LH_monitor_peak, E3g_monitor_peak, peak_day), by = c("id", "cycle", "day", "visit"))
+
+biocycle <- full_join(biocycle, biocycle_between, by = c("id" = "idnum"))
+biocycle <- biocycle %>% left_join(biocycle_lh_problems, by = c("id", "cycle")) %>% 
+  mutate(lh_problems = coalesce(lh_problems, 0))
 
 var_label(biocycle$Testo) <- "Testosterone (ng/dL)"
 var_label(biocycle$ALBUMN) <- "Albumin (g/dL)"
@@ -108,7 +121,7 @@ biocycle <- biocycle %>%
   mutate(free_t_empirical = 24.00314 * Testo / log10(SHBG) - 0.04599 * Testo^2)
 ```
 
-## Check free hormone levels
+### Check free hormone levels
 ```{r}
 mean(biocycle$`Free E2 (pg/mL)`/biocycle$ESTRGEN, na.rm = T)
 mean(biocycle$`Free T (ng/dL)`/biocycle$Testo, na.rm = T)
@@ -127,6 +140,19 @@ cor.test(biocycle$`Free T (ng/dL)`, biocycle$Testo)
 ggstatsplot::ggscatterstats(biocycle, Testo, `Free T (ng/dL)`)
 ```
 
+
+## Add back rows
+```{r}
+add_back <- biocycle_update %>% select(id = idnum, cycle, day, visit, ALBUMN, Testo, cycle_length_bl, LH_monitor_peak, E3g_monitor_peak, peak_day) %>% anti_join(biocycle, by = c("id", "cycle", "day"))
+biocycle <- bind_rows(biocycle, 
+          add_back)
+
+biocycle %>% group_by(id, cycle) %>% summarise(all_there = all(!is.na(peak_day)), any_not_na = any(!is.na(peak_day))) %>% filter(!all_there, any_not_na) %>% nrow()
+
+testthat::expect_equal(0,biocycle %>% arrange(id, cycle, visit) %>% group_by(id, cycle, visit) %>% filter(n()>1) %>% nrow())
+```
+
+
 ```{r}
 # convert nanogram to picogram for progesterone
 biocycle <- biocycle %>% mutate(E_P = ESTRGEN/(PROGEST*1000))
@@ -141,29 +167,6 @@ nrow(biocycle)
 biocycle <- biocycle %>% filter(id!=1608 | cycle == 1)
 nrow(biocycle)
 ```
-
-## Recompute anovul rate
-
-```{r}
-missing <- rowSums(is.na(biocycle))
-table(missing)
-# get denominator right
-biocycle %>% group_by(id, cycle) %>%
-  filter(!noserum) %>% 
-  filter(n() >= 7) %>% 
-summarise(p=1) %>% 
-ungroup() %>% 
-summarise(n())
-
-# get numerator
-biocycle %>% group_by(id, cycle) %>%
-  filter(!noserum) %>% 
-  filter(n() >= 7, !is.na(cycle_length_bl)) %>% 
-summarise(anov = all(is.na(peak_day))) %>% 
-ungroup() %>% 
-summarise(sum(anov), n())
-```
-
 
 
 ## Reverse cycle days
@@ -222,6 +225,49 @@ biocycle <- biocycle %>%
 library(testthat)
 expect_equal(biocycle$cycle_length, biocycle$cycle_length_mine)
 ```
+
+
+
+## Recompute anovulation rate
+
+```{r}
+missing <- rowSums(is.na(biocycle))
+table(missing)
+# get denominator right
+biocycle %>% group_by(id, cycle) %>%
+  filter(!noserum) %>% 
+  filter(n() >= 7) %>% 
+summarise(p=1) %>% 
+ungroup() %>% 
+summarise(n())
+
+biocycle %>% group_by(id, cycle, lh_problems) %>% 
+summarise(anov_urine = all(is.na(peak_day)),
+          anov_serum = all(anovulatory)) %>% 
+  arrange(lh_problems, anov_serum == anov_urine) %>% 
+  rio::export("anov_cycles.xlsx")
+
+
+biocycle %>% group_by(id, cycle, lh_problems) %>% 
+summarise(anov_urine = all(is.na(peak_day)),
+          anov_serum = all(anovulatory)) %>% 
+  { xtabs(~ anov_urine + anov_serum + lh_problems, data = .) }
+
+biocycle %>% group_by(id, cycle, lh_problems) %>% 
+summarise(anov_urine = all(is.na(peak_day)),
+          anov_serum = all(anovulatory)) %>% 
+  { xtabs(~ anov_urine + anov_serum , data = .) }
+  
+# get numerator
+biocycle %>% group_by(id, cycle) %>%
+  # filter(!noserum) %>% 
+  filter(n() >= 8) %>%
+  filter(!lh_problems) %>% 
+summarise(anov = all(is.na(peak_day))) %>% 
+ungroup() %>% 
+summarise(sum(anov), n())
+```
+
 
 ```{r}
 biocycle$progesterone_pgml <- biocycle$PROGEST * 1000
