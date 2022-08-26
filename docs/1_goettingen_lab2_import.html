@@ -1779,9 +1779,116 @@ estradiol pg/ml            -0.02                 0.13            1.00</code></pr
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gol</span> <span class='op'>&lt;-</span> <span class='va'>gol</span> <span class='op'>%&gt;%</span> <span class='fu'>rename</span><span class='op'>(</span>id <span class='op'>=</span> <span class='va'>Person</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>cycle_length</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span>, <span class='fu'>everything</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>as_tibble</span><span class='op'>(</span><span class='op'>)</span>
 
-<span class='va'>gol</span> <span class='op'>&lt;-</span> <span class='va'>gol</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>mutate</span><span class='op'>(</span>estradiol_cens <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;=</span> <span class='fl'>2.1</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
-    estradiol <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>2.1</span>, <span class='va'>estradiol</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span><span class='op'>(</span><span class='va'>gol</span><span class='op'>$</span><span class='va'>estradiol</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>   [1]  1.01  1.05  1.07  1.14  1.15  1.17  1.24  1.25  1.28  1.31
+  [11]  1.31  1.32  1.34  1.40  1.43  1.43  1.43  1.44  1.47  1.48
+  [21]  1.48  1.49  1.50  1.50  1.50  1.50  1.50  1.53  1.54  1.55
+  [31]  1.58  1.58  1.59  1.60  1.61  1.62  1.62  1.64  1.64  1.66
+  [41]  1.66  1.66  1.69  1.69  1.69  1.69  1.70  1.70  1.71  1.71
+  [51]  1.73  1.74  1.74  1.74  1.75  1.75  1.75  1.76  1.76  1.76
+  [61]  1.76  1.77  1.77  1.78  1.78  1.79  1.79  1.79  1.80  1.81
+  [71]  1.81  1.81  1.81  1.82  1.82  1.83  1.84  1.85  1.85  1.85
+  [81]  1.85  1.86  1.86  1.86  1.87  1.88  1.88  1.88  1.90  1.91
+  [91]  1.91  1.91  1.92  1.92  1.92  1.93  1.93  1.93  1.94  1.95
+ [101]  1.96  1.97  1.98  1.98  1.98  1.99  2.00  2.00  2.01  2.01
+ [111]  2.02  2.03  2.04  2.04  2.04  2.04  2.05  2.06  2.06  2.08
+ [121]  2.08  2.08  2.09  2.10  2.11  2.11  2.12  2.12  2.13  2.13
+ [131]  2.13  2.14  2.14  2.15  2.16  2.16  2.17  2.18  2.18  2.19
+ [141]  2.19  2.19  2.19  2.20  2.21  2.22  2.22  2.23  2.23  2.23
+ [151]  2.24  2.24  2.25  2.25  2.26  2.27  2.27  2.28  2.28  2.29
+ [161]  2.29  2.32  2.32  2.32  2.32  2.33  2.34  2.35  2.35  2.35
+ [171]  2.36  2.36  2.37  2.37  2.37  2.38  2.38  2.39  2.40  2.40
+ [181]  2.40  2.42  2.42  2.43  2.43  2.43  2.43  2.44  2.44  2.44
+ [191]  2.44  2.44  2.44  2.45  2.45  2.45  2.45  2.46  2.46  2.47
+ [201]  2.47  2.48  2.48  2.49  2.49  2.50  2.51  2.51  2.51  2.51
+ [211]  2.52  2.52  2.54  2.54  2.54  2.54  2.54  2.55  2.55  2.55
+ [221]  2.55  2.56  2.56  2.56  2.57  2.57  2.57  2.58  2.58  2.59
+ [231]  2.60  2.60  2.61  2.61  2.62  2.62  2.62  2.63  2.63  2.64
+ [241]  2.65  2.65  2.65  2.66  2.66  2.67  2.67  2.68  2.69  2.69
+ [251]  2.69  2.69  2.70  2.70  2.70  2.70  2.70  2.71  2.71  2.72
+ [261]  2.72  2.72  2.73  2.73  2.73  2.73  2.75  2.75  2.76  2.77
+ [271]  2.77  2.79  2.79  2.80  2.80  2.82  2.82  2.82  2.82  2.83
+ [281]  2.84  2.84  2.84  2.84  2.86  2.86  2.87  2.87  2.88  2.88
+ [291]  2.89  2.89  2.89  2.90  2.92  2.92  2.93  2.93  2.93  2.93
+ [301]  2.94  2.94  2.95  2.95  2.96  2.96  2.97  2.97  2.97  2.98
+ [311]  2.98  2.98  2.99  3.00  3.00  3.00  3.01  3.01  3.01  3.02
+ [321]  3.02  3.02  3.03  3.03  3.03  3.04  3.04  3.05  3.05  3.05
+ [331]  3.06  3.07  3.07  3.08  3.09  3.09  3.09  3.09  3.10  3.12
+ [341]  3.13  3.14  3.14  3.14  3.15  3.15  3.16  3.16  3.16  3.16
+ [351]  3.17  3.18  3.19  3.19  3.20  3.20  3.21  3.21  3.22  3.23
+ [361]  3.23  3.23  3.24  3.24  3.24  3.24  3.24  3.24  3.25  3.25
+ [371]  3.25  3.25  3.26  3.26  3.26  3.27  3.27  3.27  3.28  3.29
+ [381]  3.30  3.30  3.30  3.31  3.31  3.31  3.32  3.33  3.34  3.34
+ [391]  3.34  3.34  3.34  3.34  3.35  3.35  3.35  3.36  3.36  3.37
+ [401]  3.37  3.37  3.37  3.37  3.37  3.38  3.38  3.38  3.38  3.38
+ [411]  3.38  3.38  3.38  3.38  3.39  3.40  3.40  3.40  3.40  3.41
+ [421]  3.41  3.41  3.42  3.42  3.43  3.43  3.43  3.44  3.44  3.44
+ [431]  3.44  3.45  3.45  3.45  3.45  3.45  3.45  3.45  3.45  3.46
+ [441]  3.46  3.47  3.47  3.47  3.47  3.48  3.48  3.48  3.48  3.48
+ [451]  3.49  3.49  3.49  3.50  3.50  3.50  3.51  3.51  3.51  3.51
+ [461]  3.52  3.53  3.54  3.54  3.54  3.54  3.55  3.55  3.57  3.57
+ [471]  3.58  3.58  3.59  3.59  3.60  3.60  3.60  3.60  3.60  3.61
+ [481]  3.61  3.61  3.61  3.61  3.62  3.62  3.63  3.64  3.64  3.64
+ [491]  3.64  3.64  3.64  3.64  3.66  3.66  3.67  3.67  3.67  3.67
+ [501]  3.68  3.68  3.68  3.68  3.68  3.69  3.69  3.69  3.70  3.70
+ [511]  3.70  3.71  3.71  3.71  3.71  3.72  3.72  3.72  3.73  3.73
+ [521]  3.73  3.74  3.74  3.75  3.75  3.75  3.75  3.75  3.76  3.76
+ [531]  3.77  3.77  3.78  3.78  3.78  3.79  3.79  3.79  3.80  3.80
+ [541]  3.81  3.81  3.81  3.81  3.81  3.82  3.82  3.83  3.83  3.83
+ [551]  3.83  3.84  3.84  3.84  3.85  3.86  3.87  3.87  3.88  3.88
+ [561]  3.89  3.89  3.89  3.90  3.90  3.91  3.91  3.91  3.91  3.91
+ [571]  3.93  3.93  3.94  3.94  3.94  3.94  3.95  3.95  3.95  3.95
+ [581]  3.95  3.95  3.96  3.96  3.96  3.97  3.98  3.98  3.98  3.99
+ [591]  3.99  3.99  3.99  4.00  4.00  4.01  4.01  4.01  4.01  4.01
+ [601]  4.02  4.02  4.03  4.04  4.04  4.04  4.04  4.06  4.06  4.06
+ [611]  4.07  4.07  4.07  4.07  4.08  4.08  4.08  4.09  4.09  4.09
+ [621]  4.10  4.11  4.11  4.11  4.11  4.11  4.11  4.12  4.12  4.14
+ [631]  4.14  4.15  4.15  4.15  4.15  4.16  4.16  4.16  4.17  4.18
+ [641]  4.18  4.18  4.18  4.19  4.19  4.19  4.20  4.20  4.23  4.23
+ [651]  4.24  4.24  4.25  4.25  4.25  4.25  4.25  4.25  4.26  4.26
+ [661]  4.27  4.27  4.27  4.27  4.28  4.28  4.29  4.29  4.29  4.29
+ [671]  4.29  4.29  4.31  4.33  4.33  4.33  4.34  4.35  4.36  4.36
+ [681]  4.37  4.38  4.39  4.39  4.39  4.39  4.40  4.40  4.40  4.41
+ [691]  4.42  4.42  4.42  4.42  4.42  4.43  4.43  4.43  4.44  4.44
+ [701]  4.44  4.45  4.45  4.45  4.46  4.46  4.46  4.47  4.49  4.49
+ [711]  4.49  4.49  4.50  4.50  4.51  4.51  4.52  4.52  4.52  4.52
+ [721]  4.53  4.53  4.53  4.54  4.54  4.54  4.55  4.56  4.56  4.56
+ [731]  4.57  4.58  4.58  4.59  4.59  4.59  4.59  4.59  4.60  4.62
+ [741]  4.63  4.63  4.63  4.64  4.65  4.67  4.68  4.68  4.69  4.70
+ [751]  4.71  4.71  4.72  4.72  4.72  4.73  4.74  4.74  4.75  4.75
+ [761]  4.77  4.78  4.78  4.78  4.79  4.80  4.81  4.83  4.83  4.84
+ [771]  4.85  4.86  4.86  4.87  4.87  4.88  4.89  4.90  4.91  4.92
+ [781]  4.93  4.94  4.95  4.95  4.96  4.97  4.97  4.97  4.98  4.99
+ [791]  5.00  5.00  5.03  5.03  5.04  5.04  5.05  5.05  5.06  5.06
+ [801]  5.06  5.07  5.07  5.07  5.08  5.08  5.08  5.09  5.09  5.10
+ [811]  5.11  5.13  5.13  5.13  5.14  5.14  5.14  5.15  5.16  5.16
+ [821]  5.17  5.17  5.17  5.18  5.19  5.20  5.20  5.21  5.22  5.23
+ [831]  5.25  5.25  5.25  5.25  5.25  5.25  5.26  5.27  5.28  5.28
+ [841]  5.30  5.32  5.32  5.32  5.33  5.33  5.34  5.35  5.35  5.35
+ [851]  5.35  5.36  5.37  5.40  5.40  5.41  5.42  5.43  5.44  5.45
+ [861]  5.46  5.47  5.47  5.47  5.48  5.50  5.50  5.50  5.52  5.55
+ [871]  5.55  5.59  5.59  5.60  5.60  5.61  5.62  5.64  5.65  5.66
+ [881]  5.66  5.67  5.67  5.68  5.68  5.69  5.69  5.69  5.71  5.71
+ [891]  5.75  5.76  5.76  5.78  5.80  5.81  5.81  5.82  5.84  5.85
+ [901]  5.85  5.85  5.85  5.86  5.87  5.88  5.88  5.91  5.91  5.91
+ [911]  5.92  5.92  5.92  5.95  5.99  6.00  6.00  6.00  6.02  6.02
+ [921]  6.03  6.04  6.05  6.06  6.06  6.07  6.08  6.08  6.08  6.10
+ [931]  6.12  6.12  6.13  6.17  6.17  6.19  6.19  6.19  6.21  6.22
+ [941]  6.23  6.25  6.28  6.29  6.33  6.35  6.36  6.37  6.38  6.38
+ [951]  6.44  6.49  6.51  6.52  6.54  6.55  6.56  6.57  6.60  6.62
+ [961]  6.63  6.65  6.72  6.75  6.77  6.77  6.81  6.85  6.87  6.89
+ [971]  6.89  6.97  7.00  7.07  7.10  7.12  7.13  7.15  7.15  7.16
+ [981]  7.20  7.34  7.34  7.34  7.37  7.49  7.50  7.55  7.56  7.61
+ [991]  7.67  7.73  7.76  7.80  7.84  7.96  7.98  8.24  8.36  8.43
+[1001]  8.45  8.53  8.74  8.86  8.99  9.03  9.25  9.27  9.43  9.55
+[1011]  9.62  9.68  9.85  9.86  9.92 10.19 10.48 11.65 11.73 12.10
+[1021] 12.10 12.21 12.43 15.42 15.63 16.66 19.05</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gol</span> <span class='op'>&lt;-</span> <span class='va'>gol</span> <span class='op'>%&gt;%</span> 
+  <span class='fu'>mutate</span><span class='op'>(</span>estradiol_cens <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;=</span> <span class='fl'>2.1</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>
+<span class='co'>#    estradiol = if_else(estradiol_cens == "left", 0.6, estradiol)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span> 
   <span class='fu'>mutate</span><span class='op'>(</span>
     progesterone_cens <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>progesterone</span> <span class='op'>&lt;=</span> <span class='fl'>0</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
@@ -2120,7 +2227,7 @@ $r_fc
 [1] &quot;0.63 [0.60;0.66]&quot;
 
 $rmse_fc
-[1] &quot;1.58 [1.50;1.67]&quot;
+[1] &quot;1.58 [1.50;1.66]&quot;
 
 $r_loo_fc
 [1] &quot;0.62 [0.57;0.66]&quot;
@@ -2201,7 +2308,7 @@ $r_lh
 [1] &quot;0.69 [0.65;0.71]&quot;
 
 $rmse_lh
-[1] &quot;1.42 [1.34;1.51]&quot;
+[1] &quot;1.42 [1.33;1.51]&quot;
 
 $r_loo_lh
 [1] &quot;0.68 [0.62;0.73]&quot;
@@ -2247,7 +2354,7 @@ $rmse_lh_imputed
                   LOD <span class='op'>=</span> <span class='fl'>2.1</span>,
                   LOQ <span class='op'>=</span> <span class='fl'>2.1</span>,
                   CV_intra <span class='op'>=</span> <span class='fl'>8.8</span>,
-                  CV_inter <span class='op'>=</span> <span class='fl'>11.3</span>,
+                  CV_inter <span class='op'>=</span> <span class='fl'>11.8</span>,
                   Procedure <span class='op'>=</span> <span class='st'>"For hormone assays, we collected four saliva samples from each participant (one per testing session). Contamination of saliva samples was minimized by asking participants to abstain from eating, drinking (except plain water), smoking, chewing gum, or brushing teeth for at least one hour before each session. The samples were stored at − 80 ◦C directly after collection until shipment on dry ice to the Kirschbaum Lab at Technical University of Dresden, Germany (one freeze-thaw cycle). The samples were reanalyzed for estradiol using the highly sensitive 17β-estradiol enzyme immunoassay kit (IBL International, Hamburg, Germany). Samples were analyzed in singlets, however, the lab reported that their procedure yields CVs &lt; 11%."</span>,
                   Scheduling <span class='op'>=</span> <span class='st'>[1073 chars quoted with '"']</span>, 
                   LH_test <span class='op'>=</span> <span class='st'>"highly sensitive (10mIU) LH urine ovulation test strips from MedNet GmbH. Participants started LH-testing after menstruation (around reverse cycle day 21) and continued until a rise of LH (positive tests) was observed and a minimum of two days after the tests were negative again (as suggested by Roney, 2018b). Participants were provided with a minimum of ten LH tests each and provided daily pictures of the tests to the investigators for confir- mation. LH results were used to allow flexible scheduling in case LH test results differed from the scheduling based on counting (see supplementary material for details)."</span><span class='op'>)</span>
@@ -2256,14 +2363,665 @@ $rmse_lh_imputed
 <pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
 <pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
 <pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code>Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a66f2b0f7.stan&#39;, line 7, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a66f2b0f7.stan&#39;, line 11, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a66f2b0f7.stan&#39;, line 22, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc</code></pre>
+<pre><code>Start sampling</code></pre>
+<pre><code>Running MCMC with 4 chains, at most 8 in parallel...
+
+Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 4 finished in 5.4 seconds.
+Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 2 finished in 6.0 seconds.
+Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 1 finished in 6.0 seconds.
+Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 finished in 6.3 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 5.9 seconds.
+Total execution time: 6.8 seconds.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a42a73b47.stan&#39;, line 7, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a42a73b47.stan&#39;, line 11, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a42a73b47.stan&#39;, line 17, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a42a73b47.stan&#39;, line 28, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a42a73b47.stan&#39;, line 30, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+
+Start sampling</code></pre>
+<pre><code>Running MCMC with 4 chains, at most 8 in parallel...
+
+Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 finished in 13.2 seconds.
+Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 1 finished in 13.5 seconds.
+Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 2 finished in 15.9 seconds.
+Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 4 finished in 17.7 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 15.1 seconds.
+Total execution time: 18.0 seconds.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
 
 Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Rows containing NAs were excluded from the model.
+<pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a1a471756.stan&#39;, line 7, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a1a471756.stan&#39;, line 13, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a1a471756.stan&#39;, line 19, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a1a471756.stan&#39;, line 25, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a1a471756.stan&#39;, line 41, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a1a471756.stan&#39;, line 43, column 2: Declaration
+    of arrays by placing brackets after a variable name is</code></pre>
+<pre><code> deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc</code></pre>
+<pre><code>Start sampling</code></pre>
+<pre><code>Running MCMC with 4 chains, at most 8 in parallel...
 
-Warning: Rows containing NAs were excluded from the model.</code></pre>
+Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 1 finished in 30.0 seconds.
+Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 2 finished in 31.0 seconds.
+Chain 3 finished in 31.0 seconds.
+Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 4 finished in 34.1 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 31.5 seconds.
+Total execution time: 34.5 seconds.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a4f844a45.stan&#39;, line 7, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a4f844a45.stan&#39;, line 13, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a4f844a45.stan&#39;, line 19, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a4f844a45.stan&#39;, line 25, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a4f844a45.stan&#39;, line 41, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a4f844a45.stan&#39;, line 43, column 2: Declaration
+    of arrays by placing brackets after a variable name is</code></pre>
+<pre><code> deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc</code></pre>
+<pre><code>Start sampling</code></pre>
+<pre><code>Running MCMC with 4 chains, at most 8 in parallel...
+
+Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 4 finished in 36.6 seconds.
+Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 finished in 36.9 seconds.
+Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 2 finished in 38.0 seconds.
+Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 1 finished in 40.7 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 38.1 seconds.
+Total execution time: 41.0 seconds.</code></pre>
+<pre><code>
+Warning: 4 of 4000 (0.0%) transitions ended with a divergence.
+This may indicate insufficient exploration of the posterior distribution.
+Possible remedies include: 
+  * Increasing adapt_delta closer to 1 (default is 0.8) 
+  * Reparameterizing the model (e.g. using a non-centered parameterization)
+  * Using informative or weakly informative prior distributions </code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a2c052739.stan&#39;, line 7, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a2c052739.stan&#39;, line 13, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a2c052739.stan&#39;, line 19, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a2c052739.stan&#39;, line 25, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a2c052739.stan&#39;, line 41, column 2: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+Warning in &#39;/var/folders/tr/lgwjmdgd72bckr1hj5gd_7640000gq/T/RtmpSwxdmJ/model-e4a2c052739.stan&#39;, line 43, column 2: Declaration
+    of arrays by placing brackets after a variable name is</code></pre>
+<pre><code> deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc</code></pre>
+<pre><code>Start sampling</code></pre>
+<pre><code>Running MCMC with 4 chains, at most 8 in parallel...
+
+Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 2 finished in 28.4 seconds.
+Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 1 finished in 38.6 seconds.
+Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 finished in 39.9 seconds.
+Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 4 finished in 40.0 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 36.7 seconds.
+Total execution time: 40.4 seconds.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Some Pareto k diagnostic values are slightly high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
+
+Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
@@ -2296,7 +3054,7 @@ $`Intraassay CV`
 [1] 8.8
 
 $`Interassay CV`
-[1] 11.3
+[1] 11.8
 
 $Procedure
 [1] &quot;For hormone assays, we collected four saliva samples from each participant (one per testing session). Contamination of saliva samples was minimized by asking participants to abstain from eating, drinking (except plain water), smoking, chewing gum, or brushing teeth for at least one hour before each session. The samples were stored at − 80 ◦C directly after collection until shipment on dry ice to the Kirschbaum Lab at Technical University of Dresden, Germany (one freeze-thaw cycle). The samples were reanalyzed for estradiol using the highly sensitive 17β-estradiol enzyme immunoassay kit (IBL International, Hamburg, Germany). Samples were analyzed in singlets, however, the lab reported that their procedure yields CVs &lt; 11%.&quot;
@@ -2310,33 +3068,34 @@ $LH_test
 $distribution</code></pre>
 <pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 <pre><code>Warning: Removed 1 rows containing non-finite values (stat_bin).</code></pre>
+<p><img src="1_goettingen_lab2_import_files/figure-html5/unnamed-chunk-3-5.png" width="624" /></p>
 <pre><code>
 $mean
-[1] 4.040896
+[1] 3.995871
 
 $logmean
-[1] 1.313963
+[1] 1.28891
 
 $logsd
-[1] 0.3943412
+[1] 0.4380145
 
 $median
 [1] 3.71
 
 $sd
-[1] 1.840209
+[1] 1.893096
 
 $mad
 [1] 1.541904
 
 $range
-[1] &quot;2.10, 19.05&quot;
+[1] &quot;1.01, 19.05&quot;
 
 $missing
 [1] 1
 
 $outliers
-[1] 6
+[1] 4
 
 $censored
 [1] 124
@@ -2372,26 +3131,22 @@ $no_lh_surge_cycle
 [1] &quot;145/406 (36%)&quot;
 
 $var_id_loo
-[1] &quot;0.16 [0.09;0.21]&quot;
+[1] &quot;0.16 [0.10;0.22]&quot;
 
 $var_cycle_loo
-[1] &quot;0.16 [0.10;0.21]&quot;
+[1] &quot;0.16 [0.10;0.22]&quot;
 
 $var_id
-[1] &quot;0.24 [0.20;0.27] (33%)&quot;
+[1] &quot;0.27 [0.22;0.31] (34%)&quot;
 
 $var_cycle
-[1] &quot;0.07 [0.00;0.15] (4%)&quot;
+[1] &quot;0.07 [0.00;0.17] (4%)&quot;
 
 $var_resid
-[1] &quot;0.36 [0.33;0.38] (62%)&quot;
+[1] &quot;0.40 [0.37;0.42] (62%)&quot;
 
-$bc_day_model</code></pre>
-<pre><code>Warning: There were 2 divergent transitions after warmup.
-Increasing adapt_delta above may help. See http://mc-stan.org/misc/
-warnings.html#divergent-transitions-after-warmup</code></pre>
-<p><img src="1_goettingen_lab2_import_files/figure-html5/unnamed-chunk-3-5.png" width="624" /></p>
-<pre><code> Family: gaussian 
+$bc_day_model
+ Family: gaussian 
   Links: mu = identity; sigma = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 895) 
@@ -2400,41 +3155,41 @@ Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycl
 
 Smooth Terms: 
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sbc_day_1)     0.15      0.15     0.01     0.57 1.00     1508
+sds(sbc_day_1)     0.17      0.17     0.01     0.63 1.00     1624
                Tail_ESS
-sds(sbc_day_1)     2248
+sds(sbc_day_1)     2280
 
 Group-Level Effects: 
 ~id (Number of levels: 242) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.24      0.02     0.20     0.28 1.00      817
+sd(Intercept)     0.27      0.02     0.22     0.31 1.00      974
               Tail_ESS
-sd(Intercept)     1421
+sd(Intercept)     1374
 
 ~id:cycle (Number of levels: 388) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.06      0.04     0.00     0.15 1.01      246
+sd(Intercept)     0.06      0.04     0.00     0.15 1.01      330
               Tail_ESS
-sd(Intercept)      552
+sd(Intercept)      595
 
 Population-Level Effects: 
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     1.29      0.02     1.25     1.33 1.00     2123     2628
-sbc_day_1     0.20      0.39    -0.45     1.17 1.00     2394     1776
+Intercept     1.26      0.02     1.22     1.31 1.00     2034     2639
+sbc_day_1     0.22      0.44    -0.55     1.29 1.00     2582     2049
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.35      0.01     0.33     0.38 1.00     2583     2780
+sigma     0.40      0.01     0.37     0.42 1.00     2747     3070
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_bc
-[1] &quot;0.06 [0.01;0.11]&quot;
+[1] &quot;0.06 [0.01;0.12]&quot;
 
 $rmse_bc
-[1] &quot;0.53 [0.50;0.55]&quot;
+[1] &quot;0.59 [0.56;0.62]&quot;
 
 $r_loo_bc
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -2446,33 +3201,36 @@ $r_log_bc_stirn
 [1] &quot; 0.01 [-0.05; 0.08]&quot;
 
 $r_diff_bc_stirn
-[1] &quot; 0.01 [-0.05; 0.08]&quot;
+[1] &quot; 0.01 [-0.06; 0.08]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot; 0.01 [-0.06; 0.07]&quot;
+[1] &quot; 0.00 [-0.06; 0.07]&quot;
 
 $r_bc_imputed
-[1] &quot; 0.04 [-0.03; 0.10]&quot;
+[1] &quot; 0.03 [-0.03; 0.10]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.05 [-0.02; 0.11]&quot;
+[1] &quot; 0.04 [-0.03; 0.10]&quot;
 
 $sd_bc_imputed
 [1] &quot;0.50 (63%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.06 [-0.02; 0.14]&quot;
+[1] &quot; 0.05 [-0.03; 0.13]&quot;
 
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 27 rows containing missing values (geom_smooth).</code></pre>
 <pre><code>Warning: Removed 27 rows containing missing values (geom_point).</code></pre>
-<p><img src="1_goettingen_lab2_import_files/figure-html5/unnamed-chunk-3-6.png" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
-[1] &quot; 0.64&quot;
+[1] &quot; 0.66&quot;
 
-$fc_day_model
- Family: gaussian 
+$fc_day_model</code></pre>
+<pre><code>Warning: There were 4 divergent transitions after warmup.
+Increasing adapt_delta above may help. See http://mc-stan.org/misc/
+warnings.html#divergent-transitions-after-warmup</code></pre>
+<p><img src="1_goettingen_lab2_import_files/figure-html5/unnamed-chunk-3-6.png" width="624" /></p>
+<pre><code> Family: gaussian 
   Links: mu = identity; sigma = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 913) 
@@ -2481,47 +3239,47 @@ Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycl
 
 Smooth Terms: 
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     0.29      0.23     0.01     0.88 1.00     1090
+sds(sfc_day_1)     0.32      0.27     0.02     1.02 1.00     1150
                Tail_ESS
-sds(sfc_day_1)     1078
+sds(sfc_day_1)     1616
 
 Group-Level Effects: 
 ~id (Number of levels: 243) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.23      0.02     0.19     0.28 1.00      954
+sd(Intercept)     0.26      0.02     0.22     0.31 1.00      788
               Tail_ESS
-sd(Intercept)     1253
+sd(Intercept)     1076
 
 ~id:cycle (Number of levels: 406) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.08      0.04     0.01     0.16 1.02      302
+sd(Intercept)     0.07      0.04     0.00     0.16 1.01      267
               Tail_ESS
-sd(Intercept)      803
+sd(Intercept)      613
 
 Population-Level Effects: 
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     1.28      0.02     1.24     1.32 1.00     1954     2723
-sfc_day_1     0.66      0.67    -0.37     2.25 1.00     1853     1765
+Intercept     1.26      0.02     1.21     1.30 1.00     1613     2833
+sfc_day_1     0.72      0.78    -0.47     2.57 1.00     1567     1641
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.35      0.01     0.33     0.38 1.00     1790     2714
+sigma     0.40      0.01     0.37     0.42 1.00     2057     2954
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_fc
-[1] &quot;0.10 [0.02;0.16]&quot;
+[1] &quot;0.09 [0.02;0.15]&quot;
 
 $rmse_fc
-[1] &quot;0.53 [0.50;0.55]&quot;
+[1] &quot;0.59 [0.56;0.62]&quot;
 
 $r_loo_fc
 [1] &quot;NaN [NaN;NaN]&quot;
 
 $r_fc_stirn
-[1] &quot;-0.00 [-0.07; 0.06]&quot;
+[1] &quot; 0.00 [-0.06; 0.06]&quot;
 
 $r_log_fc_stirn
 [1] &quot; 0.00 [-0.06; 0.07]&quot;
@@ -2530,33 +3288,30 @@ $r_diff_fc_stirn
 [1] &quot; 0.04 [-0.03; 0.10]&quot;
 
 $r_log_diff_fc_stirn
-[1] &quot; 0.04 [-0.03; 0.10]&quot;
+[1] &quot; 0.03 [-0.03; 0.10]&quot;
 
 $r_fc_imputed
-[1] &quot; 0.05 [-0.02; 0.11]&quot;
+[1] &quot; 0.04 [-0.02; 0.11]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.03 [-0.04; 0.09]&quot;
+[1] &quot; 0.02 [-0.04; 0.09]&quot;
 
 $sd_fc_imputed
 [1] &quot;0.37 (51%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.04 [-0.05; 0.13]&quot;
+[1] &quot; 0.03 [-0.06; 0.12]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 9 rows containing missing values (geom_smooth).</code></pre>
 <pre><code>Warning: Removed 9 rows containing missing values (geom_point).</code></pre>
+<p><img src="1_goettingen_lab2_import_files/figure-html5/unnamed-chunk-3-7.png" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
-[1] &quot; 0.54&quot;
+[1] &quot; 0.57&quot;
 
-$lh_day_model</code></pre>
-<pre><code>Warning: There were 1 divergent transitions after warmup.
-Increasing adapt_delta above may help. See http://mc-stan.org/misc/
-warnings.html#divergent-transitions-after-warmup</code></pre>
-<p><img src="1_goettingen_lab2_import_files/figure-html5/unnamed-chunk-3-7.png" width="624" /></p>
-<pre><code> Family: gaussian 
+$lh_day_model
+ Family: gaussian 
   Links: mu = identity; sigma = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1 | id) + (1 | id:cycle) 
    Data: df %&gt;% filter(between(lh_day, -15, 15)) (Number of observations: 647) 
@@ -2565,62 +3320,62 @@ Formula: log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1 | id) + (1 | id:cycl
 
 Smooth Terms: 
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(slh_day_1)     0.48      0.31     0.11     1.30 1.00     1786
+sds(slh_day_1)     0.50      0.35     0.10     1.43 1.00     1592
                Tail_ESS
-sds(slh_day_1)     2621
+sds(slh_day_1)     1882
 
 Group-Level Effects: 
 ~id (Number of levels: 196) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.20      0.04     0.10     0.26 1.02      271
+sd(Intercept)     0.22      0.04     0.13     0.29 1.01      306
               Tail_ESS
-sd(Intercept)      232
+sd(Intercept)      442
 
 ~id:cycle (Number of levels: 259) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.11      0.06     0.01     0.23 1.03      179
+sd(Intercept)     0.13      0.06     0.01     0.24 1.02      192
               Tail_ESS
-sd(Intercept)      310
+sd(Intercept)      537
 
 Population-Level Effects: 
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     1.30      0.02     1.25     1.34 1.00     3891     3026
-slh_day_1     0.51      1.01    -1.38     2.68 1.00     2408     1813
+Intercept     1.27      0.02     1.23     1.32 1.00     3683     3216
+slh_day_1     0.36      1.03    -1.74     2.45 1.00     2733     2127
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.35      0.01     0.32     0.38 1.00     2492     2679
+sigma     0.39      0.01     0.36     0.42 1.00     2175     2869
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_lh
-[1] &quot;0.15 [0.06;0.22]&quot;
+[1] &quot;0.14 [0.05;0.22]&quot;
 
 $rmse_lh
-[1] &quot;0.52 [0.49;0.55]&quot;
+[1] &quot;0.58 [0.55;0.61]&quot;
 
 $r_loo_lh
-[1] &quot;NaN [NaN;0.11]&quot;
+[1] &quot;NaN [NaN;0.10]&quot;
 
 $r_prob_lh
-[1] &quot; 0.05 [-0.02; 0.13]&quot;
-
-$r_log_prob_lh
-[1] &quot; 0.07 [-0.01; 0.14]&quot;
-
-$r_diff_prob_lh
 [1] &quot; 0.05 [-0.03; 0.13]&quot;
 
+$r_log_prob_lh
+[1] &quot; 0.06 [-0.02; 0.14]&quot;
+
+$r_diff_prob_lh
+[1] &quot; 0.05 [-0.03; 0.12]&quot;
+
 $r_log_diff_prob_lh
-[1] &quot; 0.06 [-0.01; 0.14]&quot;
+[1] &quot; 0.05 [-0.03; 0.13]&quot;
 
 $r_lh_imputed
-[1] &quot; 0.11 [ 0.03; 0.18]&quot;
+[1] &quot; 0.10 [ 0.03; 0.18]&quot;
 
 $r_diff_lh_imputed
-[1] &quot; 0.08 [ 0.00; 0.16]&quot;
+[1] &quot; 0.08 [ 0.00; 0.15]&quot;
 
 $sd_lh_imputed
 [1] &quot;0.51 (60%)&quot;
@@ -2634,7 +3389,7 @@ $imputed_lh_vs_measured_graph</code></pre>
 <p><img src="1_goettingen_lab2_import_files/figure-html5/unnamed-chunk-3-8.png" width="624" /></p>
 <pre><code>
 $rmse_lh_imputed
-[1] &quot; 0.61&quot;</code></pre>
+[1] &quot; 0.63&quot;</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>gol2</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span>, <span class='va'>cycle_length</span><span class='op'>)</span>
 
@@ -2643,11 +3398,21 @@ $rmse_lh_imputed
 </div>
 <pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
-<pre><code>Warning: Rows containing NAs were excluded from the model.
-
-Warning: Rows containing NAs were excluded from the model.
-
-Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOL2_Er_bc.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOL2_Er_bc.rds&#39;</code></pre>
+<pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOL2_ExP_bc.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOL2_ExP_bc.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOL2_Er_fc.rds&#39;
+Automatically saving the model object in &#39;models/m_GOL2_Er_fc.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOL2_ExP_fc.rds&#39;
+Automatically saving the model object in &#39;models/m_GOL2_ExP_fc.rds&#39;</code></pre>
+<pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOL2_Er_lh.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOL2_Er_lh.rds&#39;</code></pre>
+<pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOL2_ExP_lh.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOL2_ExP_lh.rds&#39;</code></pre>
 <pre><code>$Dataset
 [1] &quot;GOL2&quot;
 
@@ -2671,22 +3436,22 @@ $n_days
 [1] 1028
 
 $r_ep
-[1] &quot; 0.02 [-0.05; 0.08]&quot;
+[1] &quot; 0.02 [-0.05; 0.09]&quot;
 
 $r_log_ep
 [1] &quot; 0.04 [-0.02; 0.11]&quot;
 
 $r_e_ratio
-[1] &quot; 0.28 [ 0.22; 0.34]&quot;
+[1] &quot; 0.29 [ 0.23; 0.35]&quot;
 
 $r_log_e_ratio
-[1] &quot; 0.22 [ 0.15; 0.28]&quot;
+[1] &quot; 0.24 [ 0.17; 0.30]&quot;
 
 $r_p_ratio
 [1] &quot;-0.30 [-0.36;-0.24]&quot;
 
 $r_log_p_ratio
-[1] &quot;-0.97 [-0.97;-0.96]&quot;
+[1] &quot;-0.96 [-0.96;-0.95]&quot;
 
 $usable_n
 [1] 777
@@ -2707,17 +3472,17 @@ Formula: prc_stirn_bc ~ log(estradiol) + log(ratio)
 
 Population-Level Effects: 
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept        0.35      0.03     0.30     0.40 1.00     3035
-logestradiol    -0.05      0.02    -0.08    -0.01 1.00     3185
-logratio         0.07      0.00     0.06     0.08 1.00     4036
+Intercept        0.35      0.02     0.30     0.40 1.00     2912
+logestradiol    -0.05      0.02    -0.08    -0.01 1.00     2928
+logratio         0.07      0.00     0.06     0.08 1.00     3839
              Tail_ESS
-Intercept        2472
-logestradiol     2652
-logratio         3035
+Intercept        2383
+logestradiol     2593
+logratio         2944
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.19      0.00     0.18     0.19 1.00     3235     2542
+sigma     0.18      0.00     0.18     0.19 1.00     3050     2623
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2736,30 +3501,30 @@ Formula: prc_stirn_bc ~ s(log(estradiol), log(progesterone))
 
 Smooth Terms: 
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.14      0.06     0.05
+sds(slogestradiollogprogesterone_1)     0.12      0.05     0.04
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.28 1.00     1405     1740
+sds(slogestradiollogprogesterone_1)     0.23 1.00     1075     1169
 
 Population-Level Effects: 
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.21      0.01     0.20     0.23
-slogestradiollogprogesterone_1    -0.01      0.13    -0.26     0.26
-slogestradiollogprogesterone_2    -0.56      0.39    -1.27     0.27
+slogestradiollogprogesterone_1    -0.49      0.30    -1.04     0.16
+slogestradiollogprogesterone_2     0.22      0.19    -0.17     0.57
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     6478     3132
-slogestradiollogprogesterone_1 1.00     2607     2729
-slogestradiollogprogesterone_2 1.00     1957     2711
+Intercept                      1.00     6266     2702
+slogestradiollogprogesterone_1 1.00     1438     1724
+slogestradiollogprogesterone_2 1.00     1587     2235
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.18      0.00     0.17     0.19 1.00     5557     3335
+sigma     0.18      0.00     0.17     0.19 1.00     5418     2960
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_loo_bc
-[1] &quot;0.51 [0.45;0.56]&quot;
+[1] &quot;0.51 [0.46;0.56]&quot;
 
 $r_fc_ratio
 [1] &quot; 0.36 [ 0.30; 0.42]&quot;
@@ -2777,17 +3542,17 @@ Formula: prc_stirn_fc ~ log(estradiol) + log(ratio)
 
 Population-Level Effects: 
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept        0.36      0.03     0.30     0.41 1.00     2781
-logestradiol    -0.05      0.02    -0.09    -0.02 1.00     2852
-logratio         0.08      0.00     0.07     0.09 1.00     3825
+Intercept        0.36      0.02     0.31     0.40 1.00     3061
+logestradiol    -0.05      0.02    -0.09    -0.02 1.00     3129
+logratio         0.08      0.00     0.07     0.09 1.00     4034
              Tail_ESS
-Intercept        2669
-logestradiol     2486
-logratio         2672
+Intercept        2773
+logestradiol     2325
+logratio         2711
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.19      0.00     0.18     0.20 1.00     2557     2355
+sigma     0.19      0.00     0.18     0.20 1.00     3501     2531
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2806,23 +3571,23 @@ Formula: prc_stirn_fc ~ s(log(estradiol), log(progesterone))
 
 Smooth Terms: 
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.13      0.05     0.04
+sds(slogestradiollogprogesterone_1)     0.09      0.04     0.02
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.26 1.00     1291     1560
+sds(slogestradiollogprogesterone_1)     0.17 1.00     1280     1252
 
 Population-Level Effects: 
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.21      0.01     0.20     0.22
-slogestradiollogprogesterone_1    -0.89      0.28    -1.44    -0.32
-slogestradiollogprogesterone_2    -0.61      0.24    -1.09    -0.12
+slogestradiollogprogesterone_1    -0.04      0.10    -0.25     0.16
+slogestradiollogprogesterone_2    -0.81      0.26    -1.28    -0.27
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     5931     3072
-slogestradiollogprogesterone_1 1.00     1653     1735
-slogestradiollogprogesterone_2 1.00     1639     2262
+Intercept                      1.00     6748     2942
+slogestradiollogprogesterone_1 1.00     2564     2565
+slogestradiollogprogesterone_2 1.00     1690     2304
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.19      0.00     0.18     0.20 1.00     5110     2760
+sigma     0.19      0.00     0.18     0.20 1.00     5238     2739
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2847,17 +3612,17 @@ Formula: fertile_lh ~ log(estradiol) + log(ratio)
 
 Population-Level Effects: 
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept        0.29      0.05     0.20     0.38 1.00     3570
-logestradiol    -0.01      0.03    -0.07     0.05 1.00     3672
-logratio         0.08      0.01     0.06     0.09 1.00     3955
+Intercept        0.31      0.04     0.22     0.39 1.00     3304
+logestradiol    -0.02      0.03    -0.07     0.04 1.00     3458
+logratio         0.08      0.01     0.06     0.09 1.00     3738
              Tail_ESS
-Intercept        2638
-logestradiol     2643
-logratio         3067
+Intercept        2593
+logestradiol     2782
+logratio         2564
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.28      0.01     0.26     0.30 1.00     3117     2281
+sigma     0.28      0.01     0.27     0.30 1.00     3562     2524
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2876,23 +3641,23 @@ Formula: fertile_lh ~ s(log(estradiol), log(progesterone))
 
 Smooth Terms: 
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.18      0.08     0.05
+sds(slogestradiollogprogesterone_1)     0.19      0.08     0.06
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.37 1.00     1705     1639
+sds(slogestradiollogprogesterone_1)     0.38 1.00     1762     1814
 
 Population-Level Effects: 
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.22      0.01     0.20     0.24
-slogestradiollogprogesterone_1    -1.02      0.54    -2.09     0.06
-slogestradiollogprogesterone_2    -0.22      0.20    -0.62     0.20
+slogestradiollogprogesterone_1    -1.12      0.59    -2.26     0.12
+slogestradiollogprogesterone_2    -0.49      0.27    -0.99     0.08
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     7439     3270
-slogestradiollogprogesterone_1 1.00     2583     2693
-slogestradiollogprogesterone_2 1.00     3439     3248
+Intercept                      1.00     6300     2998
+slogestradiollogprogesterone_1 1.00     2004     2430
+slogestradiollogprogesterone_2 1.00     2544     2634
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.28      0.01     0.26     0.30 1.00     5608     2621
+sigma     0.28      0.01     0.26     0.29 1.00     5343     2756
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2901,7 +3666,8 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_lh
 [1] &quot;0.39 [0.32;0.44]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb121"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb165"><pre
+class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

@@ -10,19 +10,25 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE, error = T)
 ```
 
 ```{r, fig.width = 5, fig.height = 15}
+library(grid)
+library(gridExtra)
+library(patchwork)
+library(cowplot)
+library(ggrepel)
+library(magick)
+library(HH)
 library(tidyverse)
+library(tidylog)
 library(gt)
 library(brms)
 ```
 
 ```{r}
 source("0_summary_functions.R")
-library(patchwork)
-library(magick)
 ```
 
 
@@ -127,7 +133,6 @@ comp_wide <- comp_wide %>%
            # var_id, var_id_cycle, rmse_icc)
 
 comp_wide <- comp_wide %>% arrange(desc(as.numeric(Days)))
-library(tidylog)
 comp <- comp_wide %>% 
   select(-Sample) %>% 
   pivot_longer(c(-Dataset, -Hormone))
@@ -168,7 +173,6 @@ comp %>%
 ## Figure 1
 
 ```{r fig.width = 10, fig.height = 7.1}
-library(cowplot)
 theme_set(theme_cowplot())
 
 low_space <- list(
@@ -194,25 +198,35 @@ remove_y_axis_p4 <- list(
 )
 
 margin_top <- 0
-plot_grid(nrow = 2, align = "hv", 
-  rel_widths = c(0.05, rep(c(1,-0.15), times = 3), 0.05, rep(c(1,-0.15))),
+multiplot <- plot_grid(nrow = 2, align = "hv", 
+  rel_widths = c(0.05, rep(c(1,-0.15), times = 4), 0.05, rep(c(1,-0.15))),
 NULL,
-cycle_phase_plot(e2_summaries[["BioCycle"]], "lh_day_model") + low_space + ggtitle("", subtitle = "BioCycle")+ theme(plot.margin = unit(c(0,0, margin_top, 0), "cm")), NULL,
-cycle_phase_plot(e2_summaries[["Marcinkowska 2020"]], "lh_day_model") + low_space + ggtitle("", subtitle = "Marcinkowska '20") + remove_y_axis_e2+ theme(plot.margin = unit(c(0,0, margin_top, 0), "cm")), NULL,
-cycle_phase_plot(e2_summaries[["GOCD2"]], "lh_day_model") + low_space + ggtitle("", subtitle = "Jünger '18") + remove_y_axis_e2+ theme(plot.margin = unit(c(0,0, margin_top, 0), "cm")),
+cycle_phase_plot(e2_summaries[["BioCycle"]], "lh_day_model") + low_space + ggtitle("", subtitle = "BioCycle\nSerum ELISA")+ theme(plot.margin = unit(c(0,0, margin_top, 0), "cm")), NULL,
+cycle_phase_plot(e2_summaries[["Marcinkowska 2020"]], "lh_day_model") + low_space + ggtitle("", subtitle = "Marcinkowska '20\nSaliva ELISA") + remove_y_axis_e2+ theme(plot.margin = unit(c(0,0, margin_top, 0), "cm")), NULL,
+cycle_phase_plot(e2_summaries[["GOL2"]], "lh_day_model") + low_space + ggtitle("", subtitle = "Stern '21\nSaliva ELISA") + remove_y_axis_e2+ theme(plot.margin = unit(c(0,0, margin_top, 0), "cm")), NULL,
+cycle_phase_plot(e2_summaries[["GOCD2"]], "lh_day_model") + low_space + ggtitle("", subtitle = "Jünger '18\nSaliva CLIA") + remove_y_axis_e2+ theme(plot.margin = unit(c(0,0, margin_top, 0), "cm")),
 
 NULL,
-cycle_phase_plot(p4_summaries[["BioCycle"]], "lh_day_model", custom_limits = log(c(0.2, 1900))) + low_space+ theme(plot.margin = unit(c(margin_top,0, 0, 0), "cm")), NULL,
-cycle_phase_plot(p4_summaries[["Marcinkowska 2020"]], "lh_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4+ theme(plot.margin = unit(c(margin_top,0, 0, 0), "cm")), NULL,
-cycle_phase_plot(p4_summaries[["GOCD2"]], "lh_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4+ theme(plot.margin = unit(c(margin_top,0, 0, 0), "cm"))
+cycle_phase_plot(p4_summaries[["BioCycle"]], "lh_day_model", custom_limits = log(c(0.2, 1900))) + low_space  + ggtitle("", subtitle = "\nSerum ELISA")+ theme(plot.margin = unit(c(margin_top,0, 0, 0), "cm")), NULL,
+cycle_phase_plot(p4_summaries[["Marcinkowska 2020"]], "lh_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", subtitle = "\nSaliva ELISA") + remove_y_axis_p4+ theme(plot.margin = unit(c(margin_top,0, 0, 0), "cm")), NULL,
+cycle_phase_plot(p4_summaries[["GOL2"]], "lh_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", subtitle = "\nSaliva LC-MS/MS") + remove_y_axis_p4+ theme(plot.margin = unit(c(margin_top,0, 0, 0), "cm")), NULL,
+cycle_phase_plot(p4_summaries[["GOCD2"]], "lh_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", subtitle = "\nSaliva LC-MS/MS") + remove_y_axis_p4+ theme(plot.margin = unit(c(margin_top,0, 0, 0), "cm"))
 )
 
-ggsave("plots/Figure1.pdf", width = 10, height = 7.1, units = "in")
-ggsave("plots/Figure1.png", width = 10, height = 7.1, units = "in")
+x.grob <- textGrob("Days relative to LH surge (day 0)", 
+                   gp=gpar(fontface="bold", col="black", fontsize=15))
+pdf("plots/Figure1.pdf", width = 10, height = 7.1, units = "in")
+grid.arrange(arrangeGrob(multiplot, bottom = x.grob))
+dev.off()
+
+png("plots/Figure1.png", width = 10, height = 7.1, units = "in", res = 300)
+grid.arrange(arrangeGrob(multiplot, bottom = x.grob))
+dev.off()
+
 
 f1 <- image_read("plots/Figure1.png")
-c(f1 %>% image_crop("3000x950+0+70"),
-    f1 %>% image_crop("3000x850+0+1230")) %>% 
+c(f1 %>% image_crop("3000x930+0+70"),
+    f1 %>% image_crop("3000x1080+0+1140")) %>% 
   image_append(stack = TRUE) %>% 
   image_write("plots/Figure1.png")
 ```
@@ -230,31 +244,40 @@ low_space <- list(
         plot.margin = unit(c(0, 0, 0, 0), "cm"))
         )
 
-plot_grid(nrow = 2, align = "hv",  hjust = -0.3,
+multiplot <- plot_grid(nrow = 2, align = "hv",  hjust = -0.3,
 rel_widths = c(0.1, rep(c(1,-0.2), times = 6), 0.1, rep(c(1,-0.2))),
 NULL,
-cycle_phase_plot(e2_summaries[["BioCycle"]], "bc_day_model") + low_space + ggtitle("", subtitle = "BioCycle"), NULL,
-cycle_phase_plot(e2_summaries[["OCMATE Non-HC"]], "bc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "OCMATE"), NULL,
-cycle_phase_plot(e2_summaries[["Roney 2013"]], "bc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "Roney '13 E2"), NULL,
-cycle_phase_plot(e2_summaries[["GOL2"]], "bc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "Jünger '18"), NULL,
-cycle_phase_plot(e2_summaries[["GOCD2"]], "bc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "Stern '21"), NULL,
-cycle_phase_plot(e2_summaries[["Marcinkowska 2020"]], "bc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "Marcinkowska '20"), 
+cycle_phase_plot(e2_summaries[["BioCycle"]], "bc_day_model") + low_space + ggtitle("", subtitle = "BioCycle\nSerum ELISA"), NULL,
+cycle_phase_plot(e2_summaries[["OCMATE Non-HC"]], "bc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "OCMATE\nSaliva ELISA"), NULL,
+cycle_phase_plot(e2_summaries[["Roney 2013"]], "bc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "Roney '13\nSaliva ELISA"), NULL,
+cycle_phase_plot(e2_summaries[["GOL2"]], "bc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "Stern '21\nSaliva ELISA"), NULL,
+cycle_phase_plot(e2_summaries[["GOCD2"]], "bc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "Jünger '18\nSaliva CLIA"), NULL,
+cycle_phase_plot(e2_summaries[["Marcinkowska 2020"]], "bc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "Marcinkowska '20\nSaliva ELISA"), 
 
 NULL,
-cycle_phase_plot(p4_summaries[["BioCycle"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space, NULL,
-cycle_phase_plot(p4_summaries[["OCMATE Non-HC"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-cycle_phase_plot(p4_summaries[["Roney 2013"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-cycle_phase_plot(p4_summaries[["GOL2"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-cycle_phase_plot(p4_summaries[["GOCD2"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-cycle_phase_plot(p4_summaries[["Marcinkowska 2020"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4)
+cycle_phase_plot(p4_summaries[["BioCycle"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", subtitle = "\nSerum ELISA"), NULL,
+cycle_phase_plot(p4_summaries[["OCMATE Non-HC"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", subtitle = "\nSaliva ELISA") + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["Roney 2013"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", subtitle = "\nSaliva ELISA")  + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["GOL2"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", subtitle = "\nSaliva LC-MS/MS")  + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["GOCD2"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", subtitle = "\nSaliva LC-MS/MS")  + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["Marcinkowska 2020"]], "bc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", subtitle = "\nSaliva ELISA") + remove_y_axis_p4)
 
-ggsave("plots/Figure2.pdf", width = 14.22, height = 9, units = "in")
-ggsave("plots/Figure2.png", width = 14.22, height = 9, units = "in")
+x.grob <- textGrob("Days relative to next menstrual onset (day 0)", 
+                   gp=gpar(fontface="bold", col="black", fontsize=15))
+pdf("plots/Figure2.pdf", width = 14.22, height = 9)
+grid.arrange(arrangeGrob(multiplot, bottom = x.grob))
+dev.off()
+
+png("plots/Figure2.png", width = 14.22, height = 9, units = "in", res = 300)
+grid.arrange(arrangeGrob(multiplot, bottom = x.grob))
+dev.off()
+# ggsave("plots/Figure2.pdf", width = 14.22, height = 9, units = "in")
+# ggsave("plots/Figure2.png", width = 14.22, height = 9, units = "in")
 
 f2 <- image_read("plots/Figure2.png")
 image_info(f2)
 c(f2 %>% image_crop("4266x1250+0+70"),
-    f2 %>% image_crop("4266x1150+0+1490")) %>% 
+    f2 %>% image_crop("4266x1350+0+1420")) %>% 
   image_append(stack = TRUE) %>% 
   image_write("plots/Figure2.png")
 ```
@@ -274,9 +297,9 @@ low_space <- list(
 plot_grid(nrow = 2, align = "hv",  hjust = -0.8, vjust = 3, 
   rel_widths = c(0.05, rep(c(1,-0.15), times = 3), 0.05, rep(c(1,-0.15))),
 NULL,
-cycle_phase_plot(e2_summaries[["GOL2"]], "fc_day_model", custom_limits = log(c(1.8, 20))) + low_space + ggtitle("", subtitle = "Forward-counting"), NULL,
-cycle_phase_plot(e2_summaries[["GOL2"]], "bc_day_model", custom_limits = log(c(1.8, 20))) + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "Backward-counting"), NULL,
-cycle_phase_plot(e2_summaries[["GOL2"]], "lh_day_model", custom_limits = log(c(1.8, 20))) + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "LH surge"),
+cycle_phase_plot(e2_summaries[["GOL2"]], "fc_day_model", custom_limits = log(c(0.8, 20))) + low_space + ggtitle("", subtitle = "Forward-counting"), NULL,
+cycle_phase_plot(e2_summaries[["GOL2"]], "bc_day_model", custom_limits = log(c(0.8, 20))) + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "Backward-counting"), NULL,
+cycle_phase_plot(e2_summaries[["GOL2"]], "lh_day_model", custom_limits = log(c(0.8, 20))) + low_space + remove_y_axis_e2 + ggtitle("", subtitle = "LH surge"),
 
 NULL,
 cycle_phase_plot(p4_summaries[["GOL2"]], "fc_day_model", custom_limits = log(c(0.5, 700))) + low_space, NULL,
@@ -374,7 +397,6 @@ rr_saliva <- all_stats %>% select(Hormone, Dataset, contains("_imputed_rr")) %>%
          conf.low = conf.low/serum,
          conf.high = conf.high/serum)
 
-library(ggrepel)
 rr_saliva %>% 
   filter(Dataset != "BioCycle") %>% 
   ggplot(aes(Dataset, estimate, ymin = conf.low, ymax = conf.high,
@@ -537,38 +559,47 @@ low_space <- list(
         plot.margin = unit(c(0, 0, 0, 0), "cm"))
         )
 
-plot_grid(nrow = 2, align = "hv", 
+multiplot <- plot_grid(nrow = 2, align = "hv", 
           label_size = 10,
 label_y = 0.99, hjust = -0.3,
 rel_widths = c(0.1, rep(c(1,-0.2), times = 8), 0.1, rep(c(1,-0.2))),
 NULL,
-cycle_phase_plot(e2_summaries[["BioCycle"]], "fc_day_model") + low_space + ggtitle("", "BioCycle"), NULL,
-cycle_phase_plot(e2_summaries[["OCMATE Non-HC"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "OCMATE"), NULL,
-cycle_phase_plot(e2_summaries[["Roney 2013"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Roney '13"), NULL,
-cycle_phase_plot(e2_summaries[["GOL2"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Jünger '18"), NULL,
-cycle_phase_plot(e2_summaries[["GOCD2"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Stern '21"), NULL,
-cycle_phase_plot(e2_summaries[["Marcinkowska 2020"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Marcinkowska '20"), NULL,
-cycle_phase_plot(e2_summaries[["Blake 2017"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Blake '17"), NULL,
-cycle_phase_plot(e2_summaries[["Grebe et al. 2016"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Grebe '16"), 
+cycle_phase_plot(e2_summaries[["BioCycle"]], "fc_day_model") + low_space + ggtitle("", "BioCycle\nSerum ELISA"), NULL,
+cycle_phase_plot(e2_summaries[["OCMATE Non-HC"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "OCMATE\nSaliva ELISA"), NULL,
+cycle_phase_plot(e2_summaries[["Roney 2013"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Roney '13\nSaliva ELISA"), NULL,
+cycle_phase_plot(e2_summaries[["GOL2"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Stern '21\nSaliva ELISA"), NULL,
+cycle_phase_plot(e2_summaries[["GOCD2"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Jünger '18\nSaliva CLIA"), NULL,
+cycle_phase_plot(e2_summaries[["Marcinkowska 2020"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Marcinkowska '20\nSaliva ELISA"), NULL,
+cycle_phase_plot(e2_summaries[["Blake 2017"]], "fc_day_model") + low_space + remove_y_axis_e2+ ggtitle("", "Blake '17\nSaliva ELISA"), NULL,
+cycle_phase_plot(e2_summaries[["Grebe et al. 2016"]], "fc_day_model") + low_space + remove_y_axis_e2 + ggtitle("", "Grebe '16\nSaliva ELISA"), 
 
 NULL,
-cycle_phase_plot(p4_summaries[["BioCycle"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space, NULL,
-cycle_phase_plot(p4_summaries[["OCMATE Non-HC"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-cycle_phase_plot(p4_summaries[["Roney 2013"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-cycle_phase_plot(p4_summaries[["GOL2"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-cycle_phase_plot(p4_summaries[["GOCD2"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-cycle_phase_plot(p4_summaries[["Marcinkowska 2020"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-cycle_phase_plot(p4_summaries[["Blake 2017"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4, NULL,
-cycle_phase_plot(p4_summaries[["Grebe et al. 2016"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + remove_y_axis_p4
+cycle_phase_plot(p4_summaries[["BioCycle"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", "\nSerum ELISA"), NULL,
+cycle_phase_plot(p4_summaries[["OCMATE Non-HC"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", "\nSaliva ELISA") + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["Roney 2013"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", "\nSaliva ELISA") + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["GOL2"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", "\nSaliva LC-MS/MS") + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["GOCD2"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", "\nSaliva LC-MS/MS") + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["Marcinkowska 2020"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", "\nSaliva ELISA") + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["Blake 2017"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", "\nSaliva ELISA") + remove_y_axis_p4, NULL,
+cycle_phase_plot(p4_summaries[["Grebe et al. 2016"]], "fc_day_model", custom_limits = log(c(0.2, 1900))) + low_space + ggtitle("", "\nSaliva ELISA") + remove_y_axis_p4
 )
 
-ggsave("plots/S_Figure1.pdf", width = 14.3, height = 9, units = "in")
-ggsave("plots/S_Figure1.png", width = 15.3, height = 9, units = "in")
+x.grob <- textGrob("Days relative to last menstrual onset (day 0)", 
+                   gp=gpar(fontface="bold", col="black", fontsize=15))
+pdf("plots/S_Figure1.pdf", width = 15.3, height = 9)
+grid.arrange(arrangeGrob(multiplot, bottom = x.grob))
+dev.off()
+
+png("plots/S_Figure1.png", width = 15.3, height = 9, units = "in", res = 300)
+grid.arrange(arrangeGrob(multiplot, bottom = x.grob))
+dev.off()
+# ggsave("plots/S_Figure1.pdf", width = 14.22, height = 9, units = "in")
+# ggsave("plots/S_Figure1.png", width = 14.22, height = 9, units = "in")
 
 sf1 <- image_read("plots/S_Figure1.png")
 image_info(sf1)
-c(sf1 %>% image_crop("4590x1250+50+70"),
-    sf1 %>% image_crop("4590x1150+50+1490")) %>% 
+c(sf1 %>% image_crop("4590x1250+0+70"),
+    sf1 %>% image_crop("4590x1350+0+1420")) %>% 
   image_append(stack = TRUE) %>% 
   image_write("plots/S_Figure1.png")
 ```
@@ -635,6 +666,9 @@ marc <- marc %>% group_by(id, cycle) %>% pipeline_e2_drop
 
 biocycle <- biocycle %>% group_by(id, cycle) %>% pipeline_e2_drop
 
+marc_cycles <- marc %>% group_by(id) %>% summarise(max_prog = max(progesterone, na.rm = T), anov_prog = max_prog < 94.3, anov_lh = all(is.na(lh_day)))
+xtabs(~ anov_prog + anov_lh, marc_cycles)
+psych::cohen.kappa(marc_cycles %>% select(anov_prog, anov_lh) %>% as.matrix())
 
 ggplot(biocycle, aes(ed_day, log(estradiol))) +
   geom_point(alpha = 0.1) +
@@ -1016,6 +1050,16 @@ cor.test(mgd$est_estradiol_lh_high, log(mgd$`Estradiol_95%`))
 cor.test(mgd$est_progesterone_lh_low, log(mgd$`Progesterone_5%`))
 cor.test(mgd$est_progesterone_lh_high, log(mgd$`Progesterone_95%`))
 
+
+bc_st <- biocycle %>% 
+    mutate(lh_day = DRLH_serum_peak) %>% left_join(stricker2, by = c("lh_day" = "Days from LH peak"))
+
+cor.test((bc_st$estradiol), (bc_st$`Mean Estradiol`))
+cor.test((bc_st$progesterone), (bc_st$`Mean Progesterone`))
+cor.test(log(bc_st$estradiol), log(bc_st$`Mean Estradiol`))
+cor.test(log(bc_st$progesterone), log(bc_st$`Mean Progesterone`))
+
+
 lh_days_serum <- biocycle %>% 
   mutate(lh_day = DRLH_serum_peak) %>% 
   drop_na(DRLH_serum_surge) %>% 
@@ -1029,6 +1073,13 @@ lh_days_serum <- biocycle %>%
             `progesterone_5%` = quantile(progesterone, probs = 0.05, na.rm = T),
             `progesterone_95%` = quantile(progesterone, probs = 0.95, na.rm = T),
             progesterone = mean(progesterone, na.rm = T))
+# 
+# ggplot()+ geom_ribbon(aes(x = `Days from LH peak`, ymin = (`Estradiol_5%`), ymax = (`Estradiol_95%`)), stat = 'identity', data = stricker2, fill = "gold") + geom_line(aes(x = `Days from LH peak`, y = (`Mean Estradiol`)), stat = 'identity', data = stricker2, color = "black")
+# 
+# 
+# e2_serum_surge + low_space + 
+#   geom_ribbon(aes(x = `Days from LH peak`, y=NA_real_, ymin = log(`Estradiol_5%`/100), ymax = log(`Estradiol_95%`/100)), stat = 'identity', data = stricker2, fill = "gold") + 
+#   geom_line(aes(x = `Days from LH peak`, y = log(`Mean Estradiol`/100)), stat = 'identity', data = stricker2, color = "black")
 
 mgd <- lh_days_serum %>% left_join(stricker2, by = c("lh_day" = "Days from LH peak"))
 cor.test(mgd$estradiol, mgd$`Mean Estradiol`)
@@ -1139,7 +1190,6 @@ options(digits = 2)
 ce$age %>% filter(round(age, 1) %in% c(18, 22, 30, 44)) %>% select(age, estimate__)
 anov_lh <- ce
 
-library(cowplot)
 plot_grid(
   plot(anov_serum)[[1]]+ ylab("Anovulatory cycle rate") + theme_cowplot() + ggtitle("Algorithm 4", "Serum P4≤5 ng/mL and no late\nserum LH peak is observed") +
     coord_cartesian(ylim = c(0, 1)), 
@@ -1227,5 +1277,270 @@ plot_grid(e2_surge + low_space, e2_bc + low_space,
 
 ggsave("plots/S_Figure6.pdf", width = 8, height = 7, units = "in")
 ggsave("plots/S_Figure6.png", width = 8, height = 7, units = "in")
+```
+
+
+
+## Variance explained
+
+```{r}
+study_names <- c("BioCycle", "Roney 2013", "OCMATE Non-HC", "Marcinkowska 2020", "GOL2", "GOCD2", "Blake 2017", "Grebe et al. 2016")
+short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Stern '21", "Jünger '18", "Blake '17", "Grebe '16")
+
+extract_var_components <- function(model) {
+  vc <- VarCorr(model)
+  vcs <- vc %>% map(~ as_tibble(.$sd ^ 2)) %>% bind_rows(.id ="param") %>% 
+    column_to_rownames("param")
+  br2 <- bayes_R2(model, 
+                       re_formula = NA)[,"Estimate"]
+  vcs$Estimate <- vcs$Estimate/sum(vcs$Estimate,na.rm=T)*(1-br2)
+  tibble(residual = 100*vcs["residual", "Estimate"],
+         cycle_id = 100*vcs["id:cycle", "Estimate"],
+         id = 100*vcs["id", "Estimate"],
+         cycle_phase = 100*br2)
+}
+
+e2_summaries_bc <- e2_summaries
+e2_summaries_bc$`Grebe et al. 2016` <- NULL
+var_comps <- e2_summaries_bc %>% map(~ extract_var_components(.$bc_day_model)) %>% bind_rows(.id = "Dataset") #%>% 
+#pivot_longer(-Dataset) %>% 
+  # mutate(name = factor(name, c("cycle_id", "id", "cycle_phase", "residual")))
+
+names(short_names) <- study_names
+var_comps$Dataset <- factor(as.character(short_names[var_comps$Dataset]), levels = short_names)
+
+var_comps <- var_comps %>% arrange(desc(cycle_phase)) %>% column_to_rownames("Dataset")
+
+rowSums(var_comps,na.rm=T)
+
+# e2_summaries_bc %>% map(~ extract_var_components(.$bc_day_model)) %>% bind_rows(.id = "Dataset") %>% 
+#   pivot_longer(-Dataset) %>% 
+#   mutate(name = factor(name, c("cycle_id", "id", "cycle_phase", "residual"))) %>% 
+# ggplot(., aes(x=1,y = value, fill = name)) + 
+#   geom_col(position = "stack") +
+#   facet_wrap(~ Dataset) +
+#   coord_polar()
+
+ll <- likert(var_comps , horizontal=F,aspect=1.5,
+       main="Variance explained in log(Estradiol)",
+       auto.key=list(space="right", columns=1,
+                     as.percent = T,
+                     reverse=TRUE, padding.text=2),
+       xlab = "Percentage",
+       col=c("lightgray", "#8a927b", "#b0874f", "#4898c7"),
+       ReferenceZero = 3.5,
+       rightAxis = T,
+       ylim = c(-100,100),
+       scales=list(y=list(rot=0), x=list(rot=70)),
+       par.settings = list(axis.line = list(col = "transparent")),
+       rightAxisLabels = sprintf("%.0f%%", var_comps$cycle_phase))
+ll
+pdf("plots/Figure5.pdf", width = 8, height = 8)
+ll
+dev.off()
+
+svglite::svglite("plots/Figure5a.svg", width = 8, height = 8)
+ll
+dev.off()
+
+var_comps_ss <- var_comps %>% rownames_to_column("Dataset") %>% mutate(Serum = if_else( Dataset=="BioCycle", "Serum IA", "Saliva IA")) %>% group_by(Serum) %>% summarise_all(~mean(.,na.rm=T)) %>% select(-Dataset) %>% column_to_rownames("Serum")
+
+likert(var_comps_ss , horizontal=F,aspect=1.5,
+       main="Variance explained in log(Estradiol)",
+       auto.key=list(space="right", columns=1,
+                     as.percent = T,
+                     reverse=TRUE, padding.text=2),
+       xlab = "Percentage",
+       col=c("lightgray", "#8a927b", "#b0874f", "#4898c7"),
+       ReferenceZero = 3.5,
+       rightAxis = T,
+       scales=list(y=list(rot=0), x=list(rot=70)),
+       par.settings = list(axis.line = list(col = "transparent")),
+       rightAxisLabels = sprintf("%.0f%%", var_comps_ss$cycle_phase))
+
+
+p4_summaries_bc <- p4_summaries
+p4_summaries_bc$`Grebe et al. 2016` <- NULL
+var_comps <- p4_summaries_bc %>% map(~ extract_var_components(.$bc_day_model)) %>% bind_rows(.id = "Dataset") #%>% 
+#pivot_longer(-Dataset) %>% 
+  # mutate(name = factor(name, c("cycle_id", "id", "cycle_phase", "residual")))
+
+names(short_names) <- study_names
+var_comps$Dataset <- factor(as.character(short_names[var_comps$Dataset]), levels = short_names)
+
+var_comps <- var_comps %>% arrange(desc(cycle_phase)) %>% column_to_rownames("Dataset")
+
+rowSums(var_comps,na.rm=T)
+
+llb <- likert(var_comps , horizontal=F,aspect=1.5,
+       main="Variance explained in log(Progesterone)",
+       auto.key=list(space="right", columns=1,
+                     as.percent = T,
+                     reverse=TRUE, padding.text=2),
+       xlab = "Percentage",
+       col=c("lightgray", "#8a927b", "#b0874f", "#4898c7"),
+       ReferenceZero = 3.5,
+       rightAxis = T,
+       scales=list(y=list(rot=0), x=list(rot=70)),
+       ylim = c(-100,100),
+       par.settings = list(axis.line = list(col = "transparent")),
+       rightAxisLabels = sprintf("%.0f%%", var_comps$cycle_phase))
+llb
+
+pdf("plots/Figure5b.pdf", width = 8, height = 8)
+llb
+dev.off()
+
+svglite::svglite("plots/Figure5b.svg", width = 8, height = 8)
+llb
+dev.off()
+
+var_comps %>% rownames_to_column("Dataset") %>% mutate(Serum = if_else( Dataset=="BioCycle", "Serum", "Saliva")) %>% group_by(Serum) %>% summarise_all(~mean(.,na.rm=T)) %>% select(-Dataset) %>% column_to_rownames("Serum") %>% 
+likert(. , horizontal=TRUE,aspect=1.5,
+       main="Variance explained in log(Progesterone)",
+       auto.key=list(space="right", columns=1,
+                     as.percent = T,
+                     reverse=TRUE, padding.text=2),
+       xlab = "Percentage",
+       col=c("#9F3B2B", "#b66b56", "#21523B", "#feefd5"))
+
+```
+
+## Supplementary Note 7
+## S Table 1
+Tabular overview of studies (assay, available cycle phase measures, means, SDs, ranges, logmean/sd, missing/censored values.
+
+```{r}
+summaries <- list.files("summaries", full.names = T)
+summaries <- summaries[!str_detect(summaries, "(empty|Ovulatory|OCMATE HC|BioCycle_Estradiol|Estradiol LCMS|Progesterone.02)")]
+summaries <- summaries[str_detect(summaries, pattern = "(Estradiol|Progesterone)")]
+summary_names <- str_match(summaries, "table_(.+?)\\.rds")[,2]
+message(paste(summary_names, "\n"))
+sus <- list()
+su_dfs <- list()
+for(s in seq_along(summaries)) {
+    su <- rio::import(summaries[s])
+    su_df <- su
+    su_df$Sample <- summary_names[s]
+    su_df$imputed_fc_vs_measured_graph <- 
+    su_df$imputed_bc_vs_measured_graph <- 
+    su_df$imputed_lh_vs_measured_graph <- 
+    su_df$bc_day_model <- 
+    su_df$fc_day_model <- 
+    su_df$lh_day_model <- 
+    su_df$distribution <- NULL
+    su_df$imputed_fc_vs_measured_graph <- 
+    su_df$imputed_bc_vs_measured_graph <- 
+    su_df$imputed_lh_vs_measured_graph <- 
+    su_df$Distribution <- 
+    su_df$plot_bc <- 
+    su_df$plot_fc <- 
+    su_df$plot_lh <- summary_names[s]
+    sus[[summary_names[s]]] <- su
+    su_dfs[[summary_names[s]]] <- su_df %>% as_tibble() %>% mutate_if(is.numeric, ~ sprintf("%.2f", .))
+}
+
+```
+
+
+```{r}
+comp_wide <- as_tibble(bind_rows(su_dfs, .id = "Sample")) %>%
+    mutate_at(vars(n_women, n_cycles, n_days, missing, censored, outliers, usable_n, usable_n_women), 
+              ~ str_sub(., 1, -4))
+all_stats <- comp_wide
+comp_wide <- comp_wide %>%
+    mutate_at(vars(missing, censored, outliers), ~ sprintf("%.0f (%.0f%%)", as.numeric(.), 100*as.numeric(.)/as.numeric(n_days)))
+
+comp_wide <- comp_wide %>% 
+  mutate(
+    `Freeze-thaw cycles` = "",
+    `Exclusions gender` = "",
+    `Exclusions anovulatory/irregular` = "",
+    `Assay manufacturer` = str_match(Method, "\\((.+)\\)")[,2],
+    `Sampling time` = "",
+    `Avoid` = "") %>% 
+    select(Sample, 
+           Dataset,
+          Days = n_days,
+          `Freeze-thaw cycles`, 
+          `Exclusions gender`,
+          `Exclusions anovulatory/irregular`,
+           Hormone,
+          `Assay manufacturer`,
+          `Avoid`,
+          `Sampling time`, 
+          `Limit of quantitation` = LOQ, `Limit of detection`, `Intraassay CV`, `Interassay CV`)
+           # icc, `Variance Ratio`, 
+           # var_id, var_id_cycle, rmse_icc)
+
+comp_wide <- comp_wide %>% arrange(desc(as.numeric(Days)))
+
+comp <- comp_wide %>% 
+  select(-Sample, -Days) %>% 
+  pivot_longer(c(-Dataset, -Hormone))
+
+table(comp$Hormone)
+comp <- comp %>% 
+    mutate(
+      Hormone = str_replace(Hormone, "Free ", ""),
+      Hormone = str_replace(Hormone, ".02", ""),
+      name = if_else(! name %in% c("Assay manufacturer", "Interassay CV", "Intraassay CV", "Limit of quantitation", "Limit of detection"),
+                                      name,
+                                      paste0(Hormone,"__", name))) %>% 
+    select(-Hormone) %>% 
+    distinct() %>% 
+    pivot_wider(name, Dataset) %>% 
+    rename(rowname = name)
+
+comp <- comp %>% 
+  mutate(rowgroup = case_when(
+    str_detect(rowname, "Estradiol") ~ "Estradiol",
+    str_detect(rowname, "Progesterone") ~ "Progesterone",
+    !rowname %in% c("Assay manufacturer", "Interassay CV", "Intraassay CV", "Limit of quantitation", "Limit of detection") ~ "Sample",
+    TRUE ~ "XX"
+  ),
+  rowname = str_match(rowname, "(__)?([^_]+?)$")[,3])
+  
+comp %>% 
+  gt(groupname_col = "rowgroup") %>% 
+  tab_header(
+    title = "Study summary",
+    subtitle = "Assay procedures"
+  )# %>%
+    # cols_width(everything() ~ px(230))
+```
+
+## S Table 2
+```{r}
+
+sample_sizes <- sus %>% map(function(su) {
+  df <- tibble(Dataset = su$Dataset, Hormone = su$Hormone)
+  m <- summary(su$fc_day_model)
+  df$fc_day = str_c(m$nobs,"/", str_c(rev(m$ngrps), collapse = "/"))
+  m <- summary(su$bc_day_model)
+  if(length(m) > 3)
+    df$bc_day = str_c(m$nobs,"/", str_c(rev(m$ngrps), collapse = "/"))
+  m <- summary(su$lh_day_model)
+  if(length(m) > 3)
+    df$lh_day = str_c(m$nobs,"/", str_c(rev(m$ngrps), collapse = "/"))
+  df
+}) %>% 
+  bind_rows(.id = "Sample") %>% 
+    mutate(
+      Hormone = str_replace(Hormone, "Free ", ""),
+      Hormone = str_replace(Hormone, ".02", "")
+    )
+
+sample_sizes$Dataset <- factor(as.character(short_names[sample_sizes$Dataset]), levels = short_names)
+
+sample_sizes %>% 
+  select(-Sample) %>% 
+  arrange(Dataset, Hormone) %>% 
+  mutate(Dataset = if_else(Hormone == "Progesterone", "", as.character(Dataset))) %>% 
+  gt() %>% 
+  tab_header(
+    title = "Sample sizes",
+    subtitle = "by cycle phase measure, hormone and study."
+  )
 ```
 

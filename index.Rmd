@@ -105,7 +105,7 @@ summary_table <- function(Hormone) {
            everything(), -matches("rmse_[^i]"), -contains("_vs_measured"))
   
   study_names <- c("BioCycle", "Roney 2013", "OCMATE Non-HC", "Marcinkowska 2020", "GOL2", "GOCD2", "Blake 2017", "Grebe et al. 2016")
-  short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Jünger '18", "Stern '21", "Blake '17", "Grebe '16")
+  short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Stern '21", "Jünger '18",  "Blake '17", "Grebe '16")
   names(short_names) <- study_names
   comp_wide$Dataset <- factor(as.character(short_names[comp_wide$Dataset]), levels = short_names)
 

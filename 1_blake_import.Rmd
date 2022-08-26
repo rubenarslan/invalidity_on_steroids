@@ -113,6 +113,9 @@ range(blake_long$fc_day, na.rm = T)
 range(blake_long$bc_day, na.rm = T)
 range(blake_long$lh_day, na.rm = T)
 
+sort(blake_long$estradiol)
+sort(blake_long$progesterone)
+
 blake_long <- blake_long %>% 
   mutate(estradiol_cens = if_else(estradiol <= 2.1, "left", "none"),
     estradiol = if_else(estradiol_cens == "left", 2.1, estradiol)

@@ -119,9 +119,11 @@ gol %>% select(Person, contains("/")) %>% group_by(Person) %>% mutate_all(~ . - 
 
 gol <- gol %>% rename(id = Person) %>% select(id, cycle, cycle_length, bc_day, fc_day, lh_day, estradiol, progesterone, everything()) %>% as_tibble()
 
+sort(gol$estradiol)
+
 gol <- gol %>% 
-  mutate(estradiol_cens = if_else(estradiol <= 2.1, "left", "none"),
-    estradiol = if_else(estradiol_cens == "left", 2.1, estradiol)
+  mutate(estradiol_cens = if_else(estradiol <= 2.1, "left", "none")
+#    estradiol = if_else(estradiol_cens == "left", 0.6, estradiol)
   ) %>% 
   mutate(
     progesterone_cens = if_else(progesterone <= 0, "left", "none"),
@@ -176,7 +178,7 @@ summarise_hormone(df = df, Dataset = "GOL2",
                   LOD = 2.1,
                   LOQ = 2.1,
                   CV_intra = 8.8,
-                  CV_inter = 11.3,
+                  CV_inter = 11.8,
                   Procedure = "For hormone assays, we collected four saliva samples from each participant (one per testing session). Contamination of saliva samples was minimized by asking participants to abstain from eating, drinking (except plain water), smoking, chewing gum, or brushing teeth for at least one hour before each session. The samples were stored at − 80 ◦C directly after collection until shipment on dry ice to the Kirschbaum Lab at Technical University of Dresden, Germany (one freeze-thaw cycle). The samples were reanalyzed for estradiol using the highly sensitive 17β-estradiol enzyme immunoassay kit (IBL International, Hamburg, Germany). Samples were analyzed in singlets, however, the lab reported that their procedure yields CVs < 11%.",
                   Scheduling = "peri-ovulatory (2x), mid-luteal und premenstrual 'Sessions two to five were computer-based testing sessions and took place across different phases of the ovulatory cycle, scheduled based on backward counting and the observed LH test surge. Suitable testing days were computed with the help of an Excel sheet created for that purpose (see open material). All participants completed two sessions in their expected fertile phase (mid to late follicular phase, approx. 5–6 days before ovulation) and two sessions in their expected luteal phase (one session in the mid luteal phase, one session in the premenstrual phase). Scheduling was validated via LH test results and via following up to the day of the next menstrual onset. Details can be found in the supple- mentary material. The starting session for each participant depended on their current cycle phase at the introductory session and their personal schedule. Of all participants who finished all sessions, 134 participants started with the first session in their fertile phase, and 123 started in the luteal phase.'", 
                   LH_test = "highly sensitive (10mIU) LH urine ovulation test strips from MedNet GmbH. Participants started LH-testing after menstruation (around reverse cycle day 21) and continued until a rise of LH (positive tests) was observed and a minimum of two days after the tests were negative again (as suggested by Roney, 2018b). Participants were provided with a minimum of ten LH tests each and provided daily pictures of the tests to the investigators for confir- mation. LH results were used to allow flexible scheduling in case LH test results differed from the scheduling based on counting (see supplementary material for details).")

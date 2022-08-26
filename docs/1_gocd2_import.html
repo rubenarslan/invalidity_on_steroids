@@ -1650,6 +1650,11 @@ FALSE  TRUE
 FALSE  TRUE 
   581    47 </code></pre>
 <div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>gocd2</span><span class='op'>$</span><span class='va'>estradiol</span>,na.rm<span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>[1] 0.1522859</code></pre>
+<div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>gocd2</span><span class='op'>$</span><span class='va'>estradiol_lcms</span>,na.rm<span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -1678,8 +1683,8 @@ sample estimates:
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gocd2</span> <span class='op'>&lt;-</span> <span class='va'>gocd2</span> <span class='op'>%&gt;%</span> 
   <span class='fu'>mutate</span><span class='op'>(</span>
-    estradiol_cens <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;=</span> <span class='fl'>2.1</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
-    estradiol <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>2.1</span>, <span class='va'>estradiol</span><span class='op'>)</span>,
+    estradiol_cens <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;=</span> <span class='fl'>0.3</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
+    estradiol <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>0.3</span>, <span class='va'>estradiol</span><span class='op'>)</span>,
     estradiol_lcms <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol_lcms</span><span class='op'>)</span> <span class='op'>|</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span>, <span class='va'>estradiol_lcms</span>, <span class='fl'>1</span><span class='op'>)</span>,
     estradiol_lcms_cens <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol_lcms</span> <span class='op'>&lt;=</span> <span class='fl'>1</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>
   <span class='op'>)</span> <span class='op'>%&gt;%</span> 
@@ -1694,13 +1699,13 @@ sample estimates:
     Pearson&#39;s product-moment correlation
 
 data:  gocd2$estradiol_lcms and gocd2$estradiol
-t = 1.3156, df = 594, p-value = 0.1888
+t = 1.3218, df = 594, p-value = 0.1868
 alternative hypothesis: true correlation is not equal to 0
 95 percent confidence interval:
- -0.02652644  0.13363534
+ -0.02627335  0.13388408
 sample estimates:
        cor 
-0.05390112 </code></pre>
+0.05415365 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>gocd2</span><span class='op'>$</span><span class='va'>estradiol_lcms_cens</span><span class='op'>)</span>
 </code></pre>
@@ -1722,8 +1727,8 @@ is.na(progesterone) FALSE TRUE
 </div>
 <pre><code>              is.na(estradiol)
 estradiol_cens FALSE
-          left    56
-          none   540</code></pre>
+          left     3
+          none   593</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>n_distinct</span><span class='op'>(</span><span class='va'>gocd2</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span>
 </code></pre>
@@ -1741,7 +1746,8 @@ estradiol_cens FALSE
 </code></pre>
 </div>
 </div>
-<h3 id="correlation-between-e2-ia-and-lcms">Correlation between E2 IA and LCMS</h3>
+<h3 id="correlation-between-e2-ia-and-lcms">Correlation between E2 IA
+and LCMS</h3>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gocd2</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>estradiol</span>, <span class='va'>estradiol_lcms</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>summarise_all</span><span class='op'>(</span><span class='fu'>funs</span><span class='op'>(</span>mean <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>.</span>, na.rm<span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span>, sd <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>.</span>, na.rm<span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span>, logmean <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span>, na.rm<span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span>, logsd <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>)</span>, na.rm<span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='op'>)</span>
@@ -1783,13 +1789,13 @@ Please use a list of either functions or lambdas:
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">5.938674</td>
+<td style="text-align: right;">5.880166</td>
 <td style="text-align: right;">4.096589</td>
-<td style="text-align: right;">3.863755</td>
+<td style="text-align: right;">3.928555</td>
 <td style="text-align: right;">15.39471</td>
-<td style="text-align: right;">1.609666</td>
+<td style="text-align: right;">1.568171</td>
 <td style="text-align: right;">0.4829841</td>
-<td style="text-align: right;">0.5768767</td>
+<td style="text-align: right;">0.6666086</td>
 <td style="text-align: right;">0.9771497</td>
 </tr>
 </tbody>
@@ -1808,13 +1814,13 @@ Please use a list of either functions or lambdas:
     Pearson&#39;s product-moment correlation
 
 data:  gocd2$estradiol and gocd2$estradiol_lcms
-t = 1.3156, df = 594, p-value = 0.1888
+t = 1.3218, df = 594, p-value = 0.1868
 alternative hypothesis: true correlation is not equal to 0
 95 percent confidence interval:
- -0.02652644  0.13363534
+ -0.02627335  0.13388408
 sample estimates:
        cor 
-0.05390112 </code></pre>
+0.05415365 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/cor.test.html'>cor.test</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>gocd2</span><span class='op'>$</span><span class='va'>estradiol</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>gocd2</span><span class='op'>$</span><span class='va'>estradiol_lcms</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
@@ -1823,13 +1829,13 @@ sample estimates:
     Pearson&#39;s product-moment correlation
 
 data:  log(gocd2$estradiol) and log(gocd2$estradiol_lcms)
-t = 1.7993, df = 594, p-value = 0.07248
+t = 1.5589, df = 594, p-value = 0.1195
 alternative hypothesis: true correlation is not equal to 0
 95 percent confidence interval:
- -0.006726411  0.153033910
+ -0.01656408  0.14341107
 sample estimates:
        cor 
-0.07362609 </code></pre>
+0.06383356 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>gocd2</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>estradiol</span>, <span class='va'>estradiol_lcms</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>scale_x_log10</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>scale_y_log10</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
@@ -2043,7 +2049,7 @@ $r_bc
 [1] &quot;0.75 [0.72;0.77]&quot;
 
 $rmse_bc
-[1] &quot;1.43 [1.34;1.51]&quot;
+[1] &quot;1.43 [1.34;1.52]&quot;
 
 $r_loo_bc
 [1] &quot;0.73 [0.68;0.77]&quot;
@@ -2124,7 +2130,7 @@ $r_fc
 [1] &quot;0.71 [0.68;0.74]&quot;
 
 $rmse_fc
-[1] &quot;1.50 [1.39;1.62]&quot;
+[1] &quot;1.50 [1.40;1.62]&quot;
 
 $r_loo_fc
 [1] &quot;0.70 [0.64;0.74]&quot;
@@ -2205,7 +2211,7 @@ $r_lh
 [1] &quot;0.70 [0.67;0.73]&quot;
 
 $rmse_lh
-[1] &quot;1.57 [1.46;1.68]&quot;
+[1] &quot;1.57 [1.46;1.69]&quot;
 
 $r_loo_lh
 [1] &quot;0.69 [0.63;0.74]&quot;
@@ -2248,9 +2254,9 @@ $rmse_lh_imputed
                   Hormone <span class='op'>=</span> <span class='st'>"Estradiol"</span>,
                   Method <span class='op'>=</span> <span class='st'>"Salivary immunoassay (IBL)"</span>,
                   Citation <span class='op'>=</span> <span class='st'>"Jünger, J., Kordsmeyer, T. L., Gerlach, T. M., &amp; Penke, L. (2018). Fertile women evaluate male bodies as more attractive, regardless of masculinity. Evolution and Human Behavior: Official Journal of the Human Behavior and Evolution Society, 39(4), 412–423. https://doi.org/10.1016/j.evolhumbehav.2018.03.007"</span>,
-                  LOD <span class='op'>=</span> <span class='fl'>2.1</span>,
-                  LOQ <span class='op'>=</span> <span class='fl'>2.1</span>,
-                  CV_intra <span class='op'>=</span> <span class='fl'>8.8</span>,
+                  LOD <span class='op'>=</span> <span class='fl'>0.3</span>,
+                  LOQ <span class='op'>=</span> <span class='fl'>0.9</span>,
+                  CV_intra <span class='op'>=</span> <span class='fl'>9.7</span>,
                   CV_inter <span class='op'>=</span> <span class='fl'>11.3</span>,
                   Procedure <span class='op'>=</span> <span class='st'>"Next, the saliva samples were collected via passive drool. For hormone assays, we collected four saliva samples from each participant (one per testing session). Contamination of saliva samples was minimized by asking participants to abstain from eating, drinking (except plain water), smoking, chewing gum or brushing teeth for at least one hour before each session. The samples were stored at -80°C directly after collection until shipment on dry ice to the Kirschbaum Lab at Technical University of Dresden, Germany, where estradiol, progesterone, testosterone and cortisol was assessed via liquid chromatography mass spectrometry (LCMS; Gao, Stalder, &amp; Kirschbaum, 2015). Since the LCMS analysis of the estradiol levels did only detect 22% of all possible values, the samples were reanalyzed using the highly sensitive 17β-estradiol enzyme immunoassay kit (IBL International, Hamburg, Germany). These latter estradiol values were used in subsequent analyses. "</span>,
                   Scheduling <span class='op'>=</span> <span class='st'>"Peri-ovulatory &amp; Luteal 'Sessions two to five, the computer-based testing sessions, took place across two ovulatory cycles per participant, once per cycle during the fertile and once during the luteal phase. To control for possible effects of diurnal changes in hormone levels (Bao et al., 2003; Veldhuis et al., 1988), all sessions took place in the second half of the day (mainly between 11.30 am and 6 pm).'"</span>, 
@@ -2261,13 +2267,42 @@ $rmse_lh_imputed
 <pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
 <pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Estradiol_icc_id.rds&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
+
+Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Estradiol_icc.rds&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
+
+Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
+
+Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Estradiol_bc.rds&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Estradiol_bc.rds&#39;</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
 
-Warning: Rows containing NAs were excluded from the model.</code></pre>
+Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Estradiol_fc.rds&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Estradiol_fc.rds&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
+
+Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Estradiol_lh.rds&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Estradiol_lh.rds&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
+<pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
@@ -2288,13 +2323,13 @@ $Method
 [1] &quot;Salivary immunoassay (IBL)&quot;
 
 $`Limit of detection`
-[1] 2.1
+[1] 0.3
 
 $LOQ
-[1] 2.1
+[1] 0.9
 
 $`Intraassay CV`
-[1] 8.8
+[1] 9.7
 
 $`Interassay CV`
 [1] 11.3
@@ -2314,34 +2349,34 @@ $distribution</code></pre>
 <p><img src="1_gocd2_import_files/figure-html5/unnamed-chunk-4-5.png" width="624" /></p>
 <pre><code>
 $mean
-[1] 5.938674
+[1] 5.880166
 
 $logmean
-[1] 1.609666
+[1] 1.568171
 
 $logsd
-[1] 0.5768767
+[1] 0.6666086
 
 $median
 [1] 5.004458
 
 $sd
-[1] 3.863755
+[1] 3.928555
 
 $mad
 [1] 3.126347
 
 $range
-[1] &quot;2.10, 31.00&quot;
+[1] &quot;0.30, 31.00&quot;
 
 $missing
 [1] 32
 
 $outliers
-[1] 2
+[1] 0
 
 $censored
-[1] 56
+[1] 3
 
 $n_women
 [1] 157
@@ -2374,19 +2409,19 @@ $no_lh_surge_cycle
 [1] &quot;57/243 (23%)&quot;
 
 $var_id_loo
-[1] &quot;0.16 [0.10;0.22]&quot;
+[1] &quot;0.14 [0.08;0.19]&quot;
 
 $var_cycle_loo
-[1] &quot;0.17 [0.10;0.22]&quot;
+[1] &quot;0.14 [0.08;0.19]&quot;
 
 $var_id
-[1] &quot;0.34 [0.27;0.42] (33%)&quot;
+[1] &quot;0.35 [0.27;0.43] (27%)&quot;
 
 $var_cycle
-[1] &quot;0.13 [0.01;0.27] (7%)&quot;
+[1] &quot;0.13 [0.01;0.28] (5%)&quot;
 
 $var_resid
-[1] &quot;0.50 [0.46;0.55] (61%)&quot;
+[1] &quot;0.55 [0.51;0.60] (68%)&quot;
 
 $bc_day_model
  Family: gaussian 
@@ -2398,44 +2433,44 @@ Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycl
 
 Smooth Terms: 
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sbc_day_1)     0.62      0.42     0.14     1.72 1.00     1539
+sds(sbc_day_1)     0.54      0.41     0.06     1.56 1.00     1446
                Tail_ESS
-sds(sbc_day_1)     2057
+sds(sbc_day_1)     1732
 
 Group-Level Effects: 
 ~id (Number of levels: 157) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.34      0.04     0.27     0.42 1.00     1030
+sd(Intercept)     0.35      0.04     0.26     0.42 1.00      920
               Tail_ESS
-sd(Intercept)     1687
+sd(Intercept)     1461
 
 ~id:cycle (Number of levels: 356) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.13      0.07     0.01     0.27 1.01      274
+sd(Intercept)     0.14      0.07     0.01     0.28 1.01      342
               Tail_ESS
-sd(Intercept)      715
+sd(Intercept)      799
 
 Population-Level Effects: 
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     1.58      0.04     1.52     1.66 1.00     1848     2211
-sbc_day_1     0.14      1.14    -2.33     2.28 1.00     2361     2009
+Intercept     1.57      0.04     1.49     1.64 1.00     2947     3163
+sbc_day_1     0.12      1.11    -2.41     2.25 1.00     2896     2251
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.50      0.02     0.45     0.54 1.00      834     1871
+sigma     0.55      0.02     0.50     0.60 1.00      872     2266
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_bc
-[1] &quot;0.14 [0.05;0.22]&quot;
+[1] &quot;0.11 [0.03;0.18]&quot;
 
 $rmse_bc
-[1] &quot;0.76 [0.71;0.81]&quot;
+[1] &quot;0.86 [0.81;0.91]&quot;
 
 $r_loo_bc
-[1] &quot;NaN [NaN;0.03]&quot;
+[1] &quot;NaN [NaN;NaN]&quot;
 
 $r_bc_stirn
 [1] &quot; 0.03 [-0.06; 0.11]&quot;
@@ -2444,22 +2479,22 @@ $r_log_bc_stirn
 [1] &quot; 0.04 [-0.05; 0.12]&quot;
 
 $r_diff_bc_stirn
-[1] &quot;-0.05 [-0.13; 0.04]&quot;
+[1] &quot;-0.04 [-0.13; 0.04]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot;-0.04 [-0.12; 0.05]&quot;
+[1] &quot;-0.03 [-0.11; 0.05]&quot;
 
 $r_bc_imputed
-[1] &quot; 0.11 [ 0.02; 0.19]&quot;
+[1] &quot; 0.10 [ 0.01; 0.18]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.15 [ 0.06; 0.23]&quot;
+[1] &quot; 0.12 [ 0.03; 0.20]&quot;
 
 $sd_bc_imputed
 [1] &quot;0.40 (41%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.23 [ 0.10; 0.35]&quot;
+[1] &quot; 0.18 [ 0.05; 0.31]&quot;
 
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 9 rows containing missing values (geom_smooth).</code></pre>
@@ -2467,7 +2502,7 @@ $imputed_bc_vs_measured_graph</code></pre>
 <p><img src="1_gocd2_import_files/figure-html5/unnamed-chunk-4-6.png" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
-[1] &quot; 0.71&quot;
+[1] &quot; 0.77&quot;
 
 $fc_day_model
  Family: gaussian 
@@ -2479,78 +2514,78 @@ Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycl
 
 Smooth Terms: 
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     0.97      0.65     0.17     2.59 1.00     1069
+sds(sfc_day_1)     0.86      0.64     0.07     2.43 1.00      988
                Tail_ESS
-sds(sfc_day_1)     1607
+sds(sfc_day_1)     1236
 
 Group-Level Effects: 
 ~id (Number of levels: 125) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.35      0.05     0.26     0.43 1.00      880
+sd(Intercept)     0.36      0.05     0.27     0.45 1.00     1020
               Tail_ESS
-sd(Intercept)     1387
+sd(Intercept)     1522
 
 ~id:cycle (Number of levels: 243) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.11      0.07     0.01     0.26 1.01      299
+sd(Intercept)     0.11      0.07     0.01     0.27 1.01      406
               Tail_ESS
-sd(Intercept)      667
+sd(Intercept)      756
 
 Population-Level Effects: 
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     1.57      0.04     1.49     1.65 1.00     2302     2834
-sfc_day_1     0.75      1.84    -3.44     4.30 1.00     1933     1845
+Intercept     1.55      0.04     1.47     1.64 1.00     1783     2436
+sfc_day_1     0.73      1.71    -3.19     4.27 1.00     1296     1252
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.50      0.03     0.45     0.56 1.00     1336     2689
+sigma     0.55      0.03     0.50     0.60 1.00     1431     2334
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_fc
-[1] &quot;0.18 [0.07;0.27]&quot;
+[1] &quot;0.14 [0.04;0.23]&quot;
 
 $rmse_fc
-[1] &quot;0.76 [0.71;0.82]&quot;
+[1] &quot;0.86 [0.80;0.93]&quot;
 
 $r_loo_fc
-[1] &quot;NaN [NaN;0.13]&quot;
+[1] &quot;NaN [NaN;0.09]&quot;
 
 $r_fc_stirn
 [1] &quot;-0.05 [-0.15; 0.05]&quot;
 
 $r_log_fc_stirn
-[1] &quot;-0.01 [-0.11; 0.09]&quot;
+[1] &quot;-0.00 [-0.11; 0.10]&quot;
 
 $r_diff_fc_stirn
-[1] &quot;-0.09 [-0.19; 0.02]&quot;
+[1] &quot;-0.08 [-0.18; 0.02]&quot;
 
 $r_log_diff_fc_stirn
-[1] &quot;-0.03 [-0.13; 0.07]&quot;
+[1] &quot;-0.01 [-0.11; 0.09]&quot;
 
 $r_fc_imputed
-[1] &quot; 0.11 [ 0.01; 0.21]&quot;
+[1] &quot; 0.10 [-0.01; 0.20]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.16 [ 0.06; 0.26]&quot;
+[1] &quot; 0.12 [ 0.02; 0.22]&quot;
 
 $sd_fc_imputed
 [1] &quot;0.31 (36%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.26 [ 0.10; 0.40]&quot;
+[1] &quot; 0.20 [ 0.04; 0.35]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 176 rows containing missing values (geom_smooth).</code></pre>
 <pre><code>Warning: Removed 176 rows containing missing values (geom_point).</code></pre>
 <pre><code>
 $rmse_fc_imputed
-[1] &quot; 0.64&quot;
+[1] &quot; 0.71&quot;
 
 $lh_day_model</code></pre>
-<pre><code>Warning: There were 4 divergent transitions after warmup.
+<pre><code>Warning: There were 5 divergent transitions after warmup.
 Increasing adapt_delta above may help. See http://mc-stan.org/misc/
 warnings.html#divergent-transitions-after-warmup</code></pre>
 <p><img src="1_gocd2_import_files/figure-html5/unnamed-chunk-4-7.png" width="624" /></p>
@@ -2563,31 +2598,31 @@ Formula: log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1 | id) + (1 | id:cycl
 
 Smooth Terms: 
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(slh_day_1)     0.43      0.45     0.01     1.66 1.00     1122
+sds(slh_day_1)     0.49      0.48     0.02     1.78 1.00     1267
                Tail_ESS
-sds(slh_day_1)     2327
+sds(slh_day_1)     2047
 
 Group-Level Effects: 
 ~id (Number of levels: 145) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.33      0.04     0.24     0.41 1.00     1189
+sd(Intercept)     0.34      0.05     0.24     0.43 1.00      554
               Tail_ESS
-sd(Intercept)     1674
+sd(Intercept)      746
 
 ~id:cycle (Number of levels: 256) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.13      0.07     0.01     0.27 1.01      402
+sd(Intercept)     0.14      0.08     0.01     0.30 1.01      360
               Tail_ESS
-sd(Intercept)      953
+sd(Intercept)     1054
 
 Population-Level Effects: 
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     1.59      0.04     1.51     1.66 1.00     4735     3326
-slh_day_1    -0.01      1.13    -2.24     2.60 1.00     3989     1959
+Intercept     1.57      0.04     1.48     1.65 1.00     2459     2856
+slh_day_1    -0.09      1.17    -2.53     2.54 1.00     1924     1779
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.51      0.03     0.46     0.57 1.00     1272     1985
+sigma     0.57      0.03     0.52     0.62 1.00     1504     2398
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2597,34 +2632,34 @@ $r_lh
 [1] &quot;0.08 [0.01;0.16]&quot;
 
 $rmse_lh
-[1] &quot;0.77 [0.72;0.83]&quot;
+[1] &quot;0.88 [0.82;0.94]&quot;
 
 $r_loo_lh
 [1] &quot;NaN [NaN;NaN]&quot;
 
 $r_prob_lh
-[1] &quot; 0.03 [-0.07; 0.12]&quot;
-
-$r_log_prob_lh
 [1] &quot; 0.03 [-0.06; 0.13]&quot;
 
-$r_diff_prob_lh
-[1] &quot;-0.02 [-0.11; 0.08]&quot;
-
-$r_log_diff_prob_lh
-[1] &quot;-0.01 [-0.10; 0.09]&quot;
-
-$r_lh_imputed
+$r_log_prob_lh
 [1] &quot; 0.06 [-0.04; 0.15]&quot;
 
+$r_diff_prob_lh
+[1] &quot;-0.01 [-0.11; 0.08]&quot;
+
+$r_log_diff_prob_lh
+[1] &quot; 0.01 [-0.09; 0.10]&quot;
+
+$r_lh_imputed
+[1] &quot; 0.07 [-0.02; 0.17]&quot;
+
 $r_diff_lh_imputed
-[1] &quot; 0.00 [-0.09; 0.10]&quot;
+[1] &quot; 0.02 [-0.08; 0.11]&quot;
 
 $sd_lh_imputed
 [1] &quot;0.43 (43%)&quot;
 
 $r_diff_lh_imputed_rr
-[1] &quot; 0.01 [-0.14; 0.15]&quot;
+[1] &quot; 0.03 [-0.12; 0.17]&quot;
 
 $imputed_lh_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 123 rows containing missing values (geom_smooth).</code></pre>
@@ -2632,7 +2667,7 @@ $imputed_lh_vs_measured_graph</code></pre>
 <p><img src="1_gocd2_import_files/figure-html5/unnamed-chunk-4-8.png" width="624" /></p>
 <pre><code>
 $rmse_lh_imputed
-[1] &quot; 0.70&quot;</code></pre>
+[1] &quot; 0.77&quot;</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>gocd2</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>estradiol_lcms</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_lcms_cens</span>, <span class='va'>cycle_length</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span>
 
@@ -2830,7 +2865,7 @@ $r_bc
 [1] &quot;0.29 [0.05;0.53]&quot;
 
 $rmse_bc
-[1] &quot;3.92 [3.27;4.72]&quot;
+[1] &quot;3.92 [3.29;4.68]&quot;
 
 $r_loo_bc
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -2911,7 +2946,7 @@ $r_fc
 [1] &quot;0.47 [0.14;0.63]&quot;
 
 $rmse_fc
-[1] &quot;4.20 [3.33;5.26]&quot;
+[1] &quot;4.20 [3.34;5.27]&quot;
 
 $r_loo_fc
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -2995,7 +3030,7 @@ $r_lh
 [1] &quot;0.29 [0.05;0.49]&quot;
 
 $rmse_lh
-[1] &quot;4.06 [3.28;5.01]&quot;
+[1] &quot;4.06 [3.32;5.02]&quot;
 
 $r_loo_lh
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -3039,15 +3074,28 @@ $rmse_lh_imputed
 </div>
 <pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Er_bc.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Er_bc.rds&#39;</code></pre>
+<pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Warning: Some Pareto k diagnostic values are slightly high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_ExP_bc.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_ExP_bc.rds&#39;</code></pre>
+<pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Er_fc.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Er_fc.rds&#39;</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
 
-Warning: Rows containing NAs were excluded from the model.
+Warning: Some Pareto k diagnostic values are slightly high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_ExP_fc.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_ExP_fc.rds&#39;</code></pre>
+<pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Er_lh.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_Er_lh.rds&#39;</code></pre>
+<pre><code>Warning: Rows containing NAs were excluded from the model.
 
-Warning: Rows containing NAs were excluded from the model.
-
-Warning: Rows containing NAs were excluded from the model.
-
-Warning: Rows containing NAs were excluded from the model.</code></pre>
+Warning: Some Pareto k diagnostic values are slightly high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_ExP_lh.rds&#39;</code></pre>
+<pre><code>Automatically saving the model object in &#39;models/m_GOCD2_ExP_lh.rds&#39;</code></pre>
 <pre><code>$Dataset
 [1] &quot;GOCD2&quot;
 
@@ -3074,19 +3122,19 @@ $r_ep
 [1] &quot; 0.02 [-0.06; 0.11]&quot;
 
 $r_log_ep
-[1] &quot; 0.03 [-0.05; 0.11]&quot;
+[1] &quot; 0.03 [-0.06; 0.11]&quot;
 
 $r_e_ratio
-[1] &quot; 0.28 [ 0.20; 0.36]&quot;
+[1] &quot; 0.29 [ 0.21; 0.36]&quot;
 
 $r_log_e_ratio
-[1] &quot; 0.32 [ 0.24; 0.39]&quot;
+[1] &quot; 0.37 [ 0.29; 0.44]&quot;
 
 $r_p_ratio
-[1] &quot;-0.26 [-0.34;-0.18]&quot;
+[1] &quot;-0.26 [-0.33;-0.18]&quot;
 
 $r_log_p_ratio
-[1] &quot;-0.94 [-0.95;-0.93]&quot;
+[1] &quot;-0.92 [-0.93;-0.91]&quot;
 
 $usable_n
 [1] 512
@@ -3095,7 +3143,7 @@ $r_bc_ratio
 [1] &quot; 0.36 [ 0.28; 0.43]&quot;
 
 $r_bc_log_ratio
-[1] &quot; 0.65 [ 0.60; 0.70]&quot;
+[1] &quot; 0.65 [ 0.59; 0.69]&quot;
 
 $m_bc_prob_rat
  Family: gaussian 
@@ -3107,17 +3155,17 @@ Formula: prc_stirn_bc ~ log(estradiol) + log(ratio)
 
 Population-Level Effects: 
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept        0.50      0.02     0.45     0.55 1.00     3314
-logestradiol    -0.08      0.01    -0.10    -0.05 1.00     3382
-logratio         0.10      0.00     0.09     0.10 1.00     3934
+Intercept        0.50      0.02     0.46     0.55 1.00     2690
+logestradiol    -0.08      0.01    -0.10    -0.06 1.00     2763
+logratio         0.10      0.00     0.09     0.10 1.00     3569
              Tail_ESS
-Intercept        2588
-logestradiol     2716
-logratio         2706
+Intercept        2430
+logestradiol     2409
+logratio         3122
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.16      0.01     0.15     0.17 1.00     3358     2802
+sigma     0.16      0.01     0.15     0.18 1.00     2753     2304
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3136,36 +3184,36 @@ Formula: prc_stirn_bc ~ s(log(estradiol), log(progesterone))
 
 Smooth Terms: 
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.15      0.06     0.06
+sds(slogestradiollogprogesterone_1)     0.16      0.06     0.06
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.28 1.00     1479     2317
+sds(slogestradiollogprogesterone_1)     0.31 1.00      937     1092
 
 Population-Level Effects: 
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.25      0.01     0.23     0.26
-slogestradiollogprogesterone_1    -0.88      0.41    -1.65    -0.01
-slogestradiollogprogesterone_2    -0.19      0.16    -0.50     0.16
+slogestradiollogprogesterone_1    -0.52      0.30    -1.07     0.14
+slogestradiollogprogesterone_2    -0.72      0.44    -1.53     0.20
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.01     6008     2611
-slogestradiollogprogesterone_1 1.00     1927     2286
-slogestradiollogprogesterone_2 1.00     1724     2114
+Intercept                      1.00     7962     3254
+slogestradiollogprogesterone_1 1.00     1494     1896
+slogestradiollogprogesterone_2 1.00     1469     1809
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.16      0.01     0.15     0.17 1.00     5113     3062
+sigma     0.16      0.01     0.15     0.17 1.00     6030     3060
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_loo_bc
-[1] &quot;0.69 [0.64;0.73]&quot;
+[1] &quot;0.69 [0.63;0.73]&quot;
 
 $r_fc_ratio
-[1] &quot; 0.35 [ 0.26; 0.44]&quot;
+[1] &quot; 0.35 [ 0.25; 0.44]&quot;
 
 $r_fc_log_ratio
-[1] &quot; 0.61 [ 0.54; 0.68]&quot;
+[1] &quot; 0.61 [ 0.54; 0.67]&quot;
 
 $m_fc_prob_rat
  Family: gaussian 
@@ -3177,17 +3225,17 @@ Formula: prc_stirn_fc ~ log(estradiol) + log(ratio)
 
 Population-Level Effects: 
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept        0.48      0.03     0.42     0.54 1.00     2619
-logestradiol    -0.08      0.02    -0.12    -0.05 1.00     2701
-logratio         0.09      0.01     0.08     0.10 1.00     3243
+Intercept        0.48      0.03     0.42     0.53 1.00     2722
+logestradiol    -0.08      0.01    -0.11    -0.05 1.00     2740
+logratio         0.09      0.01     0.08     0.10 1.00     3377
              Tail_ESS
-Intercept        2422
-logestradiol     2581
-logratio         3107
+Intercept        2749
+logestradiol     2663
+logratio         2854
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.17      0.01     0.16     0.18 1.00     3049     2690
+sigma     0.17      0.01     0.16     0.18 1.00     3125     2548
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3206,23 +3254,23 @@ Formula: prc_stirn_fc ~ s(log(estradiol), log(progesterone))
 
 Smooth Terms: 
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.08      0.04     0.01
+sds(slogestradiollogprogesterone_1)     0.11      0.06     0.01
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.17 1.00      967      897
+sds(slogestradiollogprogesterone_1)     0.25 1.00     1151     1224
 
 Population-Level Effects: 
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.23      0.01     0.22     0.25
-slogestradiollogprogesterone_1     0.15      0.11    -0.07     0.37
-slogestradiollogprogesterone_2    -0.89      0.24    -1.32    -0.36
+slogestradiollogprogesterone_1     0.34      0.19    -0.03     0.73
+slogestradiollogprogesterone_2    -1.50      0.36    -2.16    -0.74
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     6435     3105
-slogestradiollogprogesterone_1 1.00     2318     2034
-slogestradiollogprogesterone_2 1.00     1795     1829
+Intercept                      1.00     6835     2613
+slogestradiollogprogesterone_1 1.00     2681     2283
+slogestradiollogprogesterone_2 1.00     1908     2482
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.17      0.01     0.16     0.18 1.00     4746     2991
+sigma     0.17      0.01     0.16     0.18 1.00     5277     3043
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3235,7 +3283,7 @@ $r_lh_ratio
 [1] &quot; 0.27 [ 0.17; 0.36]&quot;
 
 $r_lh_log_ratio
-[1] &quot; 0.58 [ 0.52; 0.65]&quot;
+[1] &quot; 0.58 [ 0.51; 0.64]&quot;
 
 $m_lh_prob_rat
  Family: gaussian 
@@ -3247,24 +3295,24 @@ Formula: fertile_lh ~ log(estradiol) + log(ratio)
 
 Population-Level Effects: 
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept        0.68      0.05     0.59     0.78 1.00     2945
-logestradiol    -0.12      0.03    -0.17    -0.07 1.00     2848
-logratio         0.14      0.01     0.12     0.16 1.00     3798
+Intercept        0.67      0.04     0.58     0.76 1.00     2957
+logestradiol    -0.11      0.02    -0.16    -0.06 1.00     2945
+logratio         0.14      0.01     0.12     0.16 1.00     3440
              Tail_ESS
-Intercept        2480
-logestradiol     2455
-logratio         2992
+Intercept        2572
+logestradiol     2443
+logratio         2935
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.29      0.01     0.27     0.31 1.00     3596     2399
+sigma     0.29      0.01     0.27     0.31 1.00     3124     2712
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_erat_lh
-[1] &quot;0.60 [0.54;0.66]&quot;
+[1] &quot;0.61 [0.54;0.66]&quot;
 
 $m_lh_prob
  Family: gaussian 
@@ -3276,23 +3324,23 @@ Formula: fertile_lh ~ s(log(estradiol), log(progesterone))
 
 Smooth Terms: 
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.32      0.14     0.07
+sds(slogestradiollogprogesterone_1)     0.23      0.10     0.06
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.65 1.01      961      910
+sds(slogestradiollogprogesterone_1)     0.44 1.00     1230     1435
 
 Population-Level Effects: 
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.33      0.01     0.30     0.36
-slogestradiollogprogesterone_1     1.18      1.02    -1.02     2.97
-slogestradiollogprogesterone_2    -0.57      0.51    -1.51     0.48
+slogestradiollogprogesterone_1    -0.88      0.76    -2.18     0.76
+slogestradiollogprogesterone_2    -0.41      0.29    -0.99     0.16
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     5973     3405
-slogestradiollogprogesterone_1 1.00     1258     1524
-slogestradiollogprogesterone_2 1.00     1515     2226
+Intercept                      1.00     7414     3152
+slogestradiollogprogesterone_1 1.00     1712     1880
+slogestradiollogprogesterone_2 1.00     2413     1990
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.28      0.01     0.26     0.30 1.00     4905     2757
+sigma     0.28      0.01     0.26     0.30 1.00     5598     3245
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3301,7 +3349,8 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_lh
 [1] &quot;0.62 [0.55;0.67]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb135"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb174"><pre
+class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

@@ -84,14 +84,15 @@ qplot(gocd2_u$lh_day)
 
 table( is.na(gocd2$progesterone), exclude = NULL)
 
+min(gocd2$estradiol,na.rm=T)
 min(gocd2$estradiol_lcms,na.rm=T)
 qplot(gocd2$estradiol_lcms,na.rm=T) + scale_x_log10()
 cor.test(gocd2$estradiol_lcms, gocd2$estradiol)
 
 gocd2 <- gocd2 %>% 
   mutate(
-    estradiol_cens = if_else(estradiol <= 2.1, "left", "none"),
-    estradiol = if_else(estradiol_cens == "left", 2.1, estradiol),
+    estradiol_cens = if_else(estradiol <= 0.3, "left", "none"),
+    estradiol = if_else(estradiol_cens == "left", 0.3, estradiol),
     estradiol_lcms = if_else(!is.na(estradiol_lcms) | is.na(estradiol), estradiol_lcms, 1),
     estradiol_lcms_cens = if_else(estradiol_lcms <= 1, "left", "none")
   ) %>% 
@@ -150,9 +151,9 @@ summarise_hormone(df = df, Dataset = "GOCD2",
                   Hormone = "Estradiol",
                   Method = "Salivary immunoassay (IBL)",
                   Citation = "Jünger, J., Kordsmeyer, T. L., Gerlach, T. M., & Penke, L. (2018). Fertile women evaluate male bodies as more attractive, regardless of masculinity. Evolution and Human Behavior: Official Journal of the Human Behavior and Evolution Society, 39(4), 412–423. https://doi.org/10.1016/j.evolhumbehav.2018.03.007",
-                  LOD = 2.1,
-                  LOQ = 2.1,
-                  CV_intra = 8.8,
+                  LOD = 0.3,
+                  LOQ = 0.9,
+                  CV_intra = 9.7,
                   CV_inter = 11.3,
                   Procedure = "Next, the saliva samples were collected via passive drool. For hormone assays, we collected four saliva samples from each participant (one per testing session). Contamination of saliva samples was minimized by asking participants to abstain from eating, drinking (except plain water), smoking, chewing gum or brushing teeth for at least one hour before each session. The samples were stored at -80°C directly after collection until shipment on dry ice to the Kirschbaum Lab at Technical University of Dresden, Germany, where estradiol, progesterone, testosterone and cortisol was assessed via liquid chromatography mass spectrometry (LCMS; Gao, Stalder, & Kirschbaum, 2015). Since the LCMS analysis of the estradiol levels did only detect 22% of all possible values, the samples were reanalyzed using the highly sensitive 17β-estradiol enzyme immunoassay kit (IBL International, Hamburg, Germany). These latter estradiol values were used in subsequent analyses. ",
                   Scheduling = "Peri-ovulatory & Luteal 'Sessions two to five, the computer-based testing sessions, took place across two ovulatory cycles per participant, once per cycle during the fertile and once during the luteal phase. To control for possible effects of diurnal changes in hormone levels (Bao et al., 2003; Veldhuis et al., 1988), all sessions took place in the second half of the day (mainly between 11.30 am and 6 pm).'", 
