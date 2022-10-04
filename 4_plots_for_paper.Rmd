@@ -954,7 +954,6 @@ ggsave("plots/S_Figure4.png", width = 14, height = 8, units = "in")
 biocycle <- readRDS("biocycle.rds")
 
 
-
 serum_lh_surge_model <- brm(log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1|id) + (1|id:cycle) , data = biocycle %>% mutate(lh_day = DRLH_serum_surge, hormone = estradiol, hormone_cens = estradiol_cens) %>% filter(between(lh_day, -15, 15)) ,
                            control = list(adapt_delta = 0.99),
                            file_refit = "on_change", file = "models/m_BioCycle_Estradiol_lh_surge_serum") %>% 
@@ -1105,6 +1104,98 @@ ggplot(., aes(lh_day, mean, ymin = `5%`, ymax = `95%`, color = dataset)) +
   geom_pointrange(position = position_dodge(width = 0.4)) +
   facet_wrap(~ hormone, scales = "free_y")
 ```
+
+## Supplementary Note 9
+
+```{r}
+# stricker <- rio::import("data/stricker.hormonedata.sav")
+biocycle <- readRDS('biocycle.rds')
+stricker2 <- rio::import("data/tabula-stricker hormone values.tsv")
+lh_days <- rio::import("merge_files/lh_days.rds")
+
+mgd <- biocycle %>% left_join(stricker2, by = c("DRLH_serum_peak" = "Days from LH peak")) %>% left_join(lh_days, by = c("lh_day"))
+cor.test(log(mgd$estradiol), log(mgd$`Mean Estradiol`))
+cor.test(log(mgd$progesterone), log(mgd$`Mean Progesterone`))
+
+mgd <- biocycle %>% left_join(stricker2, by = c("lh_day" = "Days from LH peak")) %>% left_join(lh_days, by = c("lh_day"))
+cor.test(log(mgd$estradiol), log(mgd$`Mean Estradiol`))
+cor.test(log(mgd$progesterone), log(mgd$`Mean Progesterone`))
+
+mgd_restricted <- mgd %>% filter(between(lh_day, -3, 15), lh_day != 1, lh_day != 2, lh_day != 3, lh_day != 4) 
+cor.test(log(mgd_restricted$estradiol), log(mgd_restricted$`Mean Estradiol`))
+cor.test(log(mgd_restricted$progesterone), log(mgd_restricted$`Mean Progesterone`))
+
+ggplot(mgd_restricted, aes(lh_day, estradiol)) + geom_point(alpha = 0.1) + geom_smooth()
+
+
+cor_imp <- broom::tidy(cor.test(log(mgd_restricted$estradiol), log(mgd_restricted$`Mean Estradiol`)))
+
+sd_unrestricted <- sd(lh_days$est_estradiol_lh,na.rm=T)
+sd_observed <- sd(mgd_restricted$est_estradiol_lh, na.rm = T)
+sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
+
+rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
+                                 sd_observed, sd_unrestricted)
+sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+
+cor_imp <- broom::tidy(cor.test(log(mgd_restricted$progesterone), log(mgd_restricted$`Mean Progesterone`)))
+
+sd_unrestricted <- sd(lh_days$est_progesterone_lh,na.rm=T)
+sd_observed <- sd(mgd_restricted$est_progesterone_lh, na.rm = T)
+sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
+
+rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
+                                 sd_observed, sd_unrestricted)
+sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+
+sd_unrestricted <- sd(log(mgd$`Mean Estradiol`), na.rm = T)
+sd_observed <- sd(log(mgd_restricted$`Mean Estradiol`), na.rm = T)
+sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
+
+rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
+                                 sd_observed, sd_unrestricted)
+sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+```
+
+
+### exactly as R4 requested
+```{r}
+mgd_restricted <- mgd %>% filter(between(lh_day, -3, 0) | between(lh_day, 6, 9)) 
+cor.test(log(mgd_restricted$estradiol), log(mgd_restricted$`Mean Estradiol`))
+cor.test(log(mgd_restricted$progesterone), log(mgd_restricted$`Mean Progesterone`))
+
+ggplot(mgd_restricted, aes(lh_day, estradiol)) + geom_point(alpha = 0.1) + geom_smooth()
+
+
+cor_imp <- broom::tidy(cor.test(log(mgd_restricted$estradiol), log(mgd_restricted$`Mean Estradiol`)))
+
+sd_unrestricted <- sd(lh_days$est_estradiol_lh,na.rm=T)
+sd_observed <- sd(mgd_restricted$est_estradiol_lh, na.rm = T)
+sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
+
+rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
+                                 sd_observed, sd_unrestricted)
+sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+
+cor_imp <- broom::tidy(cor.test(log(mgd_restricted$progesterone), log(mgd_restricted$`Mean Progesterone`)))
+
+sd_unrestricted <- sd(lh_days$est_progesterone_lh,na.rm=T)
+sd_observed <- sd(mgd_restricted$est_progesterone_lh, na.rm = T)
+sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
+
+rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
+                                 sd_observed, sd_unrestricted)
+sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+
+sd_unrestricted <- sd(log(mgd$`Mean Estradiol`), na.rm = T)
+sd_observed <- sd(log(mgd_restricted$`Mean Estradiol`), na.rm = T)
+sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
+
+rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
+                                 sd_observed, sd_unrestricted)
+sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+```
+
 
 # Fertile window probability
 
