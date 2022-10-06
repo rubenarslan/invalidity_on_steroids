@@ -1130,7 +1130,8 @@ ggplot(mgd_restricted, aes(lh_day, estradiol)) + geom_point(alpha = 0.1) + geom_
 
 cor_imp <- broom::tidy(cor.test(log(mgd_restricted$estradiol), log(mgd_restricted$`Mean Estradiol`)))
 
-sd_unrestricted <- sd(lh_days$est_estradiol_lh,na.rm=T)
+sd_unrestricted <- sd(lh_days[which(between(lh_days$lh_day, -15, 13)),"est_estradiol_lh"])
+
 sd_observed <- sd(mgd_restricted$est_estradiol_lh, na.rm = T)
 sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
 
@@ -1140,7 +1141,7 @@ sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestri
 
 cor_imp <- broom::tidy(cor.test(log(mgd_restricted$progesterone), log(mgd_restricted$`Mean Progesterone`)))
 
-sd_unrestricted <- sd(lh_days$est_progesterone_lh,na.rm=T)
+sd_unrestricted <- sd(lh_days[which(between(lh_days$lh_day, -15, 13)),"est_progesterone_lh"])
 sd_observed <- sd(mgd_restricted$est_progesterone_lh, na.rm = T)
 sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
 
@@ -1169,7 +1170,7 @@ ggplot(mgd_restricted, aes(lh_day, estradiol)) + geom_point(alpha = 0.1) + geom_
 
 cor_imp <- broom::tidy(cor.test(log(mgd_restricted$estradiol), log(mgd_restricted$`Mean Estradiol`)))
 
-sd_unrestricted <- sd(lh_days$est_estradiol_lh,na.rm=T)
+sd_unrestricted <- sd(lh_days[which(between(lh_days$lh_day, -15, 13)),"est_estradiol_lh"])
 sd_observed <- sd(mgd_restricted$est_estradiol_lh, na.rm = T)
 sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
 
@@ -1179,13 +1180,16 @@ sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestri
 
 cor_imp <- broom::tidy(cor.test(log(mgd_restricted$progesterone), log(mgd_restricted$`Mean Progesterone`)))
 
-sd_unrestricted <- sd(lh_days$est_progesterone_lh,na.rm=T)
+sd_unrestricted <- sd(lh_days[which(between(lh_days$lh_day, -15, 13)),"est_progesterone_lh"])
 sd_observed <- sd(mgd_restricted$est_progesterone_lh, na.rm = T)
 sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
 
 rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
                                  sd_observed, sd_unrestricted)
 sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+
+
+cor_imp <- broom::tidy(cor.test(log(mgd_restricted$estradiol), log(mgd_restricted$`Mean Estradiol`)))
 
 sd_unrestricted <- sd(log(mgd$`Mean Estradiol`), na.rm = T)
 sd_observed <- sd(log(mgd_restricted$`Mean Estradiol`), na.rm = T)
