@@ -1,0 +1,114 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
+library(tidyverse)
+library(tidylog)
+```
+
+```{r}
+broui <- haven::read_sav("data/DB_long_obj2-3.sav")
+
+fc_days <-  rio::import("https://osf.io/download/gufzt/", format = "rds")
+# bc_days <- rio::import("https://osf.io/download/znyuf/", format = "rds")
+# lh_days <- rio::import("https://osf.io/download/qc2az", format = "rds")
+fc_days <- fc_days %>% rename(cycleday = fc_day)
+broui2 <- broui %>% left_join(fc_days, by = "cycleday")
+
+table(is.na(broui$cycleday))
+
+broui2 %>% mutate(assay = haven::as_factor(method, levels = "labels")) %>% 
+  group_by(assay) %>% 
+  summarise(e2 = broom::tidy(cor.test(log(e2), est_free_estradiol_fc)),
+            p4 = broom::tidy(cor.test(log(p4), est_progesterone_fc))) %>%
+  pivot_longer(
+    cols = c(e2, p4),
+    names_to = "hormone",
+    values_to = "correlation_result"
+  ) %>%
+  unnest(correlation_result)
+
+
+
+broui <- broui %>% 
+  mutate(
+    assay = haven::as_factor(method, levels = "labels"),
+    estradiol_cens =  if_else(is.na(e2), "left", "none"),
+    progesterone_cens =  if_else(is.na(p4), "left", "none")
+  ) %>% 
+  rename(id = ID, fc_day = cycleday, cycle_length = cyclelength) %>% 
+  mutate(bc_day = NA_integer_, lh_day = NA_integer_, cycle = 1)
+
+saveRDS(broui, "data/broui.rds")
+```
+
+## Export
+```{r}
+source("0_summary_functions.R")
+export_anon("brouillard2024", broui %>% rename(estradiol = e2, progesterone = p4))
+```
+
+
+## Summarize
+
+```{r}
+names(broui)
+df <- broui %>% 
+  filter(assay == "EIA") %>% 
+  select(id, bc_day, fc_day, lh_day, hormone = p4, hormone_cens = progesterone_cens, cycle, cycle_length) %>%
+  filter(fc_day < 35)
+
+summarise_hormone(df = df, Dataset = "Brouillard et al. 2024", Hormone = "Progesterone",
+      Citation = "",
+      LOD = NA,
+      Method = "Salivary immunoassay",
+      CV_intra = NA,
+      CV_inter = NA,
+      Procedure = "",
+      Scheduling = "",
+        LH_test = "")
+
+df <- broui %>% 
+  filter(assay == "LCMS") %>% 
+  select(id, bc_day, fc_day, lh_day, hormone = p4, hormone_cens = progesterone_cens, cycle, cycle_length) %>%
+  filter(fc_day < 35)
+
+summarise_hormone(df = df, Dataset = "Brouillard et al. 2024", Hormone = "Progesterone",
+      Citation = "",
+      LOD = NA,
+      Method = "Salivary LC-MS/MS",
+      CV_intra = NA,
+      CV_inter = NA,
+      Procedure = "",
+      Scheduling = "",
+        LH_test = "")
+
+
+df <- broui %>% 
+  filter(assay == "EIA") %>% 
+  select(id, bc_day, fc_day, lh_day, hormone = e2, hormone_cens = estradiol_cens, cycle, cycle_length) %>%
+  filter(fc_day < 35)
+
+summarise_hormone(df = df, Dataset = "Brouillard et al. 2024", Hormone = "Estradiol",
+      Citation = "",
+      LOD = NA,
+      Method = "Salivary immunoassay",
+      CV_intra = NA,
+      CV_inter = NA,
+      Procedure = "",
+      Scheduling = "",
+        LH_test = "")
+
+df <- broui %>% 
+  filter(assay == "LCMS") %>% 
+  select(id, bc_day, fc_day, lh_day, hormone = e2, hormone_cens = estradiol_cens, cycle, cycle_length) %>%
+  filter(fc_day < 35)
+
+summarise_hormone(df = df, Dataset = "Brouillard et al. 2024", Hormone = "Estradiol",
+      Citation = "",
+      LOD = NA,
+      Method = "Salivary LC-MS/MS",
+      CV_intra = NA,
+      CV_inter = NA,
+      Procedure = "",
+      Scheduling = "",
+        LH_test = "")
+```
