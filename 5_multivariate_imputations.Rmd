@@ -141,6 +141,8 @@ bc_days$mv_est_testosterone_bc <- round(preds_bc[, "Estimate", "logT"], 2)
 bc_days$mv_est_free_testosterone_bc <- round(preds_bc[, "Estimate", "logFT"], 2)
 bc_days$mv_est_luteinising_bc <- round(preds_bc[, "Estimate", "logLH"], 2)
 rio::export(bc_days ,"merge_files/bc_days_mv.rds")
+rio::export(bc_days ,"merge_files/bc_days_mv.tsv")
+rio::export(bc_days ,"merge_files/bc_days_mv.sav")
 ```
 
 ### Forward counting
@@ -170,6 +172,8 @@ fc_days$mv_est_testosterone_fc <- round(preds_fc[, "Estimate", "logT"], 2)
 fc_days$mv_est_free_testosterone_fc <- round(preds_fc[, "Estimate", "logFT"], 2)
 fc_days$mv_est_luteinising_fc <- round(preds_fc[, "Estimate", "logLH"], 2)
 rio::export(fc_days ,"merge_files/fc_days_mv.rds")
+rio::export(fc_days ,"merge_files/fc_days_mv.tsv")
+rio::export(fc_days ,"merge_files/fc_days_mv.sav")
 ```
 
 ### Relative to LH surge
@@ -204,6 +208,8 @@ lh_days$mv_est_testosterone_lh <- round(preds_lh[, "Estimate", "logT"], 2)
 lh_days$mv_est_luteinising_lh <- round(preds_lh[, "Estimate", "logLH"], 2)
 lh_days$mv_est_free_testosterone_lh <- round(preds_lh[, "Estimate", "logFT"], 2)
 rio::export(lh_days ,"merge_files/lh_days_mv.rds")
+rio::export(lh_days ,"merge_files/lh_days_mv.tsv")
+rio::export(lh_days ,"merge_files/lh_days_mv.sav")
 ```
 
 ## Comparison
