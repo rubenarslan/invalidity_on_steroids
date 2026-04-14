@@ -20,6 +20,7 @@ Below, you'll find a complete tabular summary of the methods and results for eac
 
 - Here, you'll find the code generating the [figures and tables in the manuscript](4_plots_for_paper.html).
 - Here, you'll find the [code generating the imputations](2_impute_by_day.html).
+  - __Edit (2026-04-14):__ I've since revised the imputation code to use [multivariate imputations](5_multivariate_imputations.html). Changes are minor, but you should still use the new MV imputations in the future.
 
 
 ## Tabular summary of analyses
