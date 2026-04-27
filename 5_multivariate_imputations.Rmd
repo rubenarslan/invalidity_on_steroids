@@ -83,6 +83,7 @@ biocycle$logT <- log(biocycle$Testo)
 biocycle$logFE <- log(biocycle$estradiol)
 biocycle$logFT <- log(biocycle$`Free T (ng/dL)`)
 biocycle$logLH <- log(biocycle$LH)
+biocycle$logFSH <- log(biocycle$FSH)
 biocycle$fertile_lh <- NULL
 ```
 
@@ -121,9 +122,10 @@ bf_p_bc <- bf(logP ~ s(bc_day) + (1 | id) + (1|id:cycle))
 bf_t_bc <- bf(logT ~ s(bc_day) + (1 | id) + (1|id:cycle))
 bf_ft_bc <- bf(logFT ~ s(bc_day) + (1 | id) + (1|id:cycle))
 bf_lh_bc <- bf(logLH ~ s(bc_day) + (1 | id) + (1|id:cycle))
+bf_fsh_bc <- bf(logFSH ~ s(bc_day) + (1 | id) + (1|id:cycle))
 
 mod_mv_bc <- brm(
-  bf_e_bc + bf_fe_bc + bf_p_bc + bf_t_bc + bf_ft_bc + bf_lh_bc + set_rescor(TRUE),
+  bf_e_bc + bf_fe_bc + bf_p_bc + bf_t_bc + bf_ft_bc + bf_lh_bc + bf_fsh_bc + set_rescor(TRUE),
   data = biocycle,
   control = list(adapt_delta = 0.95, max_treedepth = 20),
   file = 'models/mod_mv_bc'
@@ -140,6 +142,7 @@ bc_days$mv_est_progesterone_bc <- round(preds_bc[, "Estimate", "logP"], 2)
 bc_days$mv_est_testosterone_bc <- round(preds_bc[, "Estimate", "logT"], 2)
 bc_days$mv_est_free_testosterone_bc <- round(preds_bc[, "Estimate", "logFT"], 2)
 bc_days$mv_est_luteinising_bc <- round(preds_bc[, "Estimate", "logLH"], 2)
+bc_days$mv_est_fsh_bc <- round(preds_bc[, "Estimate", "logFSH"], 2)
 rio::export(bc_days ,"merge_files/bc_days_mv.rds")
 rio::export(bc_days ,"merge_files/bc_days_mv.tsv")
 rio::export(bc_days ,"merge_files/bc_days_mv.sav")
@@ -154,9 +157,10 @@ bf_p_fc <- bf(logP ~ s(fc_day) + (1 | id) + (1|id:cycle))
 bf_t_fc <- bf(logT ~ s(fc_day) + (1 | id) + (1|id:cycle))
 bf_ft_fc <- bf(logFT ~ s(fc_day) + (1 | id) + (1|id:cycle))
 bf_lh_fc <- bf(logLH ~ s(fc_day) + (1 | id) + (1|id:cycle))
+bf_fsh_fc <- bf(logFSH ~ s(fc_day) + (1 | id) + (1|id:cycle))
 
 mod_mv_fc <- brm(
-  bf_e_fc + bf_fe_fc + bf_p_fc + bf_t_fc + bf_ft_fc + bf_lh_fc + set_rescor(TRUE),
+  bf_e_fc + bf_fe_fc + bf_p_fc + bf_t_fc + bf_ft_fc + bf_lh_fc + bf_fsh_fc + set_rescor(TRUE),
   data = biocycle,
   control = list(adapt_delta = 0.95, max_treedepth = 20),
   file = 'models/mod_mv_fc'
@@ -171,6 +175,7 @@ fc_days$mv_est_progesterone_fc <- round(preds_fc[, "Estimate", "logP"], 2)
 fc_days$mv_est_testosterone_fc <- round(preds_fc[, "Estimate", "logT"], 2)
 fc_days$mv_est_free_testosterone_fc <- round(preds_fc[, "Estimate", "logFT"], 2)
 fc_days$mv_est_luteinising_fc <- round(preds_fc[, "Estimate", "logLH"], 2)
+fc_days$mv_est_fsh_fc <- round(preds_fc[, "Estimate", "logFSH"], 2)
 rio::export(fc_days ,"merge_files/fc_days_mv.rds")
 rio::export(fc_days ,"merge_files/fc_days_mv.tsv")
 rio::export(fc_days ,"merge_files/fc_days_mv.sav")
@@ -188,11 +193,12 @@ bf_p_lh <- bf(logP ~ s(lh_day) + (1 | id) + (1|id:cycle))
 bf_t_lh <- bf(logT ~ s(lh_day) + (1 | id) + (1|id:cycle))
 bf_ft_lh <- bf(logFT ~ s(lh_day) + (1 | id) + (1|id:cycle))
 bf_lh_lh <- bf(logLH ~ s(lh_day) + (1 | id) + (1|id:cycle))
+bf_fsh_lh <- bf(logFSH ~ s(lh_day) + (1 | id) + (1|id:cycle))
 
 # PBFW not modeled in LH model
 
 mod_mv_lh <- brm(
-  bf_e_lh + bf_fe_lh + bf_p_lh + bf_t_lh + bf_ft_lh + bf_lh_lh +  set_rescor(TRUE),
+  bf_e_lh + bf_fe_lh + bf_p_lh + bf_t_lh + bf_ft_lh + bf_lh_lh + bf_fsh_lh + set_rescor(TRUE),
   data = biocycle_lh,
   control = list(adapt_delta = 0.95, max_treedepth = 20),
   file = 'models/mod_mv_lh'
@@ -207,6 +213,7 @@ lh_days$mv_est_progesterone_lh <- round(preds_lh[, "Estimate", "logP"], 2)
 lh_days$mv_est_testosterone_lh <- round(preds_lh[, "Estimate", "logT"], 2)
 lh_days$mv_est_luteinising_lh <- round(preds_lh[, "Estimate", "logLH"], 2)
 lh_days$mv_est_free_testosterone_lh <- round(preds_lh[, "Estimate", "logFT"], 2)
+lh_days$mv_est_fsh_lh <- round(preds_lh[, "Estimate", "logFSH"], 2)
 rio::export(lh_days ,"merge_files/lh_days_mv.rds")
 rio::export(lh_days ,"merge_files/lh_days_mv.tsv")
 rio::export(lh_days ,"merge_files/lh_days_mv.sav")
