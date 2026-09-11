@@ -282,10 +282,10 @@ marc %>% filter(date < last_menstrual_onset | date > next_menstrual_onset)
 
 marc_without_cycle_phase <- marc %>% filter(is.na(last_menstrual_onset))
 marc_with_cycle_phase <- marc %>% filter(!is.na(last_menstrual_onset))
-n_distinct(marc_without_cycle_phase$id)
-n_distinct(marc_with_cycle_phase$id)
-setdiff(marc_without_cycle_phase$id, marc_with_cycle_phase$id) %>% sort
-102-n_distinct(marc_with_cycle_phase$id)
+n_distinct(marc_without_cycle_phase$ID)
+n_distinct(marc_with_cycle_phase$ID)
+setdiff(marc_without_cycle_phase$ID, marc_with_cycle_phase$ID) %>% sort
+102-n_distinct(marc_with_cycle_phase$ID)
 
 # n_nonmissing(marc$lh_surge_date)
 # n_nonmissing(marc$lh_surge_date_2)
