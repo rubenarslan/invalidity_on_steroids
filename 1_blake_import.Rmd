@@ -44,7 +44,7 @@ blake_long <- blake_long %>%
          bc_day = Day - LengthRep - 1,
          bc_day = if_else(bc_day < 0, bc_day, NA_real_)) %>% 
   group_by(SUBJECT) %>% 
-  mutate(date_lh_peak = na.omit(date + DaysAfterPeak),
+  mutate(date_lh_peak = na.omit(date - DaysAfterPeak),
          lh_day = as.numeric(date - date_lh_peak),
          cycle_no = if_else(rep(lh_day[1] < lh_day[2] &
                             Day[1] < Day[2], 2), 1, Session + 1))
