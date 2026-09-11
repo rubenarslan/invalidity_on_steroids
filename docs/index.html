@@ -1774,7 +1774,7 @@ Show code
 
 
   <span class='va'>study_names</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BioCycle"</span>, <span class='st'>"Roney 2013"</span>, <span class='st'>"OCMATE Non-HC"</span>, <span class='st'>"Marcinkowska 2020"</span>, <span class='st'>"GOL2"</span>, <span class='st'>"GOCD2"</span>, <span class='st'>"Blake 2017"</span>, <span class='st'>"Grebe et al. 2016"</span><span class='op'>)</span>
-  <span class='va'>short_names</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BioCycle"</span>, <span class='st'>"Roney '13"</span>, <span class='st'>"OCMATE"</span>, <span class='st'>"Marcinkowska '20"</span>, <span class='st'>"Jünger '18"</span>, <span class='st'>"Stern '21"</span>, <span class='st'>"Blake '17"</span>, <span class='st'>"Grebe '16"</span><span class='op'>)</span>
+  <span class='va'>short_names</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"BioCycle"</span>, <span class='st'>"Roney '13"</span>, <span class='st'>"OCMATE"</span>, <span class='st'>"Marcinkowska '20"</span>, <span class='st'>"Stern '21"</span>, <span class='st'>"Jünger '18"</span>, <span class='st'>"Blake '17"</span>, <span class='st'>"Grebe '16"</span><span class='op'>)</span>
   <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>short_names</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='va'>study_names</span>
   <span class='va'>comp_wide</span><span class='op'>$</span><span class='va'>Dataset</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/character.html'>as.character</a></span><span class='op'>(</span><span class='va'>short_names</span><span class='op'>[</span><span class='va'>comp_wide</span><span class='op'>$</span><span class='va'>Dataset</span><span class='op'>]</span><span class='op'>)</span>, levels <span class='op'>=</span> <span class='va'>short_names</span><span class='op'>)</span>
 
@@ -4245,8 +4245,8 @@ Show code
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1"></th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">BioCycle</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Blake '17</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Stern '21</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Jünger '18</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Stern '21</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Grebe '16</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Marcinkowska '20</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">OCMATE</th>
@@ -4260,8 +4260,8 @@ Show code
     <tr><td class="gt_row gt_left gt_stub">Dataset</td>
 <td class="gt_row gt_left">BioCycle</td>
 <td class="gt_row gt_left">Blake '17</td>
-<td class="gt_row gt_left">Stern '21</td>
 <td class="gt_row gt_left">Jünger '18</td>
+<td class="gt_row gt_left">Stern '21</td>
 <td class="gt_row gt_left">Grebe '16</td>
 <td class="gt_row gt_left">Marcinkowska '20</td>
 <td class="gt_row gt_left">OCMATE</td>
