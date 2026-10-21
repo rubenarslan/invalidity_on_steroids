@@ -20,6 +20,7 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -50,16 +51,17 @@ pre.numberSource code > span > a:first-child::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {   }
+  { color: #00769e; background-color: #f1f3f5; }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
+code span { color: #00769e; } /* Normal */
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { color: #657422; } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
-code span.cf { color: #007ba5; } /* ControlFlow */
+code span.cf { color: #00769e; } /* ControlFlow */
 code span.ch { color: #20794d; } /* Char */
 code span.cn { color: #8f5902; } /* Constant */
 code span.co { color: #5e5e5e; } /* Comment */
@@ -73,17 +75,18 @@ code span.fl { color: #ad0000; } /* Float */
 code span.fu { color: #4758ab; } /* Function */
 code span.im { } /* Import */
 code span.in { color: #5e5e5e; } /* Information */
-code span.kw { color: #007ba5; } /* Keyword */
+code span.kw { color: #00769e; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
-code span.ot { color: #007ba5; } /* Other */
+code span.ot { color: #00769e; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
   <title>Salivary and serum immunoassay comparison: Summarize BioCycle</title>
@@ -181,6 +184,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   d-article table.gt_table td,
   d-article table.gt_table th {
     border-bottom: none;
+    font-size: 100%;
   }
 
   .html-widget {
@@ -221,9 +225,21 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     display: none !important;
   }
 
+  hr.section-separator {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin: 0px;
+  }
+
+
+  d-byline {
+    border-top: none;
+  }
+
   d-article {
     padding-top: 2.5rem;
     padding-bottom: 30px;
+    border-top: none;
   }
 
   d-appendix {
@@ -318,6 +334,11 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   d-article div.sourceCode pre {
     padding-left: 18px;
     font-size: 14px;
+  }
+
+  /* tweak for Pandoc numbered line within distill */
+  d-article pre.numberSource code > span {
+      left: -2em;
   }
 
   d-article pre {
@@ -422,10 +443,6 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     position: relative;
     margin-bottom: 2.5em;
     margin-top: 1.5em;
-  }
-
-  .figure img {
-    width: 100%;
   }
 
   .figure .caption {
@@ -1083,6 +1100,12 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // create d-title
     $('.d-title').changeElementType('d-title');
 
+    // separator
+    var separator = '<hr class="section-separator" style="clear: both"/>';
+    // prepend separator above appendix
+    $('.d-byline').before(separator);
+    $('.d-article').before(separator);
+
     // create d-byline
     var byline = $('<d-byline></d-byline>');
     $('.d-byline').replaceWith(byline);
@@ -1160,8 +1183,9 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     $('.distill-force-highlighting-css').parent().remove();
 
     // remove empty line numbers inserted by pandoc when using a
-    // custom syntax highlighting theme
-    $('code.sourceCode a:empty').remove();
+    // custom syntax highlighting theme, except when numbering line
+    // in code chunk
+    $('pre:not(.numberLines) code.sourceCode a:empty').remove();
 
     // load distill framework
     load_distill_framework();
@@ -1187,12 +1211,13 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
       // add orcid ids
       $('.authors-affiliations').find('.author').each(function(i, el) {
         var orcid_id = front_matter.authors[i].orcidID;
+        var author_name = front_matter.authors[i].author
         if (orcid_id) {
           var a = $('<a></a>');
           a.attr('href', 'https://orcid.org/' + orcid_id);
           var img = $('<img></img>');
           img.addClass('orcid-id');
-          img.attr('alt', 'ORCID ID');
+          img.attr('alt', author_name ? 'ORCID ID for ' + author_name : 'ORCID ID');
           img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
           a.append(img);
           $(this).append(a);
@@ -1257,7 +1282,22 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
       // hoverable references
       $('span.citation[data-cites]').each(function() {
-        var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+        const citeChild = $(this).children()[0]
+        // Do not process if @xyz has been used without escaping and without bibliography activated
+        // https://github.com/rstudio/distill/issues/466
+        if (citeChild === undefined) return true
+
+        if (citeChild.nodeName == "D-FOOTNOTE") {
+          var fn = citeChild
+          $(this).html(fn.shadowRoot.querySelector("sup"))
+          $(this).id = fn.id
+          fn.remove()
+        }
+        var refs = $(this).attr('data-cites').split(" ");
+        var refHtml = refs.map(function(ref) {
+          // Could use CSS.escape too here, we insure backward compatibility in navigator
+          return "<p>" + $('div[id="ref-' + ref + '"]').html() + "</p>";
+        }).join("\n");
         window.tippy(this, {
           allowHTML: true,
           content: refHtml,
@@ -1268,6 +1308,31 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
           placement: 'bottom-start'
         });
       });
+
+      // fix footnotes in tables (#411)
+      // replacing broken distill.pub feature
+      $('table d-footnote').each(function() {
+        // we replace internal showAtNode methode which is triggered when hovering a footnote
+        this.hoverBox.showAtNode = function(node) {
+          // ported from https://github.com/distillpub/template/pull/105/files
+          calcOffset = function(elem) {
+              let x = elem.offsetLeft;
+              let y = elem.offsetTop;
+              // Traverse upwards until an `absolute` element is found or `elem`
+              // becomes null.
+              while (elem = elem.offsetParent && elem.style.position != 'absolute') {
+                  x += elem.offsetLeft;
+                  y += elem.offsetTop;
+              }
+
+              return { left: x, top: y };
+          }
+          // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetTop
+          const bbox = node.getBoundingClientRect();
+          const offset = calcOffset(node);
+          this.show([offset.left + bbox.width, offset.top + bbox.height]);
+        }
+      })
 
       // clear polling timer
       clearInterval(tid);
@@ -1367,6 +1432,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // mark non-body figures created by knitr chunks as 100% width
     $('.layout-chunk').each(function(i, val) {
       var figures = $(this).find('img, .html-widget');
+      // ignore leaflet img layers (#106)
+      figures = figures.filter(':not(img[class*="leaflet"])')
       if ($(this).attr('data-layout') !== "l-body") {
         figures.css('width', '100%');
       } else {
@@ -1389,7 +1456,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // get rid of index.html references in header
     if (window.location.protocol !== "file:") {
       $('.distill-site-header a[href]').each(function(i,val) {
-        $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
+        $(this).attr('href', $(this).attr('href').replace(/^index[.]html/, "./"));
       });
     }
 
@@ -1428,8 +1495,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </script>
 
   <!--/radix_placeholder_distill-->
-  <script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
-  <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="site_libs/header-attrs-2.31/header-attrs.js"></script>
+  <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -1449,7 +1516,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Summarize BioCycle","authors":[{"author":"Ruben Arslan","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2021-01-04T00:00:00.000+00:00","citationText":"Arslan, 2021"}
+{"title":"Summarize BioCycle","authors":[{"author":"Ruben Arslan","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2021-01-04T00:00:00.000+01:00","citationText":"Arslan, 2021"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -1460,6 +1527,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 <div class="d-title">
 <h1>Summarize BioCycle</h1>
+
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
 
@@ -1477,49 +1545,58 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <h2 id="summarize">Summarize</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>── Attaching packages ───────────────────────────── tidyverse 1.3.1 ──</code></pre>
-<pre><code>✓ ggplot2 3.3.5     ✓ purrr   0.3.4
-✓ tibble  3.1.4     ✓ dplyr   1.0.7
-✓ tidyr   1.1.3     ✓ stringr 1.4.0
-✓ readr   2.0.1     ✓ forcats 0.5.1</code></pre>
-<pre><code>── Conflicts ──────────────────────────────── tidyverse_conflicts() ──
-x dplyr::filter() masks stats::filter()
-x dplyr::lag()    masks stats::lag()</code></pre>
-<pre><code>Loading required package: Rcpp</code></pre>
-<pre><code>Loading &#39;brms&#39; package (version 2.16.2). Useful instructions
+<pre><code>Warning: package &#39;ggplot2&#39; was built under R version 4.5.2</code></pre>
+<pre><code>Warning: package &#39;tibble&#39; was built under R version 4.5.2</code></pre>
+<pre><code>Warning: package &#39;tidyr&#39; was built under R version 4.5.2</code></pre>
+<pre><code>Warning: package &#39;readr&#39; was built under R version 4.5.2</code></pre>
+<pre><code>Warning: package &#39;purrr&#39; was built under R version 4.5.2</code></pre>
+<pre><code>Warning: package &#39;dplyr&#39; was built under R version 4.5.2</code></pre>
+<pre><code>Warning: package &#39;lubridate&#39; was built under R version 4.5.2</code></pre>
+<pre><code>── Attaching core tidyverse packages ────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.2.1     ✔ readr     2.2.0
+✔ forcats   1.0.1     ✔ stringr   1.6.0
+✔ ggplot2   4.0.3     ✔ tibble    3.3.1
+✔ lubridate 1.9.5     ✔ tidyr     1.3.2
+✔ purrr     1.2.2     
+── Conflicts ──────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors
+Loading required package: Rcpp
+
+Loading &#39;brms&#39; package (version 2.23.0). Useful instructions
 can be found by typing help(&#39;brms&#39;). A more detailed introduction
-to the package is available through vignette(&#39;brms_overview&#39;).</code></pre>
-<pre><code>
-Attaching package: &#39;brms&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:stats&#39;:
+to the package is available through vignette(&#39;brms_overview&#39;).
+
+
+Attaching package: &#39;brms&#39;
+
+
+The following object is masked from &#39;package:stats&#39;:
 
     ar</code></pre>
+<pre><code>Warning: package &#39;gt&#39; was built under R version 4.5.2</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>biocycle_stdnames</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/rio/man/import.html'>import</a></span><span class='op'>(</span><span class='st'>"biocycle.rds"</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>biocycle_stdnames</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='http://gesistsa.github.io/rio/reference/import.html'>import</a></span><span class='op'>(</span><span class='st'>"biocycle.rds"</span><span class='op'>)</span></span></code></pre>
 </div>
+<pre><code>Warning: Missing `trust` will be set to FALSE by default for RDS in
+2.0.0.</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, <span class='va'>cycle_length</span><span class='op'>)</span>
-
-<span class='fu'>summarise_hormones</span><span class='op'>(</span><span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"BioCycle"</span>, Method <span class='op'>=</span> <span class='st'>"Serum Immunoassay"</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, <span class='va'>cycle_length</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'>summarise_hormones</span><span class='op'>(</span><span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"BioCycle"</span>, Method <span class='op'>=</span> <span class='st'>"Serum Immunoassay"</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
+<pre><code>Joining with `by = join_by(bc_day)`</code></pre>
+<pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Loading required namespace: rstan</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.
-
-Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.</code></pre>
 <pre><code>$Dataset
 [1] &quot;BioCycle&quot;
@@ -1531,8 +1608,9 @@ $Method
 [1] &quot;Serum Immunoassay&quot;
 
 $scatterplot</code></pre>
-<pre><code>Warning: Removed 177 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-2-1.png" width="624" /></p>
+<pre><code>Warning: Removed 171 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-2-1.png" alt="" width="624" /></p>
 <pre><code>
 $n_women
 [1] 259
@@ -1541,7 +1619,7 @@ $n_cycles
 [1] 509
 
 $n_days
-[1] 4078
+[1] 4072
 
 $r_ep
 [1] &quot; 0.14 [ 0.11; 0.17]&quot;
@@ -1572,13 +1650,13 @@ $r_bc_log_ratio
 
 $m_bc_prob_rat
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: prc_stirn_bc ~ log(estradiol) + log(ratio) 
    Data: df (Number of observations: 3425) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Population-Level Effects: 
+Regression Coefficients:
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
 Intercept        0.73      0.01     0.70     0.75 1.00     3555
 logestradiol     0.04      0.00     0.03     0.05 1.00     2855
@@ -1588,7 +1666,7 @@ Intercept        3129
 logestradiol     2480
 logratio         3167
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 sigma     0.15      0.00     0.15     0.16 1.00     1834     1958
 
@@ -1601,31 +1679,31 @@ $r_erat_bc
 
 $m_bc_prob
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: prc_stirn_bc ~ s(log(estradiol), log(progesterone)) 
    Data: df (Number of observations: 3425) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.21      0.03     0.15
+sds(slogestradiollogprogesterone_1)     0.21      0.04     0.15
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.29 1.00      972     1649
+sds(slogestradiollogprogesterone_1)     0.29 1.01      853     1033
 
-Population-Level Effects: 
+Regression Coefficients:
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.21      0.00     0.20     0.21
-slogestradiollogprogesterone_1     0.63      0.20     0.24     1.01
-slogestradiollogprogesterone_2    -0.46      0.13    -0.72    -0.19
+slogestradiollogprogesterone_1     0.42      0.14     0.15     0.69
+slogestradiollogprogesterone_2    -0.65      0.19    -1.04    -0.28
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.01     6274     2611
-slogestradiollogprogesterone_1 1.00     2723     2600
-slogestradiollogprogesterone_2 1.00     2633     2601
+Intercept                      1.00     6850     2596
+slogestradiollogprogesterone_1 1.00     2468     2506
+slogestradiollogprogesterone_2 1.00     2019     2480
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.14      0.00     0.13     0.14 1.00     5395     2759
+sigma     0.14      0.00     0.13     0.14 1.00     5827     3131
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1642,13 +1720,13 @@ $r_fc_log_ratio
 
 $m_fc_prob_rat
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: prc_stirn_fc ~ log(estradiol) + log(ratio) 
    Data: df (Number of observations: 3676) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Population-Level Effects: 
+Regression Coefficients:
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
 Intercept        0.63      0.02     0.60     0.66 1.00     3310
 logestradiol     0.02      0.00     0.02     0.03 1.00     2744
@@ -1658,7 +1736,7 @@ Intercept        3001
 logestradiol     2380
 logratio         2888
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 sigma     0.17      0.00     0.17     0.18 1.00     2011     2291
 
@@ -1671,38 +1749,38 @@ $r_erat_fc
 
 $m_fc_prob
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: prc_stirn_fc ~ s(log(estradiol), log(progesterone)) 
    Data: df (Number of observations: 3676) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                                     Estimate Est.Error l-95% CI
 sds(slogestradiollogprogesterone_1)     0.23      0.04     0.16
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.31 1.00      995     1593
+sds(slogestradiollogprogesterone_1)     0.32 1.00      997     1458
 
-Population-Level Effects: 
+Regression Coefficients:
                                Estimate Est.Error l-95% CI u-95% CI
-Intercept                          0.20      0.00     0.20     0.21
-slogestradiollogprogesterone_1    -0.89      0.21    -1.31    -0.48
-slogestradiollogprogesterone_2    -0.27      0.24    -0.74     0.20
+Intercept                          0.20      0.00     0.19     0.21
+slogestradiollogprogesterone_1    -0.80      0.28    -1.36    -0.26
+slogestradiollogprogesterone_2     0.69      0.18     0.35     1.04
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     7571     2251
-slogestradiollogprogesterone_1 1.00     1898     2057
-slogestradiollogprogesterone_2 1.00     2359     2631
+Intercept                      1.00     7906     2959
+slogestradiollogprogesterone_1 1.00     2284     2659
+slogestradiollogprogesterone_2 1.00     2253     2817
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.16      0.00     0.16     0.16 1.00     4921     2774
+sigma     0.16      0.00     0.16     0.16 1.00     5799     2599
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_loo_fc
-[1] &quot;0.58 [0.56;0.60]&quot;
+[1] &quot;0.58 [0.55;0.60]&quot;
 
 $r_lh_ratio
 [1] &quot; 0.53 [ 0.50; 0.56]&quot;
@@ -1712,13 +1790,13 @@ $r_lh_log_ratio
 
 $m_lh_prob_rat
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: fertile_lh ~ log(estradiol) + log(ratio) 
    Data: df (Number of observations: 2550) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Population-Level Effects: 
+Regression Coefficients:
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
 Intercept        0.81      0.02     0.77     0.86 1.00     3203
 logestradiol     0.13      0.01     0.12     0.14 1.00     2385
@@ -1728,7 +1806,7 @@ Intercept        2891
 logestradiol     2064
 logratio         2915
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 sigma     0.22      0.00     0.21     0.22 1.00     2723     2402
 
@@ -1741,31 +1819,31 @@ $r_erat_lh
 
 $m_lh_prob
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: fertile_lh ~ s(log(estradiol), log(progesterone)) 
    Data: df (Number of observations: 2550) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                                     Estimate Est.Error l-95% CI
 sds(slogestradiollogprogesterone_1)     0.40      0.06     0.29
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.54 1.01      672     1238
+sds(slogestradiollogprogesterone_1)     0.54 1.00      674     1068
 
-Population-Level Effects: 
+Regression Coefficients:
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.21      0.00     0.20     0.21
-slogestradiollogprogesterone_1    -0.57      0.29    -1.14     0.02
-slogestradiollogprogesterone_2     1.04      0.19     0.67     1.41
+slogestradiollogprogesterone_1    -0.66      0.29    -1.21    -0.09
+slogestradiollogprogesterone_2     1.00      0.19     0.62     1.38
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     9970     2588
-slogestradiollogprogesterone_1 1.00     2113     2416
-slogestradiollogprogesterone_2 1.00     2231     2942
+Intercept                      1.00     8764     2552
+slogestradiollogprogesterone_1 1.00     2336     2466
+slogestradiollogprogesterone_2 1.00     2550     2529
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.16      0.00     0.16     0.17 1.00     6091     2780
+sigma     0.16      0.00     0.16     0.17 1.00     5362     2622
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1777,33 +1855,50 @@ $r_loo_lh
 <h3 id="estradiol">Estradiol</h3>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>total_estradiol</span>, <span class='va'>cycle_length</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span>
-
-<span class='fu'>summarise_hormone</span><span class='op'>(</span><span class='va'>df</span>, <span class='st'>"BioCycle"</span>, 
-                  <span class='st'>"Estradiol"</span>, 
-                  Method <span class='op'>=</span> <span class='st'>"Serum CL-EIA (chemiluminescence enzyme immunoassay)"</span>,
-                  Citation <span class='op'>=</span> <span class='st'>[1039 chars quoted with '"']</span>,
-                  LOD <span class='op'>=</span> <span class='fl'>20</span>,
-                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,
-                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;10"</span>,
-                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY)."</span>,
-                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, 
-                  LH_test <span class='op'>=</span> <span class='st'>[1281 chars quoted with '"']</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>total_estradiol</span>, <span class='va'>cycle_length</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'>summarise_hormone</span><span class='op'>(</span><span class='va'>df</span>, <span class='st'>"BioCycle"</span>, </span>
+<span>                  <span class='st'>"Estradiol"</span>, </span>
+<span>                  Method <span class='op'>=</span> <span class='st'>"Serum CL-EIA (chemiluminescence enzyme immunoassay)"</span>,</span>
+<span>                  Citation <span class='op'>=</span> <span class='st'>"</span></span>
+<span><span class='st'>Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., &amp; BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x</span></span>
+<span><span class='st'>  </span></span>
+<span><span class='st'>Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., &amp; Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287</span></span>
+<span><span class='st'></span></span>
+<span><span class='st'>Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., &amp; Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012"</span>,</span>
+<span>                  LOD <span class='op'>=</span> <span class='fl'>20</span>,</span>
+<span>                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,</span>
+<span>                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;10"</span>,</span>
+<span>                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY)."</span>,</span>
+<span>                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, </span>
+<span>                  LH_test <span class='op'>=</span> <span class='st'>"Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. "</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code>`summarise()` has regrouped the output.
+Joining with `by = join_by(bc_day)`
+`summarise()` has regrouped the output.
+ℹ Summaries were computed grouped by id and cycle.
+ℹ Output is grouped by id.
+ℹ Use `summarise(.groups = &quot;drop_last&quot;)` to silence this message.
+ℹ Use `summarise(.by = c(id, cycle))` for per-operation grouping
+  (`?dplyr::dplyr_by`) instead.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
+ℹ Please use tidy evaluation idioms with `aes()`.
+ℹ See also `vignette(&quot;ggplot2-in-packages&quot;)` for more information.
+This warning is displayed once per session.
+Call `lifecycle::last_lifecycle_warnings()` to see where this warning
+was generated.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.
-
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>$Dataset
 [1] &quot;BioCycle&quot;
@@ -1839,9 +1934,10 @@ $LH_test
 [1] &quot;Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. &quot;
 
 $distribution</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 177 rows containing non-finite values (stat_bin).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-3-1.png" width="624" /></p>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>Warning: Removed 171 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-3-1.png" alt="" width="624" /></p>
 <pre><code>
 $mean
 [1] 112.3873
@@ -1865,7 +1961,7 @@ $range
 [1] &quot;20.00, 834.00&quot;
 
 $missing
-[1] 177
+[1] 171
 
 $outliers
 [1] 0
@@ -1880,7 +1976,7 @@ $n_cycles
 [1] 509
 
 $n_days
-[1] 4078
+[1] 4072
 
 $age
 [1] &quot;27.3±8.21&quot;
@@ -1920,39 +2016,39 @@ $var_resid
 
 $bc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3425) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sbc_day_1)     5.19      1.35     3.35     8.51 1.00      769
+sds(sbc_day_1)     5.19      1.30     3.33     8.38 1.00     1071
                Tail_ESS
-sds(sbc_day_1)     1392
+sds(sbc_day_1)     1902
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 246) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.29      0.02     0.25     0.32 1.00     1401
+sd(Intercept)     0.29      0.02     0.25     0.32 1.00     1179
               Tail_ESS
-sd(Intercept)     2359
+sd(Intercept)     2518
 
 ~id:cycle (Number of levels: 448) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.07      0.03     0.01     0.12 1.01      262
+sd(Intercept)     0.07      0.03     0.01     0.12 1.01      334
               Tail_ESS
-sd(Intercept)      473
+sd(Intercept)      740
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     4.45      0.02     4.41     4.49 1.00     1219     1989
-sbc_day_1   -13.20      1.74   -16.68    -9.82 1.00     1967     2875
+Intercept     4.45      0.02     4.41     4.49 1.00     1651     2318
+sbc_day_1   -13.17      1.75   -16.59    -9.72 1.00     3008     2865
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.49      0.01     0.48     0.51 1.00     2933     2708
+sigma     0.49      0.01     0.48     0.51 1.00     4077     2896
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1977,63 +2073,87 @@ $r_diff_bc_stirn
 [1] &quot; 0.35 [ 0.32; 0.38]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot; 0.36 [ 0.33; 0.39]&quot;
+[1] &quot; 0.35 [ 0.32; 0.38]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.68 [ 0.66; 0.70]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.74 [ 0.72; 0.75]&quot;
+[1] &quot; 0.73 [ 0.72; 0.75]&quot;
 
 $sd_bc_imputed
 [1] &quot;0.59 (86%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.76 [ 0.75; 0.78]&quot;
+[1] &quot; 0.76 [ 0.74; 0.77]&quot;
+
+$rr_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.756    0.741     0.771
+2 fc             0.641    0.621     0.660
+3 lh             0.791    0.776     0.806
+
+$r_within_bc_imputed
+[1] &quot; 0.74 [ 0.72; 0.76]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.76 [ 0.74; 0.77]&quot;
+
+$rr_within_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.756    0.740     0.771
+2 fc             0.632    0.612     0.652
+3 lh             0.792    0.776     0.807
 
 $imputed_bc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 310 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 310 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-3-2.png" width="624" /></p>
+<pre><code>Warning: Removed 310 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 310 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-3-2.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
 [1] &quot; 0.57&quot;
 
 $fc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3676) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     2.00      0.62     1.13     3.52 1.01      942
+sds(sfc_day_1)     2.19      0.65     1.26     3.78 1.01     1108
                Tail_ESS
-sds(sfc_day_1)     1503
+sds(sfc_day_1)     1950
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 257) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.31      0.02     0.28     0.35 1.00     1116
+sd(Intercept)     0.31      0.02     0.28     0.34 1.01     1193
               Tail_ESS
-sd(Intercept)     1947
+sd(Intercept)     2163
 
 ~id:cycle (Number of levels: 481) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.05      0.03     0.00     0.10 1.02      242
+sd(Intercept)     0.05      0.03     0.00     0.11 1.01      281
               Tail_ESS
-sd(Intercept)      803
+sd(Intercept)      941
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     4.43      0.02     4.39     4.47 1.00      667     1180
-sfc_day_1    -0.53      1.59    -3.63     2.65 1.00     1519     2432
+Intercept     4.43      0.02     4.38     4.47 1.01      826     1592
+sfc_day_1    -0.50      1.76    -3.86     2.92 1.00     1623     2205
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.57      0.01     0.55     0.58 1.00     3254     2634
+sigma     0.57      0.01     0.55     0.58 1.00     4015     2928
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2046,7 +2166,7 @@ $rmse_fc
 [1] &quot;0.85 [0.83;0.87]&quot;
 
 $r_loo_fc
-[1] &quot;0.57 [0.54;0.58]&quot;
+[1] &quot;0.57 [0.54;0.59]&quot;
 
 $r_fc_stirn
 [1] &quot; 0.23 [ 0.20; 0.26]&quot;
@@ -2058,63 +2178,71 @@ $r_diff_fc_stirn
 [1] &quot; 0.25 [ 0.22; 0.28]&quot;
 
 $r_log_diff_fc_stirn
-[1] &quot; 0.25 [ 0.22; 0.28]&quot;
+[1] &quot; 0.24 [ 0.21; 0.27]&quot;
 
 $r_fc_imputed
 [1] &quot; 0.57 [ 0.55; 0.59]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.64 [ 0.62; 0.66]&quot;
+[1] &quot; 0.63 [ 0.61; 0.65]&quot;
 
 $sd_fc_imputed
 [1] &quot;0.50 (93%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.65 [ 0.63; 0.67]&quot;
+[1] &quot; 0.64 [ 0.62; 0.66]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.63 [ 0.61; 0.65]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.63 [ 0.61; 0.65]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 23 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 23 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-3-3.png" width="624" /></p>
+<pre><code>Warning: Removed 23 rows containing missing values or values outside the scale
+range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 23 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-3-3.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
 [1] &quot; 0.64&quot;
 
 $lh_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1 | id) + (1 | id:cycle) 
    Data: df %&gt;% filter(between(lh_day, -15, 15)) (Number of observations: 2550) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(slh_day_1)     8.22      1.98     5.39    12.73 1.00      754
+sds(slh_day_1)     8.32      2.08     5.39    13.27 1.00      996
                Tail_ESS
-sds(slh_day_1)     1019
+sds(slh_day_1)     1672
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 214) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.28      0.02     0.25     0.31 1.00     1234
+sd(Intercept)     0.28      0.02     0.24     0.32 1.00     1245
               Tail_ESS
-sd(Intercept)     2166
+sd(Intercept)     2328
 
 ~id:cycle (Number of levels: 340) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.05      0.03     0.00     0.11 1.01      273
+sd(Intercept)     0.05      0.03     0.00     0.11 1.01      299
               Tail_ESS
-sd(Intercept)      877
+sd(Intercept)      858
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     4.48      0.02     4.44     4.52 1.00      890     1546
-slh_day_1    -8.76      1.53   -11.76    -5.74 1.00     3966     3210
+Intercept     4.48      0.02     4.44     4.53 1.00     1434     2474
+slh_day_1    -8.73      1.55   -11.80    -5.73 1.00     7253     3371
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.45      0.01     0.44     0.47 1.00     5677     2952
+sigma     0.45      0.01     0.44     0.47 1.00     4987     2873
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2145,18 +2273,26 @@ $r_lh_imputed
 [1] &quot; 0.71 [ 0.69; 0.73]&quot;
 
 $r_diff_lh_imputed
-[1] &quot; 0.77 [ 0.76; 0.79]&quot;
+[1] &quot; 0.77 [ 0.75; 0.78]&quot;
 
 $sd_lh_imputed
 [1] &quot;0.60 (85%)&quot;
 
 $r_diff_lh_imputed_rr
-[1] &quot; 0.80 [ 0.78; 0.81]&quot;
+[1] &quot; 0.79 [ 0.78; 0.81]&quot;
+
+$r_within_lh_imputed
+[1] &quot; 0.78 [ 0.76; 0.79]&quot;
+
+$r_within_lh_imputed_rr
+[1] &quot; 0.79 [ 0.78; 0.81]&quot;
 
 $imputed_lh_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 1132 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 1132 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-3-4.png" width="624" /></p>
+<pre><code>Warning: Removed 1132 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1132 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-3-4.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_lh_imputed
 [1] &quot; 0.54&quot;</code></pre>
@@ -2164,33 +2300,44 @@ $rmse_lh_imputed
 <h3 id="free-estradiol">Free Estradiol</h3>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, <span class='va'>cycle_length</span>, hormone <span class='op'>=</span> <span class='va'>estradiol</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span>
-
-<span class='fu'>summarise_hormone</span><span class='op'>(</span><span class='va'>df</span>, <span class='st'>"BioCycle"</span>, 
-                  <span class='st'>"Free Estradiol"</span>, 
-                  Method <span class='op'>=</span> <span class='st'>"Serum CL-EIA (chemiluminescence enzyme immunoassay) + mass-action-algorithm"</span>, 
-                  Citation <span class='op'>=</span> <span class='st'>[1039 chars quoted with '"']</span>,
-                  LOD <span class='op'>=</span> <span class='fl'>0.21</span>,
-                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,
-                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;10"</span>,
-                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY)."</span>,
-                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, 
-                  LH_test <span class='op'>=</span> <span class='st'>[1281 chars quoted with '"']</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, <span class='va'>cycle_length</span>, hormone <span class='op'>=</span> <span class='va'>estradiol</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'>summarise_hormone</span><span class='op'>(</span><span class='va'>df</span>, <span class='st'>"BioCycle"</span>, </span>
+<span>                  <span class='st'>"Free Estradiol"</span>, </span>
+<span>                  Method <span class='op'>=</span> <span class='st'>"Serum CL-EIA (chemiluminescence enzyme immunoassay) + mass-action-algorithm"</span>, </span>
+<span>                  Citation <span class='op'>=</span> <span class='st'>"</span></span>
+<span><span class='st'>Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., &amp; BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x</span></span>
+<span><span class='st'>  </span></span>
+<span><span class='st'>Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., &amp; Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287</span></span>
+<span><span class='st'></span></span>
+<span><span class='st'>Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., &amp; Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012"</span>,</span>
+<span>                  LOD <span class='op'>=</span> <span class='fl'>0.21</span>,</span>
+<span>                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,</span>
+<span>                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;10"</span>,</span>
+<span>                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY)."</span>,</span>
+<span>                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, </span>
+<span>                  LH_test <span class='op'>=</span> <span class='st'>"Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. "</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code>`summarise()` has regrouped the output.
+Joining with `by = join_by(bc_day)`
+`summarise()` has regrouped the output.
+ℹ Summaries were computed grouped by id and cycle.
+ℹ Output is grouped by id.
+ℹ Use `summarise(.groups = &quot;drop_last&quot;)` to silence this message.
+ℹ Use `summarise(.by = c(id, cycle))` for per-operation grouping
+  (`?dplyr::dplyr_by`) instead.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.
-
+Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>$Dataset
 [1] &quot;BioCycle&quot;
@@ -2226,9 +2373,10 @@ $LH_test
 [1] &quot;Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. &quot;
 
 $distribution</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 177 rows containing non-finite values (stat_bin).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-4-1.png" width="624" /></p>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>Warning: Removed 171 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-4-1.png" alt="" width="624" /></p>
 <pre><code>
 $mean
 [1] 2.131024
@@ -2252,7 +2400,7 @@ $range
 [1] &quot;0.21, 18.28&quot;
 
 $missing
-[1] 177
+[1] 171
 
 $outliers
 [1] 0
@@ -2267,7 +2415,7 @@ $n_cycles
 [1] 509
 
 $n_days
-[1] 4078
+[1] 4072
 
 $age
 [1] &quot;27.3±8.21&quot;
@@ -2307,39 +2455,39 @@ $var_resid
 
 $bc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3425) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sbc_day_1)     5.75      1.50     3.70     9.42 1.01      589
+sds(sbc_day_1)     5.76      1.39     3.65     8.96 1.01      816
                Tail_ESS
-sds(sbc_day_1)     1286
+sds(sbc_day_1)     1162
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 246) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.28      0.02     0.25     0.32 1.00      867
+sd(Intercept)     0.28      0.02     0.25     0.32 1.01     1084
               Tail_ESS
-sd(Intercept)     2065
+sd(Intercept)     1575
 
 ~id:cycle (Number of levels: 448) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.08      0.03     0.01     0.14 1.01      153
+sd(Intercept)     0.08      0.03     0.01     0.14 1.02      262
               Tail_ESS
-sd(Intercept)       NA
+sd(Intercept)      459
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     0.42      0.02     0.38     0.47 1.00     1004     1808
-sbc_day_1   -14.50      1.92   -18.23   -10.76 1.00     1420     2294
+Intercept     0.42      0.02     0.38     0.46 1.00     1100     2156
+sbc_day_1   -14.45      1.99   -18.49   -10.54 1.00     2536     2284
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.56      0.01     0.54     0.57 1.00     2922     2641
+sigma     0.56      0.01     0.54     0.57 1.00     2925     2701
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2364,63 +2512,87 @@ $r_diff_bc_stirn
 [1] &quot; 0.36 [ 0.33; 0.39]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot; 0.38 [ 0.35; 0.40]&quot;
+[1] &quot; 0.37 [ 0.34; 0.40]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.68 [ 0.66; 0.70]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.73 [ 0.72; 0.75]&quot;
+[1] &quot; 0.72 [ 0.71; 0.74]&quot;
 
 $sd_bc_imputed
 [1] &quot;0.59 (86%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.76 [ 0.74; 0.77]&quot;
+[1] &quot; 0.75 [ 0.73; 0.76]&quot;
+
+$rr_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.748    0.733     0.763
+2 fc             0.631    0.611     0.651
+3 lh             0.787    0.771     0.802
+
+$r_within_bc_imputed
+[1] &quot; 0.73 [ 0.72; 0.75]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.75 [ 0.73; 0.76]&quot;
+
+$rr_within_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.748    0.731     0.763
+2 fc             0.623    0.602     0.643
+3 lh             0.788    0.771     0.803
 
 $imputed_bc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 310 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 310 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-4-2.png" width="624" /></p>
+<pre><code>Warning: Removed 310 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 310 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-4-2.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
 [1] &quot; 0.62&quot;
 
 $fc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3676) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     2.18      0.67     1.22     3.76 1.00     1597
+sds(sfc_day_1)     2.40      0.71     1.39     4.13 1.00     1214
                Tail_ESS
-sds(sfc_day_1)     2106
+sds(sfc_day_1)     1817
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 257) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.29      0.02     0.26     0.33 1.00     1459
+sd(Intercept)     0.29      0.02     0.26     0.33 1.01      965
               Tail_ESS
-sd(Intercept)     2557
+sd(Intercept)     2001
 
 ~id:cycle (Number of levels: 481) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.06      0.03     0.00     0.12 1.01      360
+sd(Intercept)     0.06      0.03     0.00     0.13 1.02      269
               Tail_ESS
-sd(Intercept)      998
+sd(Intercept)      567
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     0.40      0.02     0.36     0.44 1.00     2136     2705
-sfc_day_1    -0.53      1.78    -3.97     2.89 1.00     2419     2679
+Intercept     0.40      0.02     0.36     0.44 1.00     1264     2076
+sfc_day_1    -0.61      1.90    -4.30     3.09 1.00     1549     2568
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.63      0.01     0.62     0.65 1.00     5604     2458
+sigma     0.63      0.01     0.62     0.65 1.00     3637     3092
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2442,7 +2614,7 @@ $r_log_fc_stirn
 [1] &quot; 0.25 [ 0.22; 0.28]&quot;
 
 $r_diff_fc_stirn
-[1] &quot; 0.26 [ 0.23; 0.29]&quot;
+[1] &quot; 0.25 [ 0.22; 0.28]&quot;
 
 $r_log_diff_fc_stirn
 [1] &quot; 0.26 [ 0.23; 0.29]&quot;
@@ -2451,64 +2623,72 @@ $r_fc_imputed
 [1] &quot; 0.57 [ 0.55; 0.59]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.63 [ 0.61; 0.65]&quot;
+[1] &quot; 0.62 [ 0.60; 0.64]&quot;
 
 $sd_fc_imputed
 [1] &quot;0.50 (93%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.64 [ 0.62; 0.66]&quot;
+[1] &quot; 0.63 [ 0.61; 0.65]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.62 [ 0.60; 0.64]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.62 [ 0.60; 0.64]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 23 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 23 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-4-3.png" width="624" /></p>
+<pre><code>Warning: Removed 23 rows containing missing values or values outside the scale
+range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 23 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-4-3.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
 [1] &quot; 0.69&quot;
 
 $lh_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1 | id) + (1 | id:cycle) 
    Data: df %&gt;% filter(between(lh_day, -15, 15)) (Number of observations: 2550) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(slh_day_1)     9.32      2.26     6.18    14.83 1.01      690
+sds(slh_day_1)     9.19      2.10     6.10    14.12 1.01      505
                Tail_ESS
-sds(slh_day_1)     1431
+sds(slh_day_1)      971
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 214) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.28      0.02     0.24     0.32 1.01     1234
+sd(Intercept)     0.28      0.02     0.24     0.32 1.00      968
               Tail_ESS
-sd(Intercept)     2191
+sd(Intercept)     1642
 
 ~id:cycle (Number of levels: 340) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.07      0.03     0.00     0.13 1.02      250
+sd(Intercept)     0.07      0.03     0.01     0.13 1.01      298
               Tail_ESS
-sd(Intercept)      482
+sd(Intercept)      767
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     0.45      0.02     0.41     0.49 1.00     1304     2042
-slh_day_1    -9.59      1.77   -13.09    -6.13 1.00     3412     2675
+Intercept     0.45      0.02     0.41     0.49 1.01     1020     1705
+slh_day_1    -9.53      1.74   -12.96    -6.08 1.00     3278     2839
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.51      0.01     0.50     0.52 1.00     4794     3184
+sigma     0.51      0.01     0.50     0.53 1.00     3850     2853
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_lh
-[1] &quot;0.73 [0.72;0.74]&quot;
+[1] &quot;0.73 [0.71;0.74]&quot;
 
 $rmse_lh
 [1] &quot;0.77 [0.75;0.79]&quot;
@@ -2532,18 +2712,26 @@ $r_lh_imputed
 [1] &quot; 0.72 [ 0.70; 0.74]&quot;
 
 $r_diff_lh_imputed
-[1] &quot; 0.77 [ 0.75; 0.78]&quot;
+[1] &quot; 0.76 [ 0.74; 0.78]&quot;
 
 $sd_lh_imputed
 [1] &quot;0.60 (85%)&quot;
 
 $r_diff_lh_imputed_rr
-[1] &quot; 0.79 [ 0.78; 0.81]&quot;
+[1] &quot; 0.79 [ 0.77; 0.80]&quot;
+
+$r_within_lh_imputed
+[1] &quot; 0.77 [ 0.76; 0.79]&quot;
+
+$r_within_lh_imputed_rr
+[1] &quot; 0.79 [ 0.77; 0.80]&quot;
 
 $imputed_lh_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 1132 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 1132 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-4-4.png" width="624" /></p>
+<pre><code>Warning: Removed 1132 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1132 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-4-4.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_lh_imputed
 [1] &quot; 0.58&quot;</code></pre>
@@ -2551,33 +2739,44 @@ $rmse_lh_imputed
 <h3 id="progesterone">Progesterone</h3>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>,  <span class='va'>lh_day</span>, <span class='va'>cycle_length</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span>
-
-<span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"BioCycle"</span>, 
-                  Hormone <span class='op'>=</span> <span class='st'>"Progesterone"</span>, 
-                  Method <span class='op'>=</span> <span class='st'>"Serum CL-EIA (chemiluminescence enzyme immunoassay)"</span>,
-                  Citation <span class='op'>=</span> <span class='st'>[1039 chars quoted with '"']</span>,
-                  LOD <span class='op'>=</span> <span class='fl'>200</span>,
-                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,
-                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;10"</span>,
-                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY)."</span>,
-                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, 
-                  LH_test <span class='op'>=</span> <span class='st'>[1280 chars quoted with '"']</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>,  <span class='va'>lh_day</span>, <span class='va'>cycle_length</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"BioCycle"</span>, </span>
+<span>                  Hormone <span class='op'>=</span> <span class='st'>"Progesterone"</span>, </span>
+<span>                  Method <span class='op'>=</span> <span class='st'>"Serum CL-EIA (chemiluminescence enzyme immunoassay)"</span>,</span>
+<span>                  Citation <span class='op'>=</span> <span class='st'>"</span></span>
+<span><span class='st'>Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., &amp; BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x</span></span>
+<span><span class='st'>  </span></span>
+<span><span class='st'>Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., &amp; Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287</span></span>
+<span><span class='st'></span></span>
+<span><span class='st'>Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., &amp; Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012"</span>,</span>
+<span>                  LOD <span class='op'>=</span> <span class='fl'>200</span>,</span>
+<span>                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,</span>
+<span>                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;10"</span>,</span>
+<span>                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY)."</span>,</span>
+<span>                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, </span>
+<span>                  LH_test <span class='op'>=</span> <span class='st'>"Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www.clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. "</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code>`summarise()` has regrouped the output.
+Joining with `by = join_by(bc_day)`
+`summarise()` has regrouped the output.
+ℹ Summaries were computed grouped by id and cycle.
+ℹ Output is grouped by id.
+ℹ Use `summarise(.groups = &quot;drop_last&quot;)` to silence this message.
+ℹ Use `summarise(.by = c(id, cycle))` for per-operation grouping
+  (`?dplyr::dplyr_by`) instead.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.
-
+Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>$Dataset
 [1] &quot;BioCycle&quot;
@@ -2613,9 +2812,10 @@ $LH_test
 [1] &quot;Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www.clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. &quot;
 
 $distribution</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 177 rows containing non-finite values (stat_bin).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-5-1.png" width="624" /></p>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>Warning: Removed 171 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-5-1.png" alt="" width="624" /></p>
 <pre><code>
 $mean
 [1] 3437.529
@@ -2639,7 +2839,7 @@ $range
 [1] &quot;200.00, 27700.00&quot;
 
 $missing
-[1] 177
+[1] 171
 
 $outliers
 [1] 0
@@ -2654,7 +2854,7 @@ $n_cycles
 [1] 509
 
 $n_days
-[1] 4078
+[1] 4072
 
 $age
 [1] &quot;27.3±8.21&quot;
@@ -2694,39 +2894,39 @@ $var_resid
 
 $bc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3425) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sbc_day_1)     5.74      1.41     3.71     9.21 1.00      595
+sds(sbc_day_1)     5.88      1.49     3.71     9.46 1.00      665
                Tail_ESS
-sds(sbc_day_1)     1236
+sds(sbc_day_1)     1075
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 246) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.41      0.03     0.36     0.46 1.01     1014
+sd(Intercept)     0.41      0.03     0.37     0.46 1.00      843
               Tail_ESS
-sd(Intercept)     1779
+sd(Intercept)     1778
 
 ~id:cycle (Number of levels: 448) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.15      0.03     0.08     0.20 1.01      429
+sd(Intercept)     0.14      0.04     0.02     0.20 1.04      149
               Tail_ESS
-sd(Intercept)      454
+sd(Intercept)       53
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     7.28      0.03     7.22     7.34 1.00      780     1296
-sbc_day_1   -19.30      2.22   -23.70   -15.11 1.00     1543     1974
+Intercept     7.28      0.03     7.22     7.34 1.01      871     1540
+sbc_day_1   -19.30      2.28   -23.79   -14.75 1.00     1499     2201
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.66      0.01     0.64     0.68 1.00     2629     2788
+sigma     0.66      0.01     0.64     0.68 1.00     2577     2066
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2736,7 +2936,7 @@ $r_bc
 [1] &quot;0.84 [0.83;0.84]&quot;
 
 $rmse_bc
-[1] &quot;1.01 [0.98;1.03]&quot;
+[1] &quot;1.01 [0.99;1.03]&quot;
 
 $r_loo_bc
 [1] &quot;0.83 [0.81;0.84]&quot;
@@ -2748,66 +2948,90 @@ $r_log_bc_stirn
 [1] &quot;-0.41 [-0.44;-0.38]&quot;
 
 $r_diff_bc_stirn
-[1] &quot;-0.42 [-0.45;-0.39]&quot;
+[1] &quot;-0.42 [-0.45;-0.40]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot;-0.42 [-0.45;-0.40]&quot;
+[1] &quot;-0.43 [-0.46;-0.40]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.83 [ 0.82; 0.84]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.85 [ 0.84; 0.86]&quot;
+[1] &quot; 0.86 [ 0.85; 0.87]&quot;
 
 $sd_bc_imputed
 [1] &quot;1.17 (87%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.87 [ 0.86; 0.88]&quot;
+[1] &quot; 0.88 [ 0.87; 0.88]&quot;
+
+$rr_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.876    0.868     0.884
+2 fc             0.791    0.778     0.803
+3 lh             0.902    0.894     0.909
+
+$r_within_bc_imputed
+[1] &quot; 0.88 [ 0.87; 0.89]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.89 [ 0.88; 0.90]&quot;
+
+$rr_within_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.889    0.881     0.896
+2 fc             0.810    0.798     0.822
+3 lh             0.914    0.907     0.920
 
 $imputed_bc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 310 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 310 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-5-2.png" width="624" /></p>
+<pre><code>Warning: Removed 310 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 310 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-5-2.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
 [1] &quot; 0.77&quot;
 
 $fc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3676) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     3.50      0.92     2.15     5.83 1.00     1502
+sds(sfc_day_1)     3.88      1.06     2.41     6.55 1.00     1459
                Tail_ESS
-sds(sfc_day_1)     2281
+sds(sfc_day_1)     1902
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 257) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.46      0.03     0.40     0.52 1.00     1134
+sd(Intercept)     0.46      0.03     0.40     0.52 1.00     1286
               Tail_ESS
-sd(Intercept)     2506
+sd(Intercept)     2280
 
 ~id:cycle (Number of levels: 481) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.20      0.03     0.13     0.27 1.01      598
+sd(Intercept)     0.20      0.04     0.13     0.27 1.01      605
               Tail_ESS
-sd(Intercept)     1152
+sd(Intercept)      921
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     7.24      0.03     7.18     7.31 1.00     1247     2160
-sfc_day_1    -9.63      2.47   -14.49    -4.87 1.00     2189     2704
+Intercept     7.24      0.03     7.18     7.31 1.00     1798     2646
+sfc_day_1   -10.73      2.80   -16.41    -5.45 1.00     2522     2657
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.84      0.01     0.81     0.86 1.00     4095     3037
+sigma     0.84      0.01     0.81     0.86 1.00     4660     3038
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2838,57 +3062,65 @@ $r_fc_imputed
 [1] &quot; 0.72 [ 0.71; 0.74]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.77 [ 0.75; 0.78]&quot;
+[1] &quot; 0.76 [ 0.75; 0.78]&quot;
 
 $sd_fc_imputed
 [1] &quot;1.07 (84%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.80 [ 0.78; 0.81]&quot;
+[1] &quot; 0.79 [ 0.78; 0.80]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.79 [ 0.77; 0.80]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.81 [ 0.80; 0.82]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 23 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 23 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-5-3.png" width="624" /></p>
+<pre><code>Warning: Removed 23 rows containing missing values or values outside the scale
+range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 23 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-5-3.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
 [1] &quot; 0.96&quot;
 
 $lh_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1 | id) + (1 | id:cycle) 
    Data: df %&gt;% filter(between(lh_day, -15, 15)) (Number of observations: 2550) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(slh_day_1)     5.29      1.31     3.37     8.62 1.00     1240
+sds(slh_day_1)     5.23      1.31     3.36     8.43 1.00      948
                Tail_ESS
-sds(slh_day_1)     2155
+sds(slh_day_1)     1669
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 214) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.27      0.03     0.20     0.33 1.00      788
+sd(Intercept)     0.27      0.03     0.21     0.33 1.00      635
               Tail_ESS
-sd(Intercept)      910
+sd(Intercept)      834
 
 ~id:cycle (Number of levels: 340) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.25      0.03     0.20     0.31 1.01      711
+sd(Intercept)     0.26      0.03     0.20     0.31 1.00      702
               Tail_ESS
-sd(Intercept)     1013
+sd(Intercept)     1075
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     7.30      0.03     7.25     7.35 1.00     3302     3048
-slh_day_1   -11.17      1.87   -14.81    -7.49 1.00     5685     2863
+Intercept     7.30      0.03     7.25     7.35 1.00     2299     2388
+slh_day_1   -11.12      1.95   -14.82    -7.25 1.00     2584     2772
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.59      0.01     0.57     0.60 1.00     6419     2676
+sigma     0.59      0.01     0.57     0.60 1.00     4300     2611
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2901,7 +3133,7 @@ $rmse_lh
 [1] &quot;0.89 [0.87;0.91]&quot;
 
 $r_loo_lh
-[1] &quot;0.87 [0.86;0.88]&quot;
+[1] &quot;0.87 [0.85;0.88]&quot;
 
 $r_prob_lh
 [1] &quot;-0.37 [-0.40;-0.33]&quot;
@@ -2910,27 +3142,35 @@ $r_log_prob_lh
 [1] &quot;-0.30 [-0.34;-0.26]&quot;
 
 $r_diff_prob_lh
-[1] &quot;-0.35 [-0.39;-0.32]&quot;
+[1] &quot;-0.36 [-0.39;-0.33]&quot;
 
 $r_log_diff_prob_lh
-[1] &quot;-0.29 [-0.32;-0.25]&quot;
+[1] &quot;-0.30 [-0.33;-0.26]&quot;
 
 $r_lh_imputed
 [1] &quot; 0.87 [ 0.86; 0.88]&quot;
 
 $r_diff_lh_imputed
-[1] &quot; 0.88 [ 0.87; 0.88]&quot;
+[1] &quot; 0.88 [ 0.88; 0.89]&quot;
 
 $sd_lh_imputed
 [1] &quot;1.21 (82%)&quot;
 
 $r_diff_lh_imputed_rr
-[1] &quot; 0.89 [ 0.89; 0.90]&quot;
+[1] &quot; 0.90 [ 0.89; 0.91]&quot;
+
+$r_within_lh_imputed
+[1] &quot; 0.90 [ 0.89; 0.91]&quot;
+
+$r_within_lh_imputed_rr
+[1] &quot; 0.91 [ 0.91; 0.92]&quot;
 
 $imputed_lh_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 1132 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 1132 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-5-4.png" width="624" /></p>
+<pre><code>Warning: Removed 1132 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1132 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-5-4.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_lh_imputed
 [1] &quot; 0.67&quot;</code></pre>
@@ -2938,33 +3178,44 @@ $rmse_lh_imputed
 <h3 id="progesterone-2">Progesterone 2%</h3>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>,  <span class='va'>lh_day</span>, <span class='va'>cycle_length</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>hormone <span class='op'>=</span> <span class='va'>hormone</span> <span class='op'>*</span> <span class='fl'>0.02</span><span class='op'>)</span>
-
-<span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"BioCycle"</span>, 
-                  Hormone <span class='op'>=</span> <span class='st'>"Progesterone.02"</span>, 
-                  Method <span class='op'>=</span> <span class='st'>"Serum CL-EIA (chemiluminescence enzyme immunoassay)"</span>,
-                  Citation <span class='op'>=</span> <span class='st'>[1039 chars quoted with '"']</span>,
-                  LOD <span class='op'>=</span> <span class='fl'>200</span> <span class='op'>*</span> <span class='fl'>.02</span>,
-                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,
-                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;10"</span>,
-                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY)."</span>,
-                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, 
-                  LH_test <span class='op'>=</span> <span class='st'>[1280 chars quoted with '"']</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>,  <span class='va'>lh_day</span>, <span class='va'>cycle_length</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>mutate</span><span class='op'>(</span>hormone <span class='op'>=</span> <span class='va'>hormone</span> <span class='op'>*</span> <span class='fl'>0.02</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"BioCycle"</span>, </span>
+<span>                  Hormone <span class='op'>=</span> <span class='st'>"Progesterone.02"</span>, </span>
+<span>                  Method <span class='op'>=</span> <span class='st'>"Serum CL-EIA (chemiluminescence enzyme immunoassay)"</span>,</span>
+<span>                  Citation <span class='op'>=</span> <span class='st'>"</span></span>
+<span><span class='st'>Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., &amp; BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x</span></span>
+<span><span class='st'>  </span></span>
+<span><span class='st'>Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., &amp; Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287</span></span>
+<span><span class='st'></span></span>
+<span><span class='st'>Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., &amp; Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012"</span>,</span>
+<span>                  LOD <span class='op'>=</span> <span class='fl'>200</span> <span class='op'>*</span> <span class='fl'>.02</span>,</span>
+<span>                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,</span>
+<span>                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;10"</span>,</span>
+<span>                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY)."</span>,</span>
+<span>                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, </span>
+<span>                  LH_test <span class='op'>=</span> <span class='st'>"Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www.clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. "</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code>`summarise()` has regrouped the output.
+Joining with `by = join_by(bc_day)`
+`summarise()` has regrouped the output.
+ℹ Summaries were computed grouped by id and cycle.
+ℹ Output is grouped by id.
+ℹ Use `summarise(.groups = &quot;drop_last&quot;)` to silence this message.
+ℹ Use `summarise(.by = c(id, cycle))` for per-operation grouping
+  (`?dplyr::dplyr_by`) instead.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.
-
+Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>$Dataset
 [1] &quot;BioCycle&quot;
@@ -3000,9 +3251,10 @@ $LH_test
 [1] &quot;Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www.clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. &quot;
 
 $distribution</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 177 rows containing non-finite values (stat_bin).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-6-1.png" width="624" /></p>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>Warning: Removed 171 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-6-1.png" alt="" width="624" /></p>
 <pre><code>
 $mean
 [1] 68.75058
@@ -3026,7 +3278,7 @@ $range
 [1] &quot;4.00, 554.00&quot;
 
 $missing
-[1] 177
+[1] 171
 
 $outliers
 [1] 0
@@ -3041,7 +3293,7 @@ $n_cycles
 [1] 509
 
 $n_days
-[1] 4078
+[1] 4072
 
 $age
 [1] &quot;27.3±8.21&quot;
@@ -3081,39 +3333,39 @@ $var_resid
 
 $bc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3425) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sbc_day_1)     5.81      1.50     3.70     9.52 1.01      465
+sds(sbc_day_1)     5.81      1.41     3.70     9.17 1.01      389
                Tail_ESS
-sds(sbc_day_1)     1228
+sds(sbc_day_1)      732
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 246) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.41      0.03     0.37     0.47 1.00      839
+sd(Intercept)     0.41      0.03     0.37     0.47 1.01      772
               Tail_ESS
-sd(Intercept)     2012
+sd(Intercept)     1447
 
 ~id:cycle (Number of levels: 448) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.15      0.03     0.08     0.20 1.00      332
+sd(Intercept)     0.15      0.03     0.09     0.20 1.01      443
               Tail_ESS
-sd(Intercept)      476
+sd(Intercept)      659
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.37      0.03     3.32     3.43 1.00      732     1329
-sbc_day_1   -19.28      2.30   -23.65   -14.67 1.00     1444     2072
+Intercept     3.37      0.03     3.31     3.43 1.00      576     1161
+sbc_day_1   -19.43      2.29   -23.85   -14.91 1.00     1117     1706
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.66      0.01     0.64     0.68 1.00     2683     2745
+sigma     0.66      0.01     0.64     0.68 1.00     2710     2707
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3135,66 +3387,90 @@ $r_log_bc_stirn
 [1] &quot;-0.41 [-0.44;-0.38]&quot;
 
 $r_diff_bc_stirn
-[1] &quot;-0.42 [-0.45;-0.39]&quot;
+[1] &quot;-0.42 [-0.45;-0.40]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot;-0.42 [-0.45;-0.40]&quot;
+[1] &quot;-0.43 [-0.46;-0.40]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.83 [ 0.82; 0.84]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.85 [ 0.84; 0.86]&quot;
+[1] &quot; 0.86 [ 0.85; 0.87]&quot;
 
 $sd_bc_imputed
 [1] &quot;1.17 (87%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.87 [ 0.86; 0.88]&quot;
+[1] &quot; 0.88 [ 0.87; 0.88]&quot;
+
+$rr_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.876    0.868     0.884
+2 fc             0.791    0.778     0.803
+3 lh             0.902    0.894     0.909
+
+$r_within_bc_imputed
+[1] &quot; 0.88 [ 0.87; 0.89]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.89 [ 0.88; 0.90]&quot;
+
+$rr_within_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.889    0.881     0.896
+2 fc             0.810    0.798     0.822
+3 lh             0.914    0.907     0.920
 
 $imputed_bc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 310 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 310 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-6-2.png" width="624" /></p>
+<pre><code>Warning: Removed 310 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 310 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-6-2.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
 [1] &quot; 0.77&quot;
 
 $fc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3676) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     3.53      0.96     2.18     5.86 1.00     1545
+sds(sfc_day_1)     3.84      1.01     2.40     6.32 1.00     1185
                Tail_ESS
-sds(sfc_day_1)     2422
+sds(sfc_day_1)     1778
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 257) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.46      0.03     0.40     0.52 1.00     1181
+sd(Intercept)     0.46      0.03     0.40     0.52 1.00     1187
               Tail_ESS
-sd(Intercept)     1594
+sd(Intercept)     1897
 
 ~id:cycle (Number of levels: 481) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.20      0.03     0.13     0.26 1.01      639
+sd(Intercept)     0.20      0.04     0.12     0.26 1.00      540
               Tail_ESS
-sd(Intercept)     1175
+sd(Intercept)      617
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.33      0.03     3.26     3.40 1.00     1909     2607
-sfc_day_1    -9.65      2.53   -14.84    -4.85 1.00     2804     2781
+Intercept     3.33      0.03     3.26     3.39 1.01     1118     2110
+sfc_day_1   -10.77      2.77   -16.43    -5.46 1.00     1703     2362
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.84      0.01     0.82     0.86 1.00     5012     2892
+sigma     0.84      0.01     0.82     0.86 1.00     4298     2736
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3225,57 +3501,65 @@ $r_fc_imputed
 [1] &quot; 0.72 [ 0.71; 0.74]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.77 [ 0.75; 0.78]&quot;
+[1] &quot; 0.76 [ 0.75; 0.78]&quot;
 
 $sd_fc_imputed
 [1] &quot;1.07 (84%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.80 [ 0.78; 0.81]&quot;
+[1] &quot; 0.79 [ 0.78; 0.80]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.79 [ 0.77; 0.80]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.81 [ 0.80; 0.82]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 23 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 23 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-6-3.png" width="624" /></p>
+<pre><code>Warning: Removed 23 rows containing missing values or values outside the scale
+range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 23 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-6-3.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
 [1] &quot; 0.96&quot;
 
 $lh_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1 | id) + (1 | id:cycle) 
    Data: df %&gt;% filter(between(lh_day, -15, 15)) (Number of observations: 2550) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(slh_day_1)     5.19      1.27     3.31     8.33 1.00     1152
+sds(slh_day_1)     5.31      1.29     3.43     8.50 1.01      549
                Tail_ESS
-sds(slh_day_1)     1700
+sds(slh_day_1)     1165
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 214) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.27      0.03     0.21     0.33 1.00      743
+sd(Intercept)     0.27      0.03     0.21     0.33 1.01      562
               Tail_ESS
-sd(Intercept)     1182
+sd(Intercept)      746
 
 ~id:cycle (Number of levels: 340) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.25      0.03     0.20     0.31 1.00      743
+sd(Intercept)     0.25      0.03     0.20     0.31 1.00      543
               Tail_ESS
-sd(Intercept)     1250
+sd(Intercept)      894
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.39      0.03     3.33     3.44 1.00     2817     3165
-slh_day_1   -11.11      1.98   -15.05    -7.15 1.00     4566     3186
+Intercept     3.38      0.03     3.33     3.44 1.00     1455     1841
+slh_day_1   -11.15      1.90   -14.89    -7.44 1.00     1632     1930
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.59      0.01     0.57     0.60 1.00     4811     2784
+sigma     0.59      0.01     0.57     0.60 1.00     2614     2919
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3297,27 +3581,35 @@ $r_log_prob_lh
 [1] &quot;-0.30 [-0.34;-0.26]&quot;
 
 $r_diff_prob_lh
-[1] &quot;-0.35 [-0.39;-0.32]&quot;
+[1] &quot;-0.36 [-0.39;-0.33]&quot;
 
 $r_log_diff_prob_lh
-[1] &quot;-0.29 [-0.32;-0.25]&quot;
+[1] &quot;-0.30 [-0.33;-0.26]&quot;
 
 $r_lh_imputed
 [1] &quot; 0.87 [ 0.86; 0.88]&quot;
 
 $r_diff_lh_imputed
-[1] &quot; 0.88 [ 0.87; 0.88]&quot;
+[1] &quot; 0.88 [ 0.88; 0.89]&quot;
 
 $sd_lh_imputed
 [1] &quot;1.21 (82%)&quot;
 
 $r_diff_lh_imputed_rr
-[1] &quot; 0.89 [ 0.89; 0.90]&quot;
+[1] &quot; 0.90 [ 0.89; 0.91]&quot;
+
+$r_within_lh_imputed
+[1] &quot; 0.90 [ 0.89; 0.91]&quot;
+
+$r_within_lh_imputed_rr
+[1] &quot; 0.91 [ 0.91; 0.92]&quot;
 
 $imputed_lh_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 1132 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 1132 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-6-4.png" width="624" /></p>
+<pre><code>Warning: Removed 1132 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1132 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-6-4.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_lh_imputed
 [1] &quot; 0.67&quot;</code></pre>
@@ -3325,36 +3617,46 @@ $rmse_lh_imputed
 <h3 id="testosterone">Testosterone</h3>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>,  <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>Testo</span>, <span class='va'>cycle_length</span>, hormone_cens <span class='op'>=</span> <span class='va'>Testo_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span>
-
-<span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"BioCycle"</span>, 
-                  Hormone <span class='op'>=</span> <span class='st'>"Testosterone"</span>, 
-                  Method <span class='op'>=</span> <span class='st'>"Serum LCMS/MS"</span>,
-                  Citation <span class='op'>=</span> <span class='st'>[1039 chars quoted with '"']</span>,
-                  LOD <span class='op'>=</span> <span class='fl'>0.2</span>,
-                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,
-                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;7"</span>,
-                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Serum testosterone was measured by liquid chromatography/ tandem mass spectrometry (Shimadzu Prominence Liquid Chromatogram with an ABSceix 5500 tandem mass spectrometer) by the Advanced Research and Diagnostic Laboratory, Minneapolis, MN. Increased sensitivity was achieved by using 100% acetonitrile mobile phase B as the solvent gradient elution and adding a low standard of 4 ng/dL."</span>,
-                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, 
-                  LH_test <span class='op'>=</span> <span class='st'>[1281 chars quoted with '"']</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>,  <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>Testo</span>, <span class='va'>cycle_length</span>, hormone_cens <span class='op'>=</span> <span class='va'>Testo_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"BioCycle"</span>, </span>
+<span>                  Hormone <span class='op'>=</span> <span class='st'>"Testosterone"</span>, </span>
+<span>                  Method <span class='op'>=</span> <span class='st'>"Serum LCMS/MS"</span>,</span>
+<span>                  Citation <span class='op'>=</span> <span class='st'>"</span></span>
+<span><span class='st'>Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., &amp; BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x</span></span>
+<span><span class='st'>  </span></span>
+<span><span class='st'>Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., &amp; Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287</span></span>
+<span><span class='st'></span></span>
+<span><span class='st'>Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., &amp; Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012"</span>,</span>
+<span>                  LOD <span class='op'>=</span> <span class='fl'>0.2</span>,</span>
+<span>                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,</span>
+<span>                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;7"</span>,</span>
+<span>                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Serum testosterone was measured by liquid chromatography/ tandem mass spectrometry (Shimadzu Prominence Liquid Chromatogram with an ABSceix 5500 tandem mass spectrometer) by the Advanced Research and Diagnostic Laboratory, Minneapolis, MN. Increased sensitivity was achieved by using 100% acetonitrile mobile phase B as the solvent gradient elution and adding a low standard of 4 ng/dL."</span>,</span>
+<span>                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, </span>
+<span>                  LH_test <span class='op'>=</span> <span class='st'>"Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. "</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code>`summarise()` has regrouped the output.
+Joining with `by = join_by(bc_day)`
+`summarise()` has regrouped the output.
+ℹ Summaries were computed grouped by id and cycle.
+ℹ Output is grouped by id.
+ℹ Use `summarise(.groups = &quot;drop_last&quot;)` to silence this message.
+ℹ Use `summarise(.by = c(id, cycle))` for per-operation grouping
+  (`?dplyr::dplyr_by`) instead.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.
-
+Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>$Dataset
 [1] &quot;BioCycle&quot;
@@ -3390,24 +3692,25 @@ $LH_test
 [1] &quot;Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. &quot;
 
 $distribution</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 201 rows containing non-finite values (stat_bin).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-7-1.png" width="624" /></p>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>Warning: Removed 201 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-7-1.png" alt="" width="624" /></p>
 <pre><code>
 $mean
-[1] 30.00735
+[1] 30.01713
 
 $logmean
-[1] 3.318887
+[1] 3.319198
 
 $logsd
-[1] 0.4121322
+[1] 0.4121979
 
 $median
 [1] 27.9
 
 $sd
-[1] 12.37714
+[1] 12.38095
 
 $mad
 [1] 11.26776
@@ -3431,7 +3734,7 @@ $n_cycles
 [1] 509
 
 $n_days
-[1] 4078
+[1] 4072
 
 $age
 [1] &quot;27.3±8.21&quot;
@@ -3443,7 +3746,7 @@ $cycle_length
 [1] &quot;28.8±4.10&quot;
 
 $usable_n
-[1] 3657
+[1] 3651
 
 $usable_n_women
 [1] 257
@@ -3471,39 +3774,39 @@ $var_resid
 
 $bc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3395) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sbc_day_1)     1.12      0.34     0.64     1.94 1.00     1206
+sds(sbc_day_1)     1.14      0.36     0.65     2.08 1.00      907
                Tail_ESS
-sds(sbc_day_1)     2056
+sds(sbc_day_1)     1333
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 246) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.35      0.02     0.32     0.38 1.00      506
+sd(Intercept)     0.35      0.02     0.32     0.38 1.00      444
               Tail_ESS
-sd(Intercept)     1170
+sd(Intercept)     1058
 
 ~id:cycle (Number of levels: 448) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.06      0.01     0.05     0.07 1.00     1039
+sd(Intercept)     0.06      0.01     0.05     0.07 1.00     1089
               Tail_ESS
-sd(Intercept)     2233
+sd(Intercept)     2037
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.31      0.02     3.27     3.36 1.01      284      649
-sbc_day_1    -0.96      0.55    -2.04     0.16 1.00     2960     3035
+Intercept     3.31      0.02     3.27     3.36 1.02      240      482
+sbc_day_1    -0.99      0.57    -2.10     0.12 1.00     2261     2764
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.17      0.00     0.17     0.18 1.00     4895     2956
+sigma     0.17      0.00     0.17     0.18 1.00     5351     2940
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3516,7 +3819,7 @@ $rmse_bc
 [1] &quot;0.43 [0.42;0.43]&quot;
 
 $r_loo_bc
-[1] &quot;0.25 [0.20;0.29]&quot;
+[1] &quot;0.24 [0.19;0.29]&quot;
 
 $r_bc_stirn
 [1] &quot; 0.22 [ 0.19; 0.25]&quot;
@@ -3525,66 +3828,90 @@ $r_log_bc_stirn
 [1] &quot; 0.23 [ 0.19; 0.26]&quot;
 
 $r_diff_bc_stirn
-[1] &quot; 0.42 [ 0.39; 0.45]&quot;
+[1] &quot; 0.41 [ 0.38; 0.44]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot; 0.46 [ 0.43; 0.48]&quot;
+[1] &quot; 0.45 [ 0.42; 0.48]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.31 [ 0.28; 0.34]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.64 [ 0.62; 0.66]&quot;
+[1] &quot; 0.62 [ 0.60; 0.64]&quot;
 
 $sd_bc_imputed
 [1] &quot;0.17 (115%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.62 [ 0.60; 0.64]&quot;
+[1] &quot; 0.60 [ 0.58; 0.62]&quot;
+
+$rr_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.597    0.576     0.618
+2 fc             0.568    0.546     0.589
+3 lh             0.598    0.574     0.621
+
+$r_within_bc_imputed
+[1] &quot; 0.64 [ 0.61; 0.66]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.60 [ 0.58; 0.62]&quot;
+
+$rr_within_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.600    0.578     0.620
+2 fc             0.576    0.553     0.597
+3 lh             0.596    0.572     0.620
 
 $imputed_bc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 315 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 315 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-7-2.png" width="624" /></p>
+<pre><code>Warning: Removed 309 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 309 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-7-2.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
 [1] &quot; 0.40&quot;
 
 $fc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3644) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     0.61      0.22     0.33     1.15 1.00     1563
+sds(sfc_day_1)     0.68      0.23     0.37     1.23 1.00     1239
                Tail_ESS
-sds(sfc_day_1)     2307
+sds(sfc_day_1)     2026
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 257) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.35      0.02     0.32     0.38 1.00      647
+sd(Intercept)     0.35      0.02     0.32     0.38 1.00      457
               Tail_ESS
-sd(Intercept)     1227
+sd(Intercept)      889
 
 ~id:cycle (Number of levels: 481) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.06      0.01     0.05     0.07 1.01      989
+sd(Intercept)     0.06      0.01     0.05     0.08 1.00      815
               Tail_ESS
-sd(Intercept)     2328
+sd(Intercept)     1870
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.32      0.02     3.28     3.37 1.01      288      538
-sfc_day_1     0.42      0.50    -0.57     1.39 1.00     3465     2951
+Intercept     3.32      0.02     3.28     3.37 1.01      225      530
+sfc_day_1     0.47      0.55    -0.65     1.54 1.00     2399     2240
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.18      0.00     0.18     0.19 1.00     5692     2975
+sigma     0.18      0.00     0.18     0.18 1.00     4144     2696
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3606,66 +3933,74 @@ $r_log_fc_stirn
 [1] &quot; 0.16 [ 0.13; 0.19]&quot;
 
 $r_diff_fc_stirn
-[1] &quot; 0.36 [ 0.34; 0.39]&quot;
+[1] &quot; 0.36 [ 0.33; 0.38]&quot;
 
 $r_log_diff_fc_stirn
-[1] &quot; 0.43 [ 0.41; 0.46]&quot;
+[1] &quot; 0.42 [ 0.40; 0.45]&quot;
 
 $r_fc_imputed
 [1] &quot; 0.27 [ 0.24; 0.30]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.60 [ 0.58; 0.62]&quot;
+[1] &quot; 0.58 [ 0.56; 0.60]&quot;
 
 $sd_fc_imputed
 [1] &quot;0.16 (107%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.59 [ 0.57; 0.61]&quot;
+[1] &quot; 0.57 [ 0.55; 0.59]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.59 [ 0.57; 0.62]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.58 [ 0.55; 0.60]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 30 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 30 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-7-3.png" width="624" /></p>
+<pre><code>Warning: Removed 24 rows containing missing values or values outside the scale
+range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 24 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-7-3.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
 [1] &quot; 0.41&quot;
 
 $lh_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1 | id) + (1 | id:cycle) 
    Data: df %&gt;% filter(between(lh_day, -15, 15)) (Number of observations: 2526) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(slh_day_1)     1.47      0.47     0.86     2.62 1.00     1704
+sds(slh_day_1)     1.44      0.43     0.83     2.45 1.00     1822
                Tail_ESS
-sds(slh_day_1)     2262
+sds(slh_day_1)     2712
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 214) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.34      0.02     0.31     0.38 1.00     1175
+sd(Intercept)     0.34      0.02     0.31     0.38 1.00     1024
               Tail_ESS
-sd(Intercept)     2134
+sd(Intercept)     1813
 
 ~id:cycle (Number of levels: 340) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.07      0.01     0.05     0.09 1.00     1098
+sd(Intercept)     0.07      0.01     0.05     0.09 1.00     1057
               Tail_ESS
-sd(Intercept)     2079
+sd(Intercept)     2263
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.31      0.02     3.26     3.35 1.02      637      743
-slh_day_1     0.59      0.58    -0.55     1.71 1.00     5111     2883
+Intercept     3.31      0.02     3.26     3.35 1.01      648     1159
+slh_day_1     0.59      0.55    -0.50     1.69 1.00     4726     3000
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.17      0.00     0.17     0.18 1.00     6111     2996
+sigma     0.17      0.00     0.17     0.18 1.00     4834     2697
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3678,7 +4013,7 @@ $rmse_lh
 [1] &quot;0.43 [0.42;0.44]&quot;
 
 $r_loo_lh
-[1] &quot;0.28 [0.22;0.32]&quot;
+[1] &quot;0.27 [0.22;0.32]&quot;
 
 $r_prob_lh
 [1] &quot; 0.28 [ 0.24; 0.32]&quot;
@@ -3687,27 +4022,35 @@ $r_log_prob_lh
 [1] &quot; 0.28 [ 0.25; 0.32]&quot;
 
 $r_diff_prob_lh
-[1] &quot; 0.50 [ 0.47; 0.53]&quot;
+[1] &quot; 0.49 [ 0.46; 0.52]&quot;
 
 $r_log_diff_prob_lh
-[1] &quot; 0.54 [ 0.51; 0.56]&quot;
+[1] &quot; 0.53 [ 0.50; 0.56]&quot;
 
 $r_lh_imputed
 [1] &quot; 0.34 [ 0.30; 0.37]&quot;
 
 $r_diff_lh_imputed
-[1] &quot; 0.66 [ 0.63; 0.68]&quot;
+[1] &quot; 0.64 [ 0.61; 0.66]&quot;
 
 $sd_lh_imputed
 [1] &quot;0.17 (122%)&quot;
 
 $r_diff_lh_imputed_rr
-[1] &quot; 0.62 [ 0.60; 0.64]&quot;
+[1] &quot; 0.60 [ 0.57; 0.62]&quot;
+
+$r_within_lh_imputed
+[1] &quot; 0.65 [ 0.62; 0.67]&quot;
+
+$r_within_lh_imputed_rr
+[1] &quot; 0.60 [ 0.57; 0.62]&quot;
 
 $imputed_lh_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 1131 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 1131 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-7-4.png" width="624" /></p>
+<pre><code>Warning: Removed 1125 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1125 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-7-4.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_lh_imputed
 [1] &quot; 0.40&quot;</code></pre>
@@ -3715,37 +4058,50 @@ $rmse_lh_imputed
 <h3 id="shbg">SHBG</h3>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>SHBG</span>, <span class='va'>cycle_length</span>, hormone_cens <span class='op'>=</span> <span class='va'>SHBG_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span>
-
-<span class='fu'>summarise_hormone</span><span class='op'>(</span><span class='va'>df</span>, <span class='st'>"BioCycle"</span>, 
-                  <span class='st'>"SHBG"</span>, 
-                  Method <span class='op'>=</span> <span class='st'>"Serum Radioimmunoassay"</span>, 
-                  Citation <span class='op'>=</span> <span class='st'>[1039 chars quoted with '"']</span>,
-                  LOD <span class='op'>=</span> <span class='fl'>20</span>,
-                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,
-                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;10"</span>,
-                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY)."</span>,
-                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, 
-                  LH_test <span class='op'>=</span> <span class='st'>[1281 chars quoted with '"']</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>biocycle_stdnames</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>SHBG</span>, <span class='va'>cycle_length</span>, hormone_cens <span class='op'>=</span> <span class='va'>SHBG_cens</span>, <span class='va'>age</span>, <span class='va'>partner</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'>summarise_hormone</span><span class='op'>(</span><span class='va'>df</span>, <span class='st'>"BioCycle"</span>, </span>
+<span>                  <span class='st'>"SHBG"</span>, </span>
+<span>                  Method <span class='op'>=</span> <span class='st'>"Serum Radioimmunoassay"</span>, </span>
+<span>                  Citation <span class='op'>=</span> <span class='st'>"</span></span>
+<span><span class='st'>Wactawski-Wende, J., Schisterman, E. F., Hovey, K. M., Howards, P. P., Browne, R. W., Hediger, M., Liu, A., Trevisan, M., &amp; BioCycle Study Group. (2009). BioCycle study: design of the longitudinal study of the oxidative stress and hormone variation during the menstrual cycle. Paediatric and Perinatal Epidemiology, 23(2), 171–184. https://doi.org/10.1111/j.1365-3016.2008.00985.x</span></span>
+<span><span class='st'>  </span></span>
+<span><span class='st'>Howards, P. P., Schisterman, E. F., Wactawski-Wende, J., Reschke, J. E., Frazer, A. A., &amp; Hovey, K. M. (2009). Timing clinic visits to phases of the menstrual cycle by using a fertility monitor: the BioCycle Study. American Journal of Epidemiology, 169(1), 105–112. https://doi.org/10.1093/aje/kwn287</span></span>
+<span><span class='st'></span></span>
+<span><span class='st'>Prasad, A., Mumford, S. L., Buck Louis, G. M., Ahrens, K. A., Sjaarda, L. A., Schliep, K. C., Perkins, N. J., Kissell, K. A., Wactawski-Wende, J., &amp; Schisterman, E. F. (2014). Sexual activity, endogenous reproductive hormones and ovulation in premenopausal women. Hormones and Behavior, 66(2), 330–338. https://doi.org/10.1016/j.yhbeh.2014.06.012"</span>,</span>
+<span>                  LOD <span class='op'>=</span> <span class='fl'>20</span>,</span>
+<span>                  CV_intra <span class='op'>=</span> <span class='cn'>NA</span>,</span>
+<span>                  CV_inter <span class='op'>=</span> <span class='st'>"&lt;10"</span>,</span>
+<span>                  Procedure <span class='op'>=</span> <span class='st'>"Blood collection and handling protocols were designed to minimize variability (Wactawski- Wende et al., 2009). All samples were processed and frozen at −80°C within 90 minutes of phlebotomy and analytes were measured in participant-specific batches within a single run to limit analytical variability. Estradiol, LH, follicle-stimulating hormone (FSH), and progesterone concentrations were measured in serum samples using solid-phase competitive chemiluminescent enzymatic immunoassays (DPC Immulite 2000 analyzer, Siemens Medical Solutions Diagnostics, Deerfield, IL) at the Kaleida Health Center for Laboratory Medicine (Buffalo, NY)."</span>,</span>
+<span>                  Scheduling <span class='op'>=</span> <span class='st'>"Distributed across cycle ', regularly menstruating premenopausal women for two menstrual cycles. Participants visited the clinic up to 8 times per cycle, at which time blood and urine were collected. The visits occurred at key hormonally defined phases of the menstrual cycle, with the help of an algorithm based on cycle length and data from a fertility monitor. The study included 16 cycle visits (eight per cycle) over two cycles. The timing of these visits was scheduled to correspond with specific times of the menstrual cycle where the most hormonal variation would be expected, approximately days 2, 7, 12, 13, 14, 18, 22 and 27 of a 28-day cycle, adjusted for cycle length (Table 4). Cycle visits were routinely scheduled between 7:00 AM and 8:30 AM to allow for collection of fasting samples and to reduce diurnal variation.'"</span>, </span>
+<span>                  LH_test <span class='op'>=</span> <span class='st'>"Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. "</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code>`summarise()` has regrouped the output.
+Joining with `by = join_by(bc_day)`
+`summarise()` has regrouped the output.
+ℹ Summaries were computed grouped by id and cycle.
+ℹ Output is grouped by id.
+ℹ Use `summarise(.groups = &quot;drop_last&quot;)` to silence this message.
+ℹ Use `summarise(.by = c(id, cycle))` for per-operation grouping
+  (`?dplyr::dplyr_by`) instead.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.
-
 Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
@@ -3784,9 +4140,10 @@ $LH_test
 [1] &quot;Participants were also provided with and trained to use the Clearblue Easy Fertility Monitor (Inverness Medical Innovations, Inc., Waltham, Massachusetts) (www. clearblueeasy.com). The fertility monitor was originally developed to assist women in becoming pregnant by helping them to identify their fertile window through measurement of both estrone- 3-glucuronide (E3G) and LH in urine as described in greater detail elsewhere (13). Briefly, the monitor is synchronized to a woman’s cycle and then is checked daily to see whether a test is requested. Between the sixth and the ninth days of a woman’s cycle (depending on her cycle length history), the monitor begins to request daily tests for 10 days. On test days, the woman briefly submerges a test stick in her first- morning urine and then inserts the test stick into the monitor. The test stick has a nitrocellulose strip with an anti-LH antibody zone and an E3G conjugate zone. The monitor optically reads the level of E3G and LH in the urine by the intensity of the lines in the corresponding zones (13). Each day, the monitor assigns the woman to low, high, or peak fertility on the basis of her E3G and LH levels. Thus, unlike home LH test sticks, the monitor provides informa- tion to help anticipate the LH surge. &quot;
 
 $distribution</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 181 rows containing non-finite values (stat_bin).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-8-1.png" width="624" /></p>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>Warning: Removed 175 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-8-1.png" alt="" width="624" /></p>
 <pre><code>
 $mean
 [1] 48.24262
@@ -3810,7 +4167,7 @@ $range
 [1] &quot;2.00, 175.00&quot;
 
 $missing
-[1] 181
+[1] 175
 
 $outliers
 [1] 0
@@ -3825,7 +4182,7 @@ $n_cycles
 [1] 509
 
 $n_days
-[1] 4078
+[1] 4072
 
 $age
 [1] &quot;27.3±8.21&quot;
@@ -3865,39 +4222,39 @@ $var_resid
 
 $bc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3421) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sbc_day_1)     0.29      0.12     0.14     0.60 1.00     2111
+sds(sbc_day_1)     0.29      0.12     0.14     0.57 1.00     2535
                Tail_ESS
-sds(sbc_day_1)     2758
+sds(sbc_day_1)     3010
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 246) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.45      0.02     0.41     0.49 1.00     1068
+sd(Intercept)     0.45      0.02     0.41     0.50 1.00     1415
               Tail_ESS
-sd(Intercept)     2136
+sd(Intercept)     2232
 
 ~id:cycle (Number of levels: 448) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.11      0.01     0.10     0.13 1.01     1481
+sd(Intercept)     0.11      0.01     0.10     0.13 1.00     1388
               Tail_ESS
-sd(Intercept)     2111
+sd(Intercept)     2119
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.77      0.03     3.71     3.82 1.01      581      976
-sbc_day_1    -0.31      0.32    -0.92     0.35 1.00     5034     2203
+Intercept     3.77      0.03     3.71     3.82 1.00      738     1405
+sbc_day_1    -0.32      0.31    -0.94     0.28 1.00     6657     3421
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.16      0.00     0.15     0.16 1.00     6305     2643
+sigma     0.16      0.00     0.15     0.16 1.00     4647     2962
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -3919,66 +4276,90 @@ $r_log_bc_stirn
 [1] &quot;-0.06 [-0.10;-0.03]&quot;
 
 $r_diff_bc_stirn
-[1] &quot;-0.31 [-0.34;-0.28]&quot;
+[1] &quot;-0.27 [-0.30;-0.23]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot;-0.27 [-0.30;-0.24]&quot;
+[1] &quot;-0.24 [-0.27;-0.21]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.01 [-0.03; 0.04]&quot;
 
 $r_diff_bc_imputed
-[1] &quot;-0.03 [-0.07;-0.00]&quot;
+[1] &quot;-0.03 [-0.07; 0.00]&quot;
 
 $sd_bc_imputed
 [1] &quot;0.59 (86%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot;-0.04 [-0.07;-0.00]&quot;
+[1] &quot;-0.04 [-0.07; 0.00]&quot;
+
+$rr_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc           -0.0350  -0.0710  0.000999
+2 fc           -0.0178  -0.0513  0.0157  
+3 lh           -0.0465  -0.0886 -0.00431 
+
+$r_within_bc_imputed
+[1] &quot;-0.03 [-0.07; 0.00]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot;-0.03 [-0.07; 0.00]&quot;
+
+$rr_within_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc           -0.0348  -0.0711   0.00162
+2 fc           -0.0175  -0.0512   0.0162 
+3 lh           -0.0490  -0.0914  -0.00632
 
 $imputed_bc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 310 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 310 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-8-2.png" width="624" /></p>
+<pre><code>Warning: Removed 310 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 310 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-8-2.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
 [1] &quot; 0.78&quot;
 
 $fc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 3672) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     0.25      0.10     0.12     0.51 1.00     2316
+sds(sfc_day_1)     0.25      0.10     0.12     0.52 1.00     2670
                Tail_ESS
-sds(sfc_day_1)     2810
+sds(sfc_day_1)     3029
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 257) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.45      0.02     0.41     0.50 1.00     1193
+sd(Intercept)     0.45      0.02     0.42     0.50 1.00     1060
               Tail_ESS
-sd(Intercept)     1923
+sd(Intercept)     1819
 
 ~id:cycle (Number of levels: 481) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.11      0.01     0.10     0.12 1.00     1502
+sd(Intercept)     0.11      0.01     0.10     0.12 1.00     1411
               Tail_ESS
-sd(Intercept)     2596
+sd(Intercept)     2065
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.76      0.03     3.71     3.82 1.00      603     1264
-sfc_day_1    -0.49      0.32    -1.16     0.13 1.00     6750     2602
+Intercept     3.76      0.03     3.71     3.82 1.01      548     1247
+sfc_day_1    -0.49      0.31    -1.13     0.09 1.00     6393     2935
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.16      0.00     0.15     0.16 1.00     4107     2611
+sigma     0.16      0.00     0.15     0.16 1.00     5359     2753
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -4000,66 +4381,74 @@ $r_log_fc_stirn
 [1] &quot;-0.02 [-0.05; 0.01]&quot;
 
 $r_diff_fc_stirn
-[1] &quot;-0.25 [-0.28;-0.22]&quot;
+[1] &quot;-0.21 [-0.24;-0.18]&quot;
 
 $r_log_diff_fc_stirn
-[1] &quot;-0.22 [-0.25;-0.18]&quot;
+[1] &quot;-0.18 [-0.21;-0.15]&quot;
 
 $r_fc_imputed
 [1] &quot;-0.01 [-0.04; 0.02]&quot;
 
 $r_diff_fc_imputed
-[1] &quot;-0.02 [-0.05; 0.01]&quot;
+[1] &quot;-0.02 [-0.05; 0.02]&quot;
 
 $sd_fc_imputed
 [1] &quot;0.50 (93%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot;-0.02 [-0.05; 0.01]&quot;
+[1] &quot;-0.02 [-0.05; 0.02]&quot;
+
+$r_within_fc_imputed
+[1] &quot;-0.02 [-0.05; 0.02]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot;-0.02 [-0.05; 0.02]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 23 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 23 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-8-3.png" width="624" /></p>
+<pre><code>Warning: Removed 23 rows containing missing values or values outside the scale
+range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 23 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-8-3.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
 [1] &quot; 0.72&quot;
 
 $lh_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(lh_day) + (1 | id) + (1 | id:cycle) 
    Data: df %&gt;% filter(between(lh_day, -15, 15)) (Number of observations: 2547) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(slh_day_1)     0.38      0.15     0.19     0.74 1.00     2504
+sds(slh_day_1)     0.38      0.14     0.20     0.72 1.00     2237
                Tail_ESS
-sds(slh_day_1)     2976
+sds(slh_day_1)     3073
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 214) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.45      0.02     0.41     0.49 1.00     1257
+sd(Intercept)     0.45      0.02     0.40     0.49 1.00     1669
               Tail_ESS
-sd(Intercept)     2132
+sd(Intercept)     2560
 
 ~id:cycle (Number of levels: 340) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.11      0.01     0.09     0.13 1.00     1095
+sd(Intercept)     0.11      0.01     0.09     0.13 1.00     1011
               Tail_ESS
-sd(Intercept)     2006
+sd(Intercept)     2349
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.79      0.03     3.73     3.85 1.01      586     1307
-slh_day_1     0.05      0.36    -0.62     0.78 1.00     7405     3081
+Intercept     3.79      0.03     3.73     3.85 1.00      865     1540
+slh_day_1     0.06      0.36    -0.62     0.77 1.00     7849     2871
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.14      0.00     0.14     0.15 1.00     4387     2723
+sigma     0.14      0.00     0.14     0.15 1.00     4646     3036
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -4081,32 +4470,40 @@ $r_log_prob_lh
 [1] &quot;-0.07 [-0.11;-0.03]&quot;
 
 $r_diff_prob_lh
-[1] &quot;-0.22 [-0.26;-0.19]&quot;
+[1] &quot;-0.19 [-0.23;-0.15]&quot;
 
 $r_log_diff_prob_lh
-[1] &quot;-0.19 [-0.23;-0.16]&quot;
+[1] &quot;-0.17 [-0.20;-0.13]&quot;
 
 $r_lh_imputed
 [1] &quot;-0.02 [-0.06; 0.02]&quot;
 
 $r_diff_lh_imputed
-[1] &quot;-0.05 [-0.09;-0.02]&quot;
+[1] &quot;-0.04 [-0.08;-0.00]&quot;
 
 $sd_lh_imputed
 [1] &quot;0.60 (85%)&quot;
 
 $r_diff_lh_imputed_rr
-[1] &quot;-0.06 [-0.10;-0.02]&quot;
+[1] &quot;-0.05 [-0.09;-0.00]&quot;
+
+$r_within_lh_imputed
+[1] &quot;-0.05 [-0.09;-0.01]&quot;
+
+$r_within_lh_imputed_rr
+[1] &quot;-0.05 [-0.09;-0.01]&quot;
 
 $imputed_lh_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 1131 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 1131 rows containing missing values (geom_point).</code></pre>
-<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-8-4.png" width="624" /></p>
+<pre><code>Warning: Removed 1131 rows containing missing values or values outside the
+scale range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1131 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="3_biocycle_summarize_files/figure-html5/unnamed-chunk-8-4.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_lh_imputed
 [1] &quot; 0.79&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb139"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb170"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

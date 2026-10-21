@@ -20,6 +20,7 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -50,16 +51,17 @@ pre.numberSource code > span > a:first-child::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {   }
+  { color: #00769e; background-color: #f1f3f5; }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
+code span { color: #00769e; } /* Normal */
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { color: #657422; } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
-code span.cf { color: #007ba5; } /* ControlFlow */
+code span.cf { color: #00769e; } /* ControlFlow */
 code span.ch { color: #20794d; } /* Char */
 code span.cn { color: #8f5902; } /* Constant */
 code span.co { color: #5e5e5e; } /* Comment */
@@ -73,17 +75,18 @@ code span.fl { color: #ad0000; } /* Float */
 code span.fu { color: #4758ab; } /* Function */
 code span.im { } /* Import */
 code span.in { color: #5e5e5e; } /* Information */
-code span.kw { color: #007ba5; } /* Keyword */
+code span.kw { color: #00769e; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
-code span.ot { color: #007ba5; } /* Other */
+code span.ot { color: #00769e; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
   <title>Salivary and serum immunoassay comparison: Untitled</title>
@@ -177,6 +180,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   d-article table.gt_table td,
   d-article table.gt_table th {
     border-bottom: none;
+    font-size: 100%;
   }
 
   .html-widget {
@@ -217,9 +221,21 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     display: none !important;
   }
 
+  hr.section-separator {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin: 0px;
+  }
+
+
+  d-byline {
+    border-top: none;
+  }
+
   d-article {
     padding-top: 2.5rem;
     padding-bottom: 30px;
+    border-top: none;
   }
 
   d-appendix {
@@ -314,6 +330,11 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   d-article div.sourceCode pre {
     padding-left: 18px;
     font-size: 14px;
+  }
+
+  /* tweak for Pandoc numbered line within distill */
+  d-article pre.numberSource code > span {
+      left: -2em;
   }
 
   d-article pre {
@@ -418,10 +439,6 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     position: relative;
     margin-bottom: 2.5em;
     margin-top: 1.5em;
-  }
-
-  .figure img {
-    width: 100%;
   }
 
   .figure .caption {
@@ -1079,6 +1096,12 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // create d-title
     $('.d-title').changeElementType('d-title');
 
+    // separator
+    var separator = '<hr class="section-separator" style="clear: both"/>';
+    // prepend separator above appendix
+    $('.d-byline').before(separator);
+    $('.d-article').before(separator);
+
     // create d-byline
     var byline = $('<d-byline></d-byline>');
     $('.d-byline').replaceWith(byline);
@@ -1156,8 +1179,9 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     $('.distill-force-highlighting-css').parent().remove();
 
     // remove empty line numbers inserted by pandoc when using a
-    // custom syntax highlighting theme
-    $('code.sourceCode a:empty').remove();
+    // custom syntax highlighting theme, except when numbering line
+    // in code chunk
+    $('pre:not(.numberLines) code.sourceCode a:empty').remove();
 
     // load distill framework
     load_distill_framework();
@@ -1183,12 +1207,13 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
       // add orcid ids
       $('.authors-affiliations').find('.author').each(function(i, el) {
         var orcid_id = front_matter.authors[i].orcidID;
+        var author_name = front_matter.authors[i].author
         if (orcid_id) {
           var a = $('<a></a>');
           a.attr('href', 'https://orcid.org/' + orcid_id);
           var img = $('<img></img>');
           img.addClass('orcid-id');
-          img.attr('alt', 'ORCID ID');
+          img.attr('alt', author_name ? 'ORCID ID for ' + author_name : 'ORCID ID');
           img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
           a.append(img);
           $(this).append(a);
@@ -1253,7 +1278,22 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
       // hoverable references
       $('span.citation[data-cites]').each(function() {
-        var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+        const citeChild = $(this).children()[0]
+        // Do not process if @xyz has been used without escaping and without bibliography activated
+        // https://github.com/rstudio/distill/issues/466
+        if (citeChild === undefined) return true
+
+        if (citeChild.nodeName == "D-FOOTNOTE") {
+          var fn = citeChild
+          $(this).html(fn.shadowRoot.querySelector("sup"))
+          $(this).id = fn.id
+          fn.remove()
+        }
+        var refs = $(this).attr('data-cites').split(" ");
+        var refHtml = refs.map(function(ref) {
+          // Could use CSS.escape too here, we insure backward compatibility in navigator
+          return "<p>" + $('div[id="ref-' + ref + '"]').html() + "</p>";
+        }).join("\n");
         window.tippy(this, {
           allowHTML: true,
           content: refHtml,
@@ -1264,6 +1304,31 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
           placement: 'bottom-start'
         });
       });
+
+      // fix footnotes in tables (#411)
+      // replacing broken distill.pub feature
+      $('table d-footnote').each(function() {
+        // we replace internal showAtNode methode which is triggered when hovering a footnote
+        this.hoverBox.showAtNode = function(node) {
+          // ported from https://github.com/distillpub/template/pull/105/files
+          calcOffset = function(elem) {
+              let x = elem.offsetLeft;
+              let y = elem.offsetTop;
+              // Traverse upwards until an `absolute` element is found or `elem`
+              // becomes null.
+              while (elem = elem.offsetParent && elem.style.position != 'absolute') {
+                  x += elem.offsetLeft;
+                  y += elem.offsetTop;
+              }
+
+              return { left: x, top: y };
+          }
+          // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetTop
+          const bbox = node.getBoundingClientRect();
+          const offset = calcOffset(node);
+          this.show([offset.left + bbox.width, offset.top + bbox.height]);
+        }
+      })
 
       // clear polling timer
       clearInterval(tid);
@@ -1363,6 +1428,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // mark non-body figures created by knitr chunks as 100% width
     $('.layout-chunk').each(function(i, val) {
       var figures = $(this).find('img, .html-widget');
+      // ignore leaflet img layers (#106)
+      figures = figures.filter(':not(img[class*="leaflet"])')
       if ($(this).attr('data-layout') !== "l-body") {
         figures.css('width', '100%');
       } else {
@@ -1385,7 +1452,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // get rid of index.html references in header
     if (window.location.protocol !== "file:") {
       $('.distill-site-header a[href]').each(function(i,val) {
-        $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
+        $(this).attr('href', $(this).attr('href').replace(/^index[.]html/, "./"));
       });
     }
 
@@ -1424,8 +1491,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </script>
 
   <!--/radix_placeholder_distill-->
-  <script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
-  <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="site_libs/header-attrs-2.31/header-attrs.js"></script>
+  <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -1456,6 +1523,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 <div class="d-title">
 <h1>1_grebe_import.knit</h1>
+
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
 
@@ -1463,119 +1531,113 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
 <div class="d-article">
-<p><a href="https://www.sciencedirect.com/science/article/pii/S0018506X1530180X" class="uri">https://www.sciencedirect.com/science/article/pii/S0018506X1530180X</a> We asked participants to provide saliva samples (~5 mL) via passive drool, from which we assayed estradiol, progesterone, and testosterone twice during the study: once during an initial session, and once upon awakening the day of a follow-up session one week later. Saliva samples were pipetted from a cup to test tubes, then frozen at -20° C. Prior to assays, frozen samples were thawed, mixed by vortexing, then centrifuged for 15 minutes to break up and precipitate mucins. Salivary 17β estradiol, progesterone, and testosterone concentrations were determined using enzyme-linked immunosorbent assays (ELISA) designed for saliva by Salimetrics LLC (Carlsbad, CA). The manufacturer reports a 0.8 correlation of saliva to serum for estradiol and progesterone, and a .61 correlation of saliva to serum for testosterone (for women). The minimum sensitivity is approximately 0.1 pg/ml for estradiol, 5 pg/ml for progesterone, and 1 pg/ml for testosterone. Intra-assay CVs, calculated as the mean CV of duplicate determinations, were 6.58%, 14.52%, and 4.07%, respectively. Inter-assay CVs were 2.68%, 4.83%, and 7.61%, respectively. The relatively high intra-assay CV for progesterone was more pronounced for relatively low values: 33.99% for the 13 values under 30 pg/ml, and 10.05% for the 49 values greater than 30 pg/ml.</p>
-<p>As expected, progesterone levels rise markedly during the second half of the cycle, as reported by women. <strong>One cannot detect a notable peak in estradiol mid-cycle, perhaps because surge days varied across a wide span of days (e.g., Stirnemann et al., 2013), as well as the secondary rise of this hormone due to secretion by the corpus luteum. Errors in self-reported beginning of last menses could also have an effect (Wagienka &amp; Baird, 2005).</strong> Nonetheless, the estradiol to progesterone ratio notably peaked during the late follicular phase and dropped during the luteal phase, consistent with expectation (Baird et al., 1991). In designing the study, our goal was to examine the potential proximate influences of hormones on women’s sexual desires and to do so by directly examining ovarian hormone levels. While many studies use self-reported cycle day to infer hormonal characteristics, substantial inter- and intra-individual variations in natural cycle length and in relative hormone production mean that associations between self-reported cycle day and hormone levels may be modest. Our results appear to support that view.</p>
+<p><a href="https://www.sciencedirect.com/science/article/pii/S0018506X1530180X" class="uri">https://www.sciencedirect.com/science/article/pii/S0018506X1530180X</a>
+We asked participants to provide saliva samples (~5 mL) via passive drool, from which we assayed estradiol, progesterone, and testosterone twice during the study: once during an initial session, and once upon awakening the day of a follow-up session one week later. Saliva samples were pipetted from a cup to test tubes, then frozen at -20° C. Prior to assays, frozen samples were thawed, mixed by vortexing, then centrifuged for 15 minutes to break up and precipitate mucins.
+Salivary 17β estradiol, progesterone, and testosterone concentrations were determined using enzyme-linked immunosorbent assays (ELISA) designed for saliva by Salimetrics LLC (Carlsbad, CA). The manufacturer reports a 0.8 correlation of saliva to serum for estradiol and progesterone, and a .61 correlation of saliva to serum for testosterone (for women). The minimum sensitivity is approximately 0.1 pg/ml for estradiol, 5 pg/ml for progesterone, and 1 pg/ml for testosterone. Intra-assay CVs, calculated as the mean CV of duplicate determinations, were 6.58%, 14.52%, and 4.07%, respectively. Inter-assay CVs were 2.68%, 4.83%, and 7.61%, respectively. The relatively high intra-assay CV for progesterone was more pronounced for relatively low values: 33.99% for the 13 values under 30 pg/ml, and 10.05% for the 49 values greater than 30 pg/ml.</p>
+<p>As expected, progesterone levels rise markedly during the second half of the cycle, as reported by women. <strong>One cannot detect a notable peak in estradiol mid-cycle, perhaps because surge days varied across a wide span of days (e.g., Stirnemann et al., 2013), as well as the secondary rise of this hormone due to secretion by the corpus luteum. Errors in self-reported beginning of last menses could also have an effect (Wagienka &amp; Baird, 2005).</strong> Nonetheless, the estradiol to progesterone ratio notably peaked during the late follicular phase and dropped during the luteal phase, consistent with expectation (Baird et al., 1991).
+In designing the study, our goal was to examine the potential proximate influences of hormones on women’s sexual desires and to do so by directly examining ovarian hormone levels. While many studies use self-reported cycle day to infer hormonal characteristics, substantial inter- and intra-individual variations in natural cycle length and in relative hormone production mean that associations between self-reported cycle day and hormone levels may be modest. Our results appear to support that view.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grebe</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/rio/man/import.html'>import</a></span><span class='op'>(</span><span class='st'>"data/grebe/EP_cycle_info.xlsx"</span><span class='op'>)</span>
-
-<span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>grebe</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>dayofcycle</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>grebe</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='http://gesistsa.github.io/rio/reference/import.html'>import</a></span><span class='op'>(</span><span class='st'>"data/grebe/EP_cycle_info.xlsx"</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>grebe</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>dayofcycle</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
-<pre><code>Warning: Removed 4 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
-<img src="1_grebe_import_files/figure-html5/unnamed-chunk-1-1.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;loess&#39; and formula = &#39;y ~ x&#39;</code></pre>
+<pre><code>Warning: Removed 4 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 4 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<img src="1_grebe_import_files/figure-html5/unnamed-chunk-1-1.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>grebe</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>dayofcycle</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>grebe</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>dayofcycle</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
-<pre><code>Warning: Removed 5 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 5 rows containing missing values (geom_point).</code></pre>
-<img src="1_grebe_import_files/figure-html5/unnamed-chunk-1-2.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;loess&#39; and formula = &#39;y ~ x&#39;</code></pre>
+<pre><code>Warning: Removed 5 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 5 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<img src="1_grebe_import_files/figure-html5/unnamed-chunk-1-2.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>grebe</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>dayofcycle</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>/</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>grebe</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>dayofcycle</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>/</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
-<pre><code>Warning: Removed 5 rows containing non-finite values (stat_smooth).
-
-Warning: Removed 5 rows containing missing values (geom_point).</code></pre>
-<img src="1_grebe_import_files/figure-html5/unnamed-chunk-1-3.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;loess&#39; and formula = &#39;y ~ x&#39;</code></pre>
+<pre><code>Warning: Removed 5 rows containing non-finite outside the scale range
+(`stat_smooth()`).
+Removed 5 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<img src="1_grebe_import_files/figure-html5/unnamed-chunk-1-3.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol</span><span class='op'>[</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol</span> <span class='op'>==</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span><span class='op'>]</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol</span><span class='op'>[</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol</span> <span class='op'>==</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span><span class='op'>]</span></span></code></pre>
 </div>
 <pre><code>[1] 0.53   NA   NA   NA   NA</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone</span><span class='op'>[</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone</span> <span class='op'>==</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span><span class='op'>]</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone</span><span class='op'>[</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone</span> <span class='op'>==</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span><span class='op'>]</span></span></code></pre>
 </div>
 <pre><code>[1]   NA 3.32   NA   NA   NA   NA</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 FALSE  TRUE 
    62     4 </code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>       
         FALSE TRUE
   FALSE    61    1
   TRUE      0    4</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 FALSE  TRUE 
    61     5 </code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grebe</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>mutate</span><span class='op'>(</span>estradiol_cens <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;=</span> <span class='fl'>0.1</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
-    estradiol <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>0.1</span>, <span class='va'>estradiol</span><span class='op'>)</span>
-  <span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>mutate</span><span class='op'>(</span>
-    progesterone_cens <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>progesterone</span> <span class='op'>&lt;=</span> <span class='fl'>5</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
-    progesterone <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>progesterone_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>5</span>, <span class='va'>progesterone</span><span class='op'>)</span>
-  <span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol_cens</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>grebe</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>estradiol_cens <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;=</span> <span class='fl'>0.1</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,</span>
+<span>    estradiol <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>estradiol_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>0.1</span>, <span class='va'>estradiol</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>    progesterone_cens <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>progesterone</span> <span class='op'>&lt;=</span> <span class='fl'>5</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,</span>
+<span>    progesterone <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>progesterone_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>5</span>, <span class='va'>progesterone</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>estradiol_cens</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 none 
   62 </code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone_cens</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>progesterone_cens</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 left none 
    1   60 </code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/xtabs.html'>xtabs</a></span><span class='op'>(</span><span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span>, <span class='va'>grebe</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/stats/xtabs.html'>xtabs</a></span><span class='op'>(</span><span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span>, <span class='va'>grebe</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>                is.na(progesterone)
 is.na(estradiol) FALSE TRUE
            FALSE    61    1
            TRUE      0    4</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grebe</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>rename</span><span class='op'>(</span>id <span class='op'>=</span> <span class='va'>ID</span>, fc_day <span class='op'>=</span> <span class='va'>dayofcycle</span>, cycle_length <span class='op'>=</span> <span class='va'>typcyclength</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>mutate</span><span class='op'>(</span>fc_day <span class='op'>=</span> <span class='va'>fc_day</span> <span class='op'>-</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'>mutate</span><span class='op'>(</span>cycle <span class='op'>=</span> <span class='fl'>1</span>, bc_day <span class='op'>=</span> <span class='cn'>NA_real_</span><span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>fc_day</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>grebe</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/rename.html'>rename</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='va'>ID</span>, fc_day <span class='op'>=</span> <span class='va'>dayofcycle</span>, cycle_length <span class='op'>=</span> <span class='va'>typcyclength</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>fc_day <span class='op'>=</span> <span class='va'>fc_day</span> <span class='op'>-</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>cycle <span class='op'>=</span> <span class='fl'>1</span>, bc_day <span class='op'>=</span> <span class='cn'>NA_real_</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>fc_day</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>[1]  0 31</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>cycle_length</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>grebe</span><span class='op'>$</span><span class='va'>cycle_length</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>[1] 22 39</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/rio/man/export.html'>export</a></span><span class='op'>(</span><span class='va'>grebe</span>, <span class='st'>"data/grebe/grebe.rds"</span><span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span>, <span class='va'>grebe</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='http://gesistsa.github.io/rio/reference/export.html'>export</a></span><span class='op'>(</span><span class='va'>grebe</span>, <span class='st'>"data/grebe/grebe.rds"</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span>, <span class='va'>grebe</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
 Formula: scale(log(estradiol)) ~ (1 | id)
@@ -1597,8 +1659,7 @@ Fixed effects:
             Estimate Std. Error t value
 (Intercept) 0.005556   0.152838   0.036</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span>, <span class='va'>grebe</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='fu'>lme4</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>~</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>id</span><span class='op'>)</span>, <span class='va'>grebe</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>Linear mixed model fit by REML [&#39;lmerMod&#39;]
 Formula: scale(log(progesterone)) ~ (1 | id)
@@ -1623,11 +1684,10 @@ Fixed effects:
 <h2 id="export">Export</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>Loading required package: Rcpp</code></pre>
-<pre><code>Loading &#39;brms&#39; package (version 2.16.2). Useful instructions
+<pre><code>Loading &#39;brms&#39; package (version 2.23.0). Useful instructions
 can be found by typing help(&#39;brms&#39;). A more detailed introduction
 to the package is available through vignette(&#39;brms_overview&#39;).</code></pre>
 <pre><code>
@@ -1635,41 +1695,53 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>The following object is masked from &#39;package:stats&#39;:
 
     ar</code></pre>
+<pre><code>Warning: package &#39;gt&#39; was built under R version 4.5.2</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>export_anon</span><span class='op'>(</span><span class='st'>"grebe2016"</span>, <span class='va'>grebe</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='op'>-</span><span class='va'>bc_day</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>export_anon</span><span class='op'>(</span><span class='st'>"grebe2016"</span>, <span class='va'>grebe</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='op'>-</span><span class='va'>bc_day</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>Warning: Unknown columns: `bc_day`, `lh_day`</code></pre>
 </div>
 <h2 id="summarize">Summarize</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>fc_day</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>cycle_length</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span><span class='op'>)</span>
-
-<span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, 
-                  Dataset <span class='op'>=</span> <span class='st'>"Grebe et al. 2016"</span>, 
-                  Hormone <span class='op'>=</span> <span class='st'>"Progesterone"</span>,
-                  Citation <span class='op'>=</span> <span class='st'>"Grebe, N. M., Emery Thompson, M., &amp; Gangestad, S. W. (2016). Hormonal predictors of women’s extra-pair vs. in-pair sexual attraction in natural cycles: Implications for extended sexuality. Hormones and Behavior, 78, 211–219. https://doi.org/10.1016/j.yhbeh.2015.11.008"</span>,
-                  LOD <span class='op'>=</span> <span class='fl'>5</span>,
-                  LOQ <span class='op'>=</span> <span class='fl'>10</span>,
-                  CV_intra <span class='op'>=</span> <span class='fl'>14.52</span>,
-                  CV_inter <span class='op'>=</span> <span class='fl'>4.83</span>,
-                  Method <span class='op'>=</span> <span class='st'>"Salivary immunoassay (Salimetrics)"</span>,
-                  Procedure <span class='op'>=</span> <span class='st'>"We asked participants to provide saliva samples (~5 mL) via passive drool, from which we assayed estradiol, progesterone, and testosterone twice during the study: once during an initial session, and once upon awakening the day of a follow-up session one week later. Saliva samples were pipetted from a cup to test tubes, then frozen at -20° C. Prior to assays, frozen samples were thawed, mixed by vortexing, then centrifuged for 15 minutes to break up and precipitate mucins. Salivary 17β estradiol, progesterone, and testosterone concentrations were determined using enzyme-linked immunosorbent assays (ELISA) designed for saliva by Salimetrics LLC (Carlsbad, CA). "</span>,
-                  Scheduling <span class='op'>=</span> <span class='st'>"Irrespective of cycle phase. 'We do emphasize that, although we sought to representatively sample days and phases of the cycle, by chance the luteal phase appears to have been overrepresented in our sample.'"</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>fc_day</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>cycle_length</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, </span>
+<span>                  Dataset <span class='op'>=</span> <span class='st'>"Grebe et al. 2016"</span>, </span>
+<span>                  Hormone <span class='op'>=</span> <span class='st'>"Progesterone"</span>,</span>
+<span>                  Citation <span class='op'>=</span> <span class='st'>"Grebe, N. M., Emery Thompson, M., &amp; Gangestad, S. W. (2016). Hormonal predictors of women’s extra-pair vs. in-pair sexual attraction in natural cycles: Implications for extended sexuality. Hormones and Behavior, 78, 211–219. https://doi.org/10.1016/j.yhbeh.2015.11.008"</span>,</span>
+<span>                  LOD <span class='op'>=</span> <span class='fl'>5</span>,</span>
+<span>                  LOQ <span class='op'>=</span> <span class='fl'>10</span>,</span>
+<span>                  CV_intra <span class='op'>=</span> <span class='fl'>14.52</span>,</span>
+<span>                  CV_inter <span class='op'>=</span> <span class='fl'>4.83</span>,</span>
+<span>                  Method <span class='op'>=</span> <span class='st'>"Salivary immunoassay (Salimetrics)"</span>,</span>
+<span>                  Procedure <span class='op'>=</span> <span class='st'>"We asked participants to provide saliva samples (~5 mL) via passive drool, from which we assayed estradiol, progesterone, and testosterone twice during the study: once during an initial session, and once upon awakening the day of a follow-up session one week later. Saliva samples were pipetted from a cup to test tubes, then frozen at -20° C. Prior to assays, frozen samples were thawed, mixed by vortexing, then centrifuged for 15 minutes to break up and precipitate mucins. Salivary 17β estradiol, progesterone, and testosterone concentrations were determined using enzyme-linked immunosorbent assays (ELISA) designed for saliva by Salimetrics LLC (Carlsbad, CA). "</span>,</span>
+<span>                  Scheduling <span class='op'>=</span> <span class='st'>"Irrespective of cycle phase. 'We do emphasize that, although we sought to representatively sample days and phases of the cycle, by chance the luteal phase appears to have been overrepresented in our sample.'"</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.</code></pre>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
+<pre><code>`summarise()` has regrouped the output.
+Joining with `by = join_by(bc_day)`
+ℹ Summaries were computed grouped by id and cycle.
+ℹ Output is grouped by id.
+ℹ Use `summarise(.groups = &quot;drop_last&quot;)` to silence this message.
+ℹ Use `summarise(.by = c(id, cycle))` for per-operation grouping
+  (`?dplyr::dplyr_by`) instead.</code></pre>
 <pre><code>Warning: Unknown or uninitialised column: `lh_day`.</code></pre>
+<pre><code>Loading required namespace: rstan</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
+<pre><code>Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
+ℹ Please use tidy evaluation idioms with `aes()`.
+ℹ See also `vignette(&quot;ggplot2-in-packages&quot;)` for more information.
+This warning is displayed once per session.
+Call `lifecycle::last_lifecycle_warnings()` to see where this warning
+was generated.</code></pre>
 <pre><code>$Dataset
 [1] &quot;Grebe et al. 2016&quot;
 
@@ -1704,8 +1776,10 @@ $LH_test
 [1] &quot;&quot;
 
 $distribution</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 5 rows containing non-finite values (stat_bin).</code></pre>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>Warning: Removed 5 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+<p><img src="1_grebe_import_files/figure-html5/unnamed-chunk-3-1.png" alt="" width="624" /></p>
 <pre><code>
 $mean
 [1] 69.62279
@@ -1768,7 +1842,7 @@ $no_lh_surge_cycle
 [1] &quot;NA&quot;
 
 $var_id_loo
-[1] &quot;0.11 [-0.05;0.25]&quot;
+[1] &quot;0.10 [-0.06;0.23]&quot;
 
 $var_id
 [1] &quot;0.58 [0.13;0.96] (37%)&quot;
@@ -1777,48 +1851,47 @@ $var_resid
 [1] &quot;0.75 [0.56;1.00] (63%)&quot;
 
 $fc_day_model</code></pre>
-<pre><code>Warning: There were 2 divergent transitions after warmup.
-Increasing adapt_delta above may help. See http://mc-stan.org/misc/
-warnings.html#divergent-transitions-after-warmup</code></pre>
-<p><img src="1_grebe_import_files/figure-html5/unnamed-chunk-3-1.png" width="624" /></p>
+<pre><code>Warning: There were 18 divergent transitions after warmup. Increasing
+adapt_delta above 0.99 may help. See
+http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
 <pre><code> Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) 
    Data: df (Number of observations: 57) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     1.01      1.05     0.03     3.87 1.00     1270
+sds(sfc_day_1)     1.04      1.06     0.03     3.99 1.00      727
                Tail_ESS
-sds(sfc_day_1)     1561
+sds(sfc_day_1)      303
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 31) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.55      0.20     0.11     0.92 1.00      790
+sd(Intercept)     0.56      0.20     0.12     0.92 1.01      633
               Tail_ESS
-sd(Intercept)     1042
+sd(Intercept)      724
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.83      0.15     3.53     4.13 1.00     1660     2114
-sfc_day_1     0.10      2.57    -5.35     6.16 1.01     1276     1020
+Intercept     3.83      0.15     3.53     4.14 1.00     1983     2270
+sfc_day_1     0.23      3.01    -5.25     7.08 1.01      602      204
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.77      0.12     0.58     1.03 1.00      992     1848
+sigma     0.77      0.11     0.58     1.02 1.00      712     2130
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_fc
-[1] &quot;0.20 [0.03;0.38]&quot;
+[1] &quot;0.20 [0.03;0.37]&quot;
 
 $rmse_fc
-[1] &quot;1.20 [0.98;1.46]&quot;
+[1] &quot;1.19 [0.98;1.46]&quot;
 
 $r_loo_fc
 [1] &quot;NaN [NaN;NaN]&quot;
@@ -1847,34 +1920,57 @@ $sd_fc_imputed
 $r_diff_fc_imputed_rr
 [1] &quot; 0.09 [-0.18; 0.35]&quot;
 
+$rr_unrounded
+# A tibble: 1 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 fc            0.0931   -0.178     0.351
+
+$r_within_fc_imputed
+[1] &quot; 0.12 [-0.27; 0.48]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.12 [-0.26; 0.46]&quot;
+
+$rr_within_unrounded
+# A tibble: 1 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 fc             0.116   -0.256     0.459
+
 $imputed_fc_vs_measured_graph</code></pre>
-<p><img src="1_grebe_import_files/figure-html5/unnamed-chunk-3-2.png" width="624" /></p>
+<p><img src="1_grebe_import_files/figure-html5/unnamed-chunk-3-2.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
 [1] &quot; 1.75&quot;</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>fc_day</span>, hormone <span class='op'>=</span> <span class='va'>estradiol</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_cens</span>, <span class='va'>cycle_length</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span><span class='op'>)</span>
-
-<span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, 
-                  Dataset <span class='op'>=</span> <span class='st'>"Grebe et al. 2016"</span>, 
-                  Hormone <span class='op'>=</span> <span class='st'>"Estradiol"</span>,
-                  Citation <span class='op'>=</span> <span class='st'>"Grebe, N. M., Emery Thompson, M., &amp; Gangestad, S. W. (2016). Hormonal predictors of women’s extra-pair vs. in-pair sexual attraction in natural cycles: Implications for extended sexuality. Hormones and Behavior, 78, 211–219. https://doi.org/10.1016/j.yhbeh.2015.11.008"</span>,
-                  LOD <span class='op'>=</span> <span class='fl'>0.1</span>,
-                  LOQ <span class='op'>=</span> <span class='fl'>1</span>,
-                  CV_intra <span class='op'>=</span> <span class='fl'>6.58</span>,
-                  CV_inter <span class='op'>=</span> <span class='fl'>2.68</span>,
-                  Method <span class='op'>=</span> <span class='st'>"Salivary immunoassay (Salimetrics)"</span>,
-                  Procedure <span class='op'>=</span> <span class='st'>"We asked participants to provide saliva samples (~5 mL) via passive drool, from which we assayed estradiol, progesterone, and testosterone twice during the study: once during an initial session, and once upon awakening the day of a follow-up session one week later. Saliva samples were pipetted from a cup to test tubes, then frozen at -20° C. Prior to assays, frozen samples were thawed, mixed by vortexing, then centrifuged for 15 minutes to break up and precipitate mucins. Salivary 17β estradiol, progesterone, and testosterone concentrations were determined using enzyme-linked immunosorbent assays (ELISA) designed for saliva by Salimetrics LLC (Carlsbad, CA). "</span>,
-                  Scheduling <span class='op'>=</span> <span class='st'>"Irrespective of cycle phase. 'We do emphasize that, although we sought to representatively sample days and phases of the cycle, by chance the luteal phase appears to have been overrepresented in our sample.'"</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>fc_day</span>, hormone <span class='op'>=</span> <span class='va'>estradiol</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_cens</span>, <span class='va'>cycle_length</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, </span>
+<span>                  Dataset <span class='op'>=</span> <span class='st'>"Grebe et al. 2016"</span>, </span>
+<span>                  Hormone <span class='op'>=</span> <span class='st'>"Estradiol"</span>,</span>
+<span>                  Citation <span class='op'>=</span> <span class='st'>"Grebe, N. M., Emery Thompson, M., &amp; Gangestad, S. W. (2016). Hormonal predictors of women’s extra-pair vs. in-pair sexual attraction in natural cycles: Implications for extended sexuality. Hormones and Behavior, 78, 211–219. https://doi.org/10.1016/j.yhbeh.2015.11.008"</span>,</span>
+<span>                  LOD <span class='op'>=</span> <span class='fl'>0.1</span>,</span>
+<span>                  LOQ <span class='op'>=</span> <span class='fl'>1</span>,</span>
+<span>                  CV_intra <span class='op'>=</span> <span class='fl'>6.58</span>,</span>
+<span>                  CV_inter <span class='op'>=</span> <span class='fl'>2.68</span>,</span>
+<span>                  Method <span class='op'>=</span> <span class='st'>"Salivary immunoassay (Salimetrics)"</span>,</span>
+<span>                  Procedure <span class='op'>=</span> <span class='st'>"We asked participants to provide saliva samples (~5 mL) via passive drool, from which we assayed estradiol, progesterone, and testosterone twice during the study: once during an initial session, and once upon awakening the day of a follow-up session one week later. Saliva samples were pipetted from a cup to test tubes, then frozen at -20° C. Prior to assays, frozen samples were thawed, mixed by vortexing, then centrifuged for 15 minutes to break up and precipitate mucins. Salivary 17β estradiol, progesterone, and testosterone concentrations were determined using enzyme-linked immunosorbent assays (ELISA) designed for saliva by Salimetrics LLC (Carlsbad, CA). "</span>,</span>
+<span>                  Scheduling <span class='op'>=</span> <span class='st'>"Irrespective of cycle phase. 'We do emphasize that, although we sought to representatively sample days and phases of the cycle, by chance the luteal phase appears to have been overrepresented in our sample.'"</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`summarise()` has grouped output by &#39;id&#39;. You can override using the `.groups` argument.
-Joining, by = &quot;bc_day&quot;</code></pre>
+<pre><code>`summarise()` has regrouped the output.
+Joining with `by = join_by(bc_day)`
+ℹ Summaries were computed grouped by id and cycle.
+ℹ Output is grouped by id.
+ℹ Use `summarise(.groups = &quot;drop_last&quot;)` to silence this message.
+ℹ Use `summarise(.by = c(id, cycle))` for per-operation grouping
+  (`?dplyr::dplyr_by`) instead.</code></pre>
 <pre><code>Warning: Unknown or uninitialised column: `lh_day`.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Some Pareto k diagnostic values are too high. See help(&#39;pareto-k-diagnostic&#39;) for details.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
@@ -1913,8 +2009,10 @@ $LH_test
 [1] &quot;&quot;
 
 $distribution</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 4 rows containing non-finite values (stat_bin).</code></pre>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>Warning: Removed 4 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+<p><img src="1_grebe_import_files/figure-html5/unnamed-chunk-3-3.png" alt="" width="624" /></p>
 <pre><code>
 $mean
 [1] 2.449839
@@ -1977,7 +2075,7 @@ $no_lh_surge_cycle
 [1] &quot;NA&quot;
 
 $var_id_loo
-[1] &quot;0.23 [0.01;0.40]&quot;
+[1] &quot;0.22 [-0.03;0.40]&quot;
 
 $var_id
 [1] &quot;0.31 [0.15;0.46] (48%)&quot;
@@ -1986,45 +2084,44 @@ $var_resid
 [1] &quot;0.32 [0.24;0.42] (52%)&quot;
 
 $fc_day_model</code></pre>
-<pre><code>Warning: There were 9 divergent transitions after warmup.
-Increasing adapt_delta above may help. See http://mc-stan.org/misc/
-warnings.html#divergent-transitions-after-warmup</code></pre>
-<p><img src="1_grebe_import_files/figure-html5/unnamed-chunk-3-3.png" width="624" /></p>
+<pre><code>Warning: There were 20 divergent transitions after warmup. Increasing
+adapt_delta above 0.99 may help. See
+http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
 <pre><code> Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) 
    Data: df (Number of observations: 58) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     0.46      0.49     0.01     1.89 1.01     1171
+sds(sfc_day_1)     0.47      0.54     0.01     1.92 1.01      881
                Tail_ESS
-sds(sfc_day_1)     1298
+sds(sfc_day_1)      849
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 31) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.29      0.08     0.11     0.45 1.00      769
+sd(Intercept)     0.30      0.09     0.09     0.46 1.00      686
               Tail_ESS
-sd(Intercept)      867
+sd(Intercept)      669
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     0.83      0.07     0.69     0.97 1.00     2079     2765
-sfc_day_1     0.62      1.44    -1.37     4.77 1.00     1584      956
+Intercept     0.83      0.07     0.69     0.97 1.00     2135     2543
+sfc_day_1     0.66      1.52    -1.36     4.79 1.01      881      563
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.33      0.05     0.25     0.45 1.00     1030     1349
+sigma     0.33      0.05     0.25     0.45 1.00      920     1380
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_fc
-[1] &quot;0.18 [0.03;0.35]&quot;
+[1] &quot;0.18 [0.03;0.34]&quot;
 
 $rmse_fc
 [1] &quot;0.55 [0.46;0.66]&quot;
@@ -2056,18 +2153,35 @@ $sd_fc_imputed
 $r_diff_fc_imputed_rr
 [1] &quot;-0.05 [-0.32; 0.22]&quot;
 
+$rr_unrounded
+# A tibble: 1 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 fc           -0.0541   -0.316     0.216
+
+$r_within_fc_imputed
+[1] &quot;-0.06 [-0.43; 0.32]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot;-0.06 [-0.38; 0.28]&quot;
+
+$rr_within_unrounded
+# A tibble: 1 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 fc           -0.0563   -0.383     0.281
+
 $imputed_fc_vs_measured_graph</code></pre>
-<p><img src="1_grebe_import_files/figure-html5/unnamed-chunk-3-4.png" width="624" /></p>
+<p><img src="1_grebe_import_files/figure-html5/unnamed-chunk-3-4.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
 [1] &quot; 0.66&quot;</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'>%&gt;%</span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>fc_day</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span>, <span class='va'>cycle_length</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span><span class='op'>)</span>
-
-<span class='fu'>summarise_hormones</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"Grebe et al. 2016"</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>grebe</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>fc_day</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span>, <span class='va'>cycle_length</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'>summarise_hormones</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"Grebe et al. 2016"</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
+<pre><code>Joining with `by = join_by(bc_day)`</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
@@ -2082,8 +2196,9 @@ $Method
 [1] &quot;Salivary Immunoassay&quot;
 
 $scatterplot</code></pre>
-<pre><code>Warning: Removed 5 rows containing missing values (geom_point).</code></pre>
-<p><img src="1_grebe_import_files/figure-html5/unnamed-chunk-3-5.png" width="624" /></p>
+<pre><code>Warning: Removed 5 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="1_grebe_import_files/figure-html5/unnamed-chunk-3-5.png" alt="" width="624" /></p>
 <pre><code>
 $n_women
 [1] 33
@@ -2123,13 +2238,13 @@ $r_fc_log_ratio
 
 $m_fc_prob_rat
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: prc_stirn_fc ~ log(estradiol) + log(ratio) 
    Data: df (Number of observations: 57) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Population-Level Effects: 
+Regression Coefficients:
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
 Intercept        0.40      0.13     0.16     0.65 1.00     3964
 logestradiol     0.05      0.07    -0.08     0.18 1.00     3685
@@ -2139,7 +2254,7 @@ Intercept        2829
 logestradiol     2633
 logratio         2709
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 sigma     0.22      0.02     0.18     0.26 1.00     3322     2412
 
@@ -2152,40 +2267,40 @@ $r_erat_fc
 
 $m_fc_prob
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: prc_stirn_fc ~ s(log(estradiol), log(progesterone)) 
    Data: df (Number of observations: 57) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.12      0.09     0.00
+sds(slogestradiollogprogesterone_1)     0.12      0.10     0.01
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.35 1.00     1112     1462
+sds(slogestradiollogprogesterone_1)     0.36 1.01     1118     1988
 
-Population-Level Effects: 
+Regression Coefficients:
                                Estimate Est.Error l-95% CI u-95% CI
-Intercept                          0.21      0.03     0.15     0.27
-slogestradiollogprogesterone_1    -0.31      0.30    -0.84     0.33
-slogestradiollogprogesterone_2    -0.11      0.33    -0.80     0.50
+Intercept                          0.21      0.03     0.15     0.26
+slogestradiollogprogesterone_1    -0.29      0.29    -0.79     0.33
+slogestradiollogprogesterone_2     0.02      0.39    -0.86     0.71
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     4391     2782
-slogestradiollogprogesterone_1 1.00     2520     1982
-slogestradiollogprogesterone_2 1.00     3123     2385
+Intercept                      1.00     4655     2806
+slogestradiollogprogesterone_1 1.01     1929     1654
+slogestradiollogprogesterone_2 1.00     1855     1883
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.21      0.02     0.17     0.26 1.00     3734     2899
+sigma     0.21      0.02     0.17     0.26 1.00     3299     2829
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_loo_fc
-[1] &quot;NaN [NaN;0.36]&quot;</code></pre>
+[1] &quot;NaN [NaN;0.33]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb65"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

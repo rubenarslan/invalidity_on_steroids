@@ -42,6 +42,25 @@ roney <- roney %>% mutate(fc_day = fc_day - 1) # start at zero
 
 xtabs(~ is.na(estradiol) + is.na(progesterone), roney)
 
+# Days with an estradiol value but no progesterone value are coded as progesterone at or below the
+# limit of detection (9.14 pg/ml). We take these to be non-detects that the laboratory left blank:
+# they fall mostly in the follicular phase, and progesterone on the neighbouring days of the same
+# cycle is low (check below). Days without either value stay missing.
+roney %>% 
+  arrange(id, cycle, fc_day) %>% 
+  group_by(id, cycle) %>% 
+  mutate(neighbour_p4 = (lag(progesterone) + lead(progesterone)) / 2) %>% 
+  ungroup() %>% 
+  mutate(group = case_when(!is.na(estradiol) & is.na(progesterone) ~ "estradiol only (coded censored)",
+                           !is.na(progesterone) ~ "progesterone measured",
+                           TRUE ~ "neither")) %>% 
+  filter(group != "neither") %>% 
+  group_by(group) %>% 
+  summarise(days = n(), 
+            share_more_than_14_days_before_next_onset = mean(bc_day < -14, na.rm = TRUE),
+            median_progesterone_neighbouring_days = median(neighbour_p4, na.rm = TRUE)) %>% 
+  knitr::kable(digits = 2)
+
 roney <- roney %>% 
   mutate(
     estradiol_cens = if_else(estradiol <= 0.1, "left", "none"),

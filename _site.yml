@@ -17,3 +17,4 @@ exclude:
 - summaries
 - osf_data
 - plots
+- manuscript

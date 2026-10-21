@@ -11,6 +11,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE, error = T)
+set.seed(20221212)
 ```
 
 ```{r, fig.width = 5, fig.height = 15}
@@ -73,6 +74,8 @@ for(s in seq_along(summaries)) {
     su_df$fc_day_model <- 
     su_df$lh_day_model <- 
     su_df$distribution <- NULL
+    su_df$rr_unrounded <- NULL
+    su_df$rr_within_unrounded <- NULL
     su_df$imputed_fc_vs_measured_graph <- 
     su_df$imputed_bc_vs_measured_graph <- 
     su_df$imputed_lh_vs_measured_graph <- 
@@ -112,7 +115,8 @@ comp_wide <- comp_wide %>%
            case_when(is.na(r_bc_stirn) ~ "FC",
                      is.na(r_prob_lh) ~ "FC+BC",
                      TRUE ~ "FC+BC+LH")) %>% 
-  mutate(`Geometric mean` = sprintf("%.2f",exp(as.numeric(logmean)))) %>% 
+  # exponentiate the unrounded log mean (logmean in comp_wide is already rounded to two decimals)
+  mutate(`Geometric mean` = sprintf("%.2f", exp(map_dbl(Sample, ~ sus[[.x]]$logmean)))) %>% 
     select(Sample, Dataset,Hormone,
            Women = n_women,
            Cycles = n_cycles,
@@ -147,7 +151,7 @@ comp <- comp %>%
                                       paste0(Hormone,"__", name))) %>% 
     select(-Hormone) %>% 
     distinct() %>% 
-    pivot_wider(name, Dataset) %>% 
+    pivot_wider(id_cols = name, names_from = Dataset, values_from = value) %>% 
     rename(rowname = name)
 
 comp <- comp %>% 
@@ -215,7 +219,7 @@ cycle_phase_plot(p4_summaries[["GOCD2"]], "lh_day_model", custom_limits = log(c(
 
 x.grob <- textGrob("Days relative to LH surge (day 0)", 
                    gp=gpar(fontface="bold", col="black", fontsize=15))
-pdf("plots/Figure1.pdf", width = 10, height = 7.1, units = "in")
+pdf("plots/Figure1.pdf", width = 10, height = 7.1)
 grid.arrange(arrangeGrob(multiplot, bottom = x.grob))
 dev.off()
 
@@ -381,13 +385,11 @@ study_names <- c("BioCycle", "Roney 2013", "OCMATE Non-HC", "Marcinkowska 2020",
 short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Stern '21", "Jünger '18", "Blake '17", "Grebe '16")
 names(short_names) <- study_names
 all_stats$Dataset <- factor(as.character(short_names[all_stats$Dataset]), levels = short_names)
-rr_saliva <- all_stats %>% select(Hormone, Dataset, contains("_imputed_rr")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
-  mutate(name = str_replace(name, "^r_diff_", ""),
-         name = str_replace(name, "_imputed_rr$", "")) %>% 
-  rename(cycle_phase = name) %>% 
+# Equation 1 divides the unrounded range-corrected correlations stored in the summaries
+# (the two-decimal strings in all_stats were divided before)
+rr_saliva <- sus %>% map_dfr(~ mutate(.x$rr_unrounded, Hormone = .x$Hormone, Dataset = .x$Dataset)) %>% 
+  mutate(Dataset = factor(as.character(short_names[Dataset]), levels = short_names)) %>% 
   mutate(cycle_phase = factor(cycle_phase, levels = rev(c("fc", "bc", "lh")))) %>% 
-  extract(value, into = c("estimate", "conf.low", "conf.high"), regex = "([^\\[]+) \\[([^;]+);([^(]+)\\]",
-          convert = TRUE) %>% 
   mutate(Hormone = str_replace(Hormone, "Free ", "")) %>% 
   mutate(Hormone = str_replace(Hormone, ".02", "")) %>% 
   mutate(Dataset = factor(Dataset, rev(short_names))) %>%
@@ -413,6 +415,60 @@ rr_saliva %>%
 
 ggsave("plots/Figure4.pdf", width = 5, height = 5, units = "in")
 ggsave("plots/Figure4.png", width = 5, height = 5, units = "in")
+```
+
+The divisors of Equation 1, i.e. the range-corrected correlations of imputed and measured serum hormones in BioCycle (centred within woman like the salivary values):
+
+```{r}
+rr_saliva %>% ungroup() %>% filter(Dataset == "BioCycle") %>% 
+  transmute(Hormone, cycle_phase, divisor = sprintf("%.3f", serum)) %>% 
+  arrange(Hormone, desc(cycle_phase)) %>% 
+  knitr::kable()
+```
+
+### Sensitivity analysis: imputed values centred within woman too
+
+Figure 4 centres each measured log hormone on the woman's mean and correlates it with the uncentred imputed value. Here both are centred on the woman's mean (a repeated-measures correlation, Bakdash & Marusich, 2017), and the range correction uses the pooled within-woman standard deviation of the imputed values. Women with a single sample carry no within-woman information and drop out. The BioCycle divisor is computed the same way.
+
+```{r fig.width = 5, fig.height = 5}
+rr_both <- sus %>% map_dfr(~ mutate(.x$rr_within_unrounded, Hormone = .x$Hormone, Dataset = .x$Dataset)) %>% 
+  mutate(Dataset = factor(as.character(short_names[Dataset]), levels = rev(short_names)),
+         cycle_phase = factor(cycle_phase, levels = rev(c("fc", "bc", "lh"))),
+         Hormone = str_replace(Hormone, "Free ", ""),
+         Hormone = str_replace(Hormone, ".02", "")) %>% 
+  group_by(Hormone, cycle_phase) %>% 
+  mutate(serum = estimate[which(Dataset=="BioCycle")],
+         estimate = estimate/serum,
+         conf.low = conf.low/serum,
+         conf.high = conf.high/serum) %>% 
+  ungroup()
+
+rr_both %>% 
+  filter(Dataset != "BioCycle") %>% 
+  ggplot(aes(Dataset, estimate, ymin = conf.low, ymax = conf.high,
+             color = cycle_phase, label = sprintf("%.2f", estimate))) + 
+  geom_pointrange(position = position_dodge(0.4), size = 0.3) +
+  ggrepel::geom_text_repel(size = 2.5, position = position_dodge(0.4)) +
+  facet_wrap(~ Hormone) +
+  coord_flip() +
+  theme_bw() + 
+  scale_color_viridis_d(begin = 0.2, end = 0.8) +
+  scale_y_continuous(expression(Estimated~r[Serum][", "][Saliva]), limits = c(NA, 1)) +
+  theme(legend.position="none")
+
+bind_rows(`Figure 4` = rr_saliva %>% ungroup(), 
+          `Both centred` = rr_both, .id = "centring") %>% 
+  mutate(value = if_else(Dataset == "BioCycle", sprintf("%.3f (divisor)", serum),
+                         sprintf("%.2f [%.2f; %.2f]", estimate, conf.low, conf.high))) %>% 
+  select(Hormone, Dataset, cycle_phase, centring, value) %>% 
+  pivot_wider(names_from = centring, values_from = value) %>% 
+  arrange(Hormone, desc(Dataset), desc(cycle_phase)) %>% 
+  knitr::kable()
+
+rr_both %>% 
+  filter(Dataset != "BioCycle") %>% 
+  group_by(Hormone) %>% 
+  summarise(median = median(estimate), min = min(estimate), max = max(estimate))
 ```
 
 ## Statement 1
@@ -1149,6 +1205,8 @@ rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
                                  sd_observed, sd_unrestricted)
 sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
 
+# back to estradiol (until 2026 the progesterone correlation was combined with estradiol SDs here)
+cor_imp <- broom::tidy(cor.test(log(mgd_restricted$estradiol), log(mgd_restricted$`Mean Estradiol`)))
 sd_unrestricted <- sd(log(mgd$`Mean Estradiol`), na.rm = T)
 sd_observed <- sd(log(mgd_restricted$`Mean Estradiol`), na.rm = T)
 sprintf("%.2f (%.0f%%)", sd_observed, 100*sd_observed^2/sd_unrestricted^2)
@@ -1524,6 +1582,8 @@ for(s in seq_along(summaries)) {
     su_df$fc_day_model <- 
     su_df$lh_day_model <- 
     su_df$distribution <- NULL
+    su_df$rr_unrounded <- NULL
+    su_df$rr_within_unrounded <- NULL
     su_df$imputed_fc_vs_measured_graph <- 
     su_df$imputed_bc_vs_measured_graph <- 
     su_df$imputed_lh_vs_measured_graph <- 
@@ -1584,7 +1644,7 @@ comp <- comp %>%
                                       paste0(Hormone,"__", name))) %>% 
     select(-Hormone) %>% 
     distinct() %>% 
-    pivot_wider(name, Dataset) %>% 
+    pivot_wider(id_cols = name, names_from = Dataset, values_from = value) %>% 
     rename(rowname = name)
 
 comp <- comp %>% 

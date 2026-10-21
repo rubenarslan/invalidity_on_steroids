@@ -11,6 +11,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+set.seed(20221212)
 ```
 
 
@@ -50,6 +51,8 @@ summary_table <- function(Hormone) {
     su_df$fc_day_model <- 
     su_df$lh_day_model <- 
     su_df$distribution <- NULL
+    su_df$rr_unrounded <- NULL
+    su_df$rr_within_unrounded <- NULL
     su_df$imputed_fc_vs_measured_graph <- 
     su_df$imputed_bc_vs_measured_graph <- 
     su_df$imputed_lh_vs_measured_graph <- 
@@ -95,13 +98,13 @@ summary_table <- function(Hormone) {
            var_id_loo, var_cycle_loo,
            var_id, var_cycle, var_resid,
            r_fc_stirn, r_log_fc_stirn, r_diff_fc_stirn, r_log_diff_fc_stirn, r_loo_fc, r_fc_imputed, 
-           r_diff_fc_imputed, sd_fc_imputed, r_diff_fc_imputed_rr, 
+           r_diff_fc_imputed, sd_fc_imputed, r_diff_fc_imputed_rr, r_within_fc_imputed, r_within_fc_imputed_rr, 
            plot_fc,
            r_bc_stirn, r_log_bc_stirn, r_diff_bc_stirn, r_log_diff_bc_stirn, r_loo_bc, r_bc_imputed, 
-           r_diff_bc_imputed, sd_bc_imputed, r_diff_bc_imputed_rr, 
+           r_diff_bc_imputed, sd_bc_imputed, r_diff_bc_imputed_rr, r_within_bc_imputed, r_within_bc_imputed_rr, 
            plot_bc,
           r_prob_lh, r_log_prob_lh, r_diff_prob_lh, r_log_diff_prob_lh, r_loo_lh, r_lh_imputed, 
-           r_diff_lh_imputed, sd_lh_imputed, r_diff_lh_imputed_rr, 
+           r_diff_lh_imputed, sd_lh_imputed, r_diff_lh_imputed_rr, r_within_lh_imputed, r_within_lh_imputed_rr, 
            plot_lh,
            everything(), -matches("rmse_[^i]"), -contains("_vs_measured"))
   
@@ -123,7 +126,7 @@ summary_table <- function(Hormone) {
   comp <- comp %>% arrange(Sample)
 
   comp <- comp %>% 
-    pivot_wider(name, Sample) %>% 
+    pivot_wider(id_cols = name, names_from = Sample, values_from = value) %>% 
     rename(rowname = name)
 
   comp <- comp %>% 
@@ -136,11 +139,11 @@ summary_table <- function(Hormone) {
                      "mean", "sd", "median", "mad", "range") ~ "Descriptive statistics",
       rowname %in%  c("var_id_loo", "var_cycle_loo", "var_id", "var_cycle", "var_resid") ~ "Interindividual differences",
     rowname %in%  c("r_fc", "r_loo_fc", "plot_fc", "imputed_fc_vs_measured_graph",
-           "r_fc_stirn", "r_log_fc_stirn", "r_diff_fc_stirn", "r_log_diff_fc_stirn", "rmse_fc", "r_fc_imputed", "r_diff_fc_imputed", "sd_fc_imputed", "r_diff_fc_imputed_rr",  "rmse_fc_imputed") ~ "Validity (Forward counting)",
+           "r_fc_stirn", "r_log_fc_stirn", "r_diff_fc_stirn", "r_log_diff_fc_stirn", "rmse_fc", "r_fc_imputed", "r_diff_fc_imputed", "sd_fc_imputed", "r_diff_fc_imputed_rr", "r_within_fc_imputed", "r_within_fc_imputed_rr",  "rmse_fc_imputed") ~ "Validity (Forward counting)",
     rowname %in%  c("r_bc", "r_loo_bc", "plot_bc", "imputed_bc_vs_measured_graph",
-           "r_bc_stirn", "r_log_bc_stirn", "r_diff_bc_stirn", "r_log_diff_bc_stirn", "rmse_bc", "r_bc_imputed", "r_diff_bc_imputed", "sd_bc_imputed", "r_diff_bc_imputed_rr", "rmse_bc_imputed") ~ "Validity (Backward counting)",
+           "r_bc_stirn", "r_log_bc_stirn", "r_diff_bc_stirn", "r_log_diff_bc_stirn", "rmse_bc", "r_bc_imputed", "r_diff_bc_imputed", "sd_bc_imputed", "r_diff_bc_imputed_rr", "r_within_bc_imputed", "r_within_bc_imputed_rr", "rmse_bc_imputed") ~ "Validity (Backward counting)",
     rowname %in%  c("r_lh", "r_loo_lh", "plot_lh", "imputed_lh_vs_measured_graph",
-           "r_prob_lh", "r_log_prob_lh", "r_diff_prob_lh", "r_log_diff_prob_lh", "rmse_lh", "r_lh_imputed", "r_diff_lh_imputed", "sd_lh_imputed", "r_diff_lh_imputed_rr",  "rmse_lh_imputed") ~ "Validity (LH)"
+           "r_prob_lh", "r_log_prob_lh", "r_diff_prob_lh", "r_log_diff_prob_lh", "rmse_lh", "r_lh_imputed", "r_diff_lh_imputed", "sd_lh_imputed", "r_diff_lh_imputed_rr", "r_within_lh_imputed", "r_within_lh_imputed_rr",  "rmse_lh_imputed") ~ "Validity (LH)"
     ))
   
   comp %>% 
@@ -291,7 +294,7 @@ comp_wide <- as_tibble(bind_rows(su_dfs, .id = "Sample")) %>%
 
 
   study_names <- c("BioCycle", "Roney 2013", "OCMATE Non-HC", "Marcinkowska 2020", "GOL2", "GOCD2", "Blake 2017", "Grebe et al. 2016")
-  short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Jünger '18", "Stern '21", "Blake '17", "Grebe '16")
+  short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Stern '21", "Jünger '18", "Blake '17", "Grebe '16")
   names(short_names) <- study_names
   comp_wide$Dataset <- factor(as.character(short_names[comp_wide$Dataset]), levels = short_names)
 
@@ -301,7 +304,7 @@ comp_wide <- as_tibble(bind_rows(su_dfs, .id = "Sample")) %>%
 
 comp <- comp_wide %>% 
   pivot_longer(-Sample) %>% 
-  pivot_wider(name, Sample) %>% 
+  pivot_wider(id_cols = name, names_from = Sample, values_from = value) %>% 
   rename(rowname = name)
 
 colnames(comp) <- str_trim(str_replace(
@@ -374,8 +377,11 @@ ratio_summary_table()
   - `r_fc/bc/lh` reflects the square root of variance by a spline over cycle day explained after marginalizing inter-individual and cycle-to-cycle variation in means.
   - `r_loo_fc/bc/lh` reflect the same thing, but using approximative leave-one-out cross-validation, which is necessary because the splines can easily overfit to the data. When these yield NaN, this shows the explained variance veered negative, i.e. no LOO-robust explained variance.
   - `r_fc/bc/lh_imputed` reflect a correlation of the raw steroid value with a value _imputed_ from the cycle phase using a model based on the BioCycle serum data.
+  - `r_diff_fc/bc/lh_imputed` correlate the measured log hormone, centred on the woman's mean, with the imputed log hormone. `sd_fc/bc/lh_imputed` gives the SD of the imputed values in the sample (and its variance as a percentage of the variance over a full cycle); `r_diff_fc/bc/lh_imputed_rr` is the correlation corrected for this range restriction. Divided by the BioCycle value, it gives Equation 1 (Figure 4). (Until 2026, the measured values were centred within woman and cycle.)
+  - `r_within_fc/bc/lh_imputed` and `r_within_fc/bc/lh_imputed_rr` are a sensitivity analysis: measured and imputed log hormones both centred on the woman's mean (a repeated-measures correlation), range-corrected with the pooled within-woman SD of the imputed values.
   - `r_fc/bc_stirn` reflect correlations with the imputed probability of being in the fertile window according to the method in Gangestad et al. 2016 (based on Stirnemann's data).
   - `r_prob_lh` reflects correlations with the probability of being in the fertile window according to LH tests, based on the method in Stern et al. 2018 (supplement), which meta-analyzed various probabilities of conception relative to the day of ovulation.
+- Jünger '18's saliva samples were also assayed for estradiol by LC-MS/MS (`Estradiol LCMS` in the [Jünger '18 import](1_gocd2_import.html)). `r lcms <- rio::import("summaries/table_GOCD2_Estradiol LCMS.rds"); sprintf("Only %.0f%% of the %.0f samples with a value", 100 * (1 - lcms$censored / (lcms$n_days - lcms$missing)), lcms$n_days - lcms$missing)` were above the limit of quantitation (Stern et al., 2019, report 22% of all possible values), the rest were set to 1 pg/ml and treated as censored. We fitted the same models to this measure, but do not report them in these tables or in the article, because an assay that detects so few values cannot track the cycle.
 
 
 ## Literature survey of estradiol assays
@@ -439,13 +445,22 @@ Roos et al. 2015 and Johnson et al. 2015 report aggregated data for E3g and Pdg 
 ```{r}
 ser <- rio::import("data/tabula-roos2015.tsv")
 uri <- rio::import("data/tabula-2015_Urinary_hormones_nomograms_Gnoth_Clin_Chem_Lab_Med.tsv")
-seruri <- ser %>% left_join(uri, by = c("Day relative to ovulation"), suffix = c("_serum", "_urine")) %>% mutate_all(~ as.numeric(str_match(., "([0-9.]+)( \\()?")[,2]))
+# central values only (the tables give ranges in parentheses); days keep their sign
+central <- function(x) as.numeric(str_match(x, "(-?[0-9.]+)( \\()?")[,2])
+ser <- ser %>% mutate(across(everything(), central))
+uri <- uri %>% mutate(across(everything(), central))
+# same day
+seruri <- ser %>% left_join(uri, by = c("Day relative to ovulation"), suffix = c("_serum", "_urine"))
 cor.test(seruri$`E2 (pmol/l)`, seruri$`E3G, ng/mL`)
-cor.test(seruri$`E2 (pmol/l)`, lead(seruri$`E3G, ng/mL`))
-psych::cor.wt(cbind(seruri$`E2 (pmol/l)`, lead(seruri$`E3G, ng/mL`)), w = seruri$n_serum*seruri$n_urine)
 cor.test(seruri$`Progesterone (nmol/l)`, seruri$`P3G, ug/mL`)
-cor.test(seruri$`Progesterone (nmol/l)`, lead(seruri$`P3G, ug/mL`))
-psych::cor.wt(cbind(seruri$`Progesterone (nmol/l)`, lead(seruri$`P3G, ug/mL`)), w = seruri$n_serum*seruri$n_urine)
+# urine one day after serum: serum day d joined to urine day d + 1 (until 2026, lead() on the
+# same-day join dropped the pair serum day 11 / urine day 12 and weighted by the wrong day's n)
+seruri_lag <- ser %>% mutate(urine_day = `Day relative to ovulation` + 1) %>% 
+  left_join(uri %>% rename(urine_day = `Day relative to ovulation`), by = "urine_day", suffix = c("_serum", "_urine"))
+cor.test(seruri_lag$`E2 (pmol/l)`, seruri_lag$`E3G, ng/mL`)
+psych::cor.wt(cbind(seruri_lag$`E2 (pmol/l)`, seruri_lag$`E3G, ng/mL`), w = seruri_lag$n_serum*seruri_lag$n_urine)
+cor.test(seruri_lag$`Progesterone (nmol/l)`, seruri_lag$`P3G, ug/mL`)
+psych::cor.wt(cbind(seruri_lag$`Progesterone (nmol/l)`, seruri_lag$`P3G, ug/mL`), w = seruri_lag$n_serum*seruri_lag$n_urine)
 ```
 
 
