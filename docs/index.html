@@ -6573,7 +6573,12 @@ Show code
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>ser</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='http://gesistsa.github.io/rio/reference/import.html'>import</a></span><span class='op'>(</span><span class='st'>"data/tabula-roos2015.tsv"</span><span class='op'>)</span></span>
 <span><span class='va'>uri</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='http://gesistsa.github.io/rio/reference/import.html'>import</a></span><span class='op'>(</span><span class='st'>"data/tabula-2015_Urinary_hormones_nomograms_Gnoth_Clin_Chem_Lab_Med.tsv"</span><span class='op'>)</span></span>
-<span><span class='va'>seruri</span> <span class='op'>&lt;-</span> <span class='va'>ser</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate-joins.html'>left_join</a></span><span class='op'>(</span><span class='va'>uri</span>, by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Day relative to ovulation"</span><span class='op'>)</span>, suffix <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"_serum"</span>, <span class='st'>"_urine"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate_all.html'>mutate_all</a></span><span class='op'>(</span><span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='fu'><a href='https://stringr.tidyverse.org/reference/str_match.html'>str_match</a></span><span class='op'>(</span><span class='va'>.</span>, <span class='st'>"([0-9.]+)( \\()?"</span><span class='op'>)</span><span class='op'>[</span>,<span class='fl'>2</span><span class='op'>]</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='co'># central values only (the tables give ranges in parentheses); days keep their sign</span></span>
+<span><span class='va'>central</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='fu'><a href='https://stringr.tidyverse.org/reference/str_match.html'>str_match</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='st'>"(-?[0-9.]+)( \\()?"</span><span class='op'>)</span><span class='op'>[</span>,<span class='fl'>2</span><span class='op'>]</span><span class='op'>)</span></span>
+<span><span class='va'>ser</span> <span class='op'>&lt;-</span> <span class='va'>ser</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/across.html'>across</a></span><span class='op'>(</span><span class='fu'><a href='https://tidyselect.r-lib.org/reference/everything.html'>everything</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='va'>central</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='va'>uri</span> <span class='op'>&lt;-</span> <span class='va'>uri</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/across.html'>across</a></span><span class='op'>(</span><span class='fu'><a href='https://tidyselect.r-lib.org/reference/everything.html'>everything</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='va'>central</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='co'># same day</span></span>
+<span><span class='va'>seruri</span> <span class='op'>&lt;-</span> <span class='va'>ser</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate-joins.html'>left_join</a></span><span class='op'>(</span><span class='va'>uri</span>, by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Day relative to ovulation"</span><span class='op'>)</span>, suffix <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"_serum"</span>, <span class='st'>"_urine"</span><span class='op'>)</span><span class='op'>)</span></span>
 <span><span class='fu'><a href='https://rdrr.io/r/stats/cor.test.html'>cor.test</a></span><span class='op'>(</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>`E2 (pmol/l)`</span>, <span class='va'>seruri</span><span class='op'>$</span><span class='va'>`E3G, ng/mL`</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
@@ -6588,39 +6593,6 @@ alternative hypothesis: true correlation is not equal to 0
 sample estimates:
       cor 
 0.7763094 </code></pre>
-<details>
-<summary>
-Show code
-</summary>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/stats/cor.test.html'>cor.test</a></span><span class='op'>(</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>`E2 (pmol/l)`</span>, <span class='fu'><a href='https://dplyr.tidyverse.org/reference/lead-lag.html'>lead</a></span><span class='op'>(</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>`E3G, ng/mL`</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
-</div>
-</details>
-<pre><code>
-    Pearson&#39;s product-moment correlation
-
-data:  seruri$`E2 (pmol/l)` and lead(seruri$`E3G, ng/mL`)
-t = 10.164, df = 25, p-value = 2.309e-10
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- 0.7849329 0.9525164
-sample estimates:
-      cor 
-0.8972964 </code></pre>
-<details>
-<summary>
-Show code
-</summary>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>psych</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/psych/man/cor.wt.html'>cor.wt</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>`E2 (pmol/l)`</span>, <span class='fu'><a href='https://dplyr.tidyverse.org/reference/lead-lag.html'>lead</a></span><span class='op'>(</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>`E3G, ng/mL`</span><span class='op'>)</span><span class='op'>)</span>, w <span class='op'>=</span> <span class='va'>seruri</span><span class='op'>$</span><span class='va'>n_serum</span><span class='op'>*</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>n_urine</span><span class='op'>)</span></span></code></pre>
-</div>
-</details>
-<pre><code>Weighted Correlations 
-Call:psych::cor.wt(data = cbind(seruri$`E2 (pmol/l)`, lead(seruri$`E3G, ng/mL`)), 
-    w = seruri$n_serum * seruri$n_urine)
-   C1   C2  
-R1 1.00     
-R2 0.96 1.00</code></pre>
 <details>
 <summary>
 Show code
@@ -6645,31 +6617,68 @@ sample estimates:
 Show code
 </summary>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/stats/cor.test.html'>cor.test</a></span><span class='op'>(</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>`Progesterone (nmol/l)`</span>, <span class='fu'><a href='https://dplyr.tidyverse.org/reference/lead-lag.html'>lead</a></span><span class='op'>(</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>`P3G, ug/mL`</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># urine one day after serum: serum day d joined to urine day d + 1 (until 2026, lead() on the</span></span>
+<span><span class='co'># same-day join dropped the pair serum day 11 / urine day 12 and weighted by the wrong day's n)</span></span>
+<span><span class='va'>seruri_lag</span> <span class='op'>&lt;-</span> <span class='va'>ser</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>urine_day <span class='op'>=</span> <span class='va'>`Day relative to ovulation`</span> <span class='op'>+</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate-joins.html'>left_join</a></span><span class='op'>(</span><span class='va'>uri</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/rename.html'>rename</a></span><span class='op'>(</span>urine_day <span class='op'>=</span> <span class='va'>`Day relative to ovulation`</span><span class='op'>)</span>, by <span class='op'>=</span> <span class='st'>"urine_day"</span>, suffix <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"_serum"</span>, <span class='st'>"_urine"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/stats/cor.test.html'>cor.test</a></span><span class='op'>(</span><span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>`E2 (pmol/l)`</span>, <span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>`E3G, ng/mL`</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
 <pre><code>
     Pearson&#39;s product-moment correlation
 
-data:  seruri$`Progesterone (nmol/l)` and lead(seruri$`P3G, ug/mL`)
-t = 25.224, df = 25, p-value &lt; 2.2e-16
+data:  seruri_lag$`E2 (pmol/l)` and seruri_lag$`E3G, ng/mL`
+t = 10.337, df = 26, p-value = 1.059e-10
 alternative hypothesis: true correlation is not equal to 0
 95 percent confidence interval:
- 0.9580096 0.9913804
+ 0.7870852 0.9515298
 sample estimates:
       cor 
-0.9809147 </code></pre>
+0.8968176 </code></pre>
 <details>
 <summary>
 Show code
 </summary>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>psych</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/psych/man/cor.wt.html'>cor.wt</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>`Progesterone (nmol/l)`</span>, <span class='fu'><a href='https://dplyr.tidyverse.org/reference/lead-lag.html'>lead</a></span><span class='op'>(</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>`P3G, ug/mL`</span><span class='op'>)</span><span class='op'>)</span>, w <span class='op'>=</span> <span class='va'>seruri</span><span class='op'>$</span><span class='va'>n_serum</span><span class='op'>*</span><span class='va'>seruri</span><span class='op'>$</span><span class='va'>n_urine</span><span class='op'>)</span></span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>psych</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/psych/man/cor.wt.html'>cor.wt</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>`E2 (pmol/l)`</span>, <span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>`E3G, ng/mL`</span><span class='op'>)</span>, w <span class='op'>=</span> <span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>n_serum</span><span class='op'>*</span><span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>n_urine</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
 <pre><code>Weighted Correlations 
-Call:psych::cor.wt(data = cbind(seruri$`Progesterone (nmol/l)`, lead(seruri$`P3G, ug/mL`)), 
-    w = seruri$n_serum * seruri$n_urine)
+Call:psych::cor.wt(data = cbind(seruri_lag$`E2 (pmol/l)`, seruri_lag$`E3G, ng/mL`), 
+    w = seruri_lag$n_serum * seruri_lag$n_urine)
+   C1   C2  
+R1 1.00     
+R2 0.96 1.00</code></pre>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/stats/cor.test.html'>cor.test</a></span><span class='op'>(</span><span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>`Progesterone (nmol/l)`</span>, <span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>`P3G, ug/mL`</span><span class='op'>)</span></span></code></pre>
+</div>
+</details>
+<pre><code>
+    Pearson&#39;s product-moment correlation
+
+data:  seruri_lag$`Progesterone (nmol/l)` and seruri_lag$`P3G, ug/mL`
+t = 25.799, df = 26, p-value &lt; 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.9589009 0.9912905
+sample estimates:
+      cor 
+0.9810229 </code></pre>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>psych</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/psych/man/cor.wt.html'>cor.wt</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>`Progesterone (nmol/l)`</span>, <span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>`P3G, ug/mL`</span><span class='op'>)</span>, w <span class='op'>=</span> <span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>n_serum</span><span class='op'>*</span><span class='va'>seruri_lag</span><span class='op'>$</span><span class='va'>n_urine</span><span class='op'>)</span></span></code></pre>
+</div>
+</details>
+<pre><code>Weighted Correlations 
+Call:psych::cor.wt(data = cbind(seruri_lag$`Progesterone (nmol/l)`, 
+    seruri_lag$`P3G, ug/mL`), w = seruri_lag$n_serum * seruri_lag$n_urine)
    C1   C2  
 R1 1.00     
 R2 0.98 1.00</code></pre>

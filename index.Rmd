@@ -444,13 +444,22 @@ Roos et al. 2015 and Johnson et al. 2015 report aggregated data for E3g and Pdg 
 ```{r}
 ser <- rio::import("data/tabula-roos2015.tsv")
 uri <- rio::import("data/tabula-2015_Urinary_hormones_nomograms_Gnoth_Clin_Chem_Lab_Med.tsv")
-seruri <- ser %>% left_join(uri, by = c("Day relative to ovulation"), suffix = c("_serum", "_urine")) %>% mutate_all(~ as.numeric(str_match(., "([0-9.]+)( \\()?")[,2]))
+# central values only (the tables give ranges in parentheses); days keep their sign
+central <- function(x) as.numeric(str_match(x, "(-?[0-9.]+)( \\()?")[,2])
+ser <- ser %>% mutate(across(everything(), central))
+uri <- uri %>% mutate(across(everything(), central))
+# same day
+seruri <- ser %>% left_join(uri, by = c("Day relative to ovulation"), suffix = c("_serum", "_urine"))
 cor.test(seruri$`E2 (pmol/l)`, seruri$`E3G, ng/mL`)
-cor.test(seruri$`E2 (pmol/l)`, lead(seruri$`E3G, ng/mL`))
-psych::cor.wt(cbind(seruri$`E2 (pmol/l)`, lead(seruri$`E3G, ng/mL`)), w = seruri$n_serum*seruri$n_urine)
 cor.test(seruri$`Progesterone (nmol/l)`, seruri$`P3G, ug/mL`)
-cor.test(seruri$`Progesterone (nmol/l)`, lead(seruri$`P3G, ug/mL`))
-psych::cor.wt(cbind(seruri$`Progesterone (nmol/l)`, lead(seruri$`P3G, ug/mL`)), w = seruri$n_serum*seruri$n_urine)
+# urine one day after serum: serum day d joined to urine day d + 1 (until 2026, lead() on the
+# same-day join dropped the pair serum day 11 / urine day 12 and weighted by the wrong day's n)
+seruri_lag <- ser %>% mutate(urine_day = `Day relative to ovulation` + 1) %>% 
+  left_join(uri %>% rename(urine_day = `Day relative to ovulation`), by = "urine_day", suffix = c("_serum", "_urine"))
+cor.test(seruri_lag$`E2 (pmol/l)`, seruri_lag$`E3G, ng/mL`)
+psych::cor.wt(cbind(seruri_lag$`E2 (pmol/l)`, seruri_lag$`E3G, ng/mL`), w = seruri_lag$n_serum*seruri_lag$n_urine)
+cor.test(seruri_lag$`Progesterone (nmol/l)`, seruri_lag$`P3G, ug/mL`)
+psych::cor.wt(cbind(seruri_lag$`Progesterone (nmol/l)`, seruri_lag$`P3G, ug/mL`), w = seruri_lag$n_serum*seruri_lag$n_urine)
 ```
 
 
