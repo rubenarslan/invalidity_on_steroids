@@ -75,6 +75,7 @@ for(s in seq_along(summaries)) {
     su_df$lh_day_model <- 
     su_df$distribution <- NULL
     su_df$rr_unrounded <- NULL
+    su_df$rr_within_unrounded <- NULL
     su_df$imputed_fc_vs_measured_graph <- 
     su_df$imputed_bc_vs_measured_graph <- 
     su_df$imputed_lh_vs_measured_graph <- 
@@ -413,6 +414,60 @@ rr_saliva %>%
 
 ggsave("plots/Figure4.pdf", width = 5, height = 5, units = "in")
 ggsave("plots/Figure4.png", width = 5, height = 5, units = "in")
+```
+
+The divisors of Equation 1, i.e. the range-corrected correlations of imputed and measured serum hormones in BioCycle (centred within woman like the salivary values):
+
+```{r}
+rr_saliva %>% ungroup() %>% filter(Dataset == "BioCycle") %>% 
+  transmute(Hormone, cycle_phase, divisor = sprintf("%.3f", serum)) %>% 
+  arrange(Hormone, desc(cycle_phase)) %>% 
+  knitr::kable()
+```
+
+### Sensitivity analysis: imputed values centred within woman too
+
+Figure 4 centres each measured log hormone on the woman's mean and correlates it with the uncentred imputed value. Here both are centred on the woman's mean (a repeated-measures correlation, Bakdash & Marusich, 2017), and the range correction uses the pooled within-woman standard deviation of the imputed values. Women with a single sample carry no within-woman information and drop out. The BioCycle divisor is computed the same way.
+
+```{r fig.width = 5, fig.height = 5}
+rr_both <- sus %>% map_dfr(~ mutate(.x$rr_within_unrounded, Hormone = .x$Hormone, Dataset = .x$Dataset)) %>% 
+  mutate(Dataset = factor(as.character(short_names[Dataset]), levels = rev(short_names)),
+         cycle_phase = factor(cycle_phase, levels = rev(c("fc", "bc", "lh"))),
+         Hormone = str_replace(Hormone, "Free ", ""),
+         Hormone = str_replace(Hormone, ".02", "")) %>% 
+  group_by(Hormone, cycle_phase) %>% 
+  mutate(serum = estimate[which(Dataset=="BioCycle")],
+         estimate = estimate/serum,
+         conf.low = conf.low/serum,
+         conf.high = conf.high/serum) %>% 
+  ungroup()
+
+rr_both %>% 
+  filter(Dataset != "BioCycle") %>% 
+  ggplot(aes(Dataset, estimate, ymin = conf.low, ymax = conf.high,
+             color = cycle_phase, label = sprintf("%.2f", estimate))) + 
+  geom_pointrange(position = position_dodge(0.4), size = 0.3) +
+  ggrepel::geom_text_repel(size = 2.5, position = position_dodge(0.4)) +
+  facet_wrap(~ Hormone) +
+  coord_flip() +
+  theme_bw() + 
+  scale_color_viridis_d(begin = 0.2, end = 0.8) +
+  scale_y_continuous(expression(Estimated~r[Serum][", "][Saliva]), limits = c(NA, 1)) +
+  theme(legend.position="none")
+
+bind_rows(`Figure 4` = rr_saliva %>% ungroup(), 
+          `Both centred` = rr_both, .id = "centring") %>% 
+  mutate(value = if_else(Dataset == "BioCycle", sprintf("%.3f (divisor)", serum),
+                         sprintf("%.2f [%.2f; %.2f]", estimate, conf.low, conf.high))) %>% 
+  select(Hormone, Dataset, cycle_phase, centring, value) %>% 
+  pivot_wider(names_from = centring, values_from = value) %>% 
+  arrange(Hormone, desc(Dataset), desc(cycle_phase)) %>% 
+  knitr::kable()
+
+rr_both %>% 
+  filter(Dataset != "BioCycle") %>% 
+  group_by(Hormone) %>% 
+  summarise(median = median(estimate), min = min(estimate), max = max(estimate))
 ```
 
 ## Statement 1
@@ -1525,6 +1580,7 @@ for(s in seq_along(summaries)) {
     su_df$lh_day_model <- 
     su_df$distribution <- NULL
     su_df$rr_unrounded <- NULL
+    su_df$rr_within_unrounded <- NULL
     su_df$imputed_fc_vs_measured_graph <- 
     su_df$imputed_bc_vs_measured_graph <- 
     su_df$imputed_lh_vs_measured_graph <- 

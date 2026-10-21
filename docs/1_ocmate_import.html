@@ -3654,9 +3654,9 @@ select: dropped 7 variables (cycle, bc_day, fc_day, cycle_length, hormone, …)
 group_by: one grouping variable (id)
 summarise: now 384 rows and 2 columns, ungrouped
 filter: removed 730 rows (30%), 1,664 rows remaining
-group_by: 2 grouping variables (id, cycle)
-mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,428 unique values and 0% NA
-                  new variable &#39;log_hormone_diff&#39; (double) with 1,433 unique values and 0% NA
+group_by: one grouping variable (id)
+mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,550 unique values and 0% NA
+                  new variable &#39;log_hormone_diff&#39; (double) with 1,554 unique values and 0% NA
 ungroup: no grouping variables remain
 Joining with `by = join_by(bc_day)`
 left_join: added 26 columns (prc_stirn_bc, prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, …)
@@ -3693,6 +3693,12 @@ Warning: Rows containing NAs were excluded from the model.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
+<pre><code>filter: removed 891 rows (54%), 773 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): removed 49 rows (6%), 724 rows remaining (removed 49 groups, 206 groups remaining)
+mutate (grouped): changed 724 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 724 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
 ℹ Please use tidy evaluation idioms with `aes()`.
 ℹ See also `vignette(&quot;ggplot2-in-packages&quot;)` for more information.
@@ -3705,6 +3711,12 @@ was generated.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
+<pre><code>filter: removed 112 rows (7%), 1,552 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): removed 40 rows (3%), 1,512 rows remaining (removed 40 groups, 309 groups remaining)
+mutate (grouped): changed 1,512 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,512 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>$Dataset
 [1] &quot;OCMATE Non-HC&quot;
 
@@ -3878,29 +3890,42 @@ $r_log_bc_stirn
 [1] &quot;-0.00 [-0.08; 0.07]&quot;
 
 $r_diff_bc_stirn
-[1] &quot;-0.04 [-0.11; 0.03]&quot;
+[1] &quot;-0.03 [-0.10; 0.04]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot;-0.04 [-0.11; 0.03]&quot;
+[1] &quot;-0.02 [-0.09; 0.05]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.08 [ 0.01; 0.15]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.18 [ 0.11; 0.25]&quot;
+[1] &quot; 0.15 [ 0.09; 0.22]&quot;
 
 $sd_bc_imputed
 [1] &quot;0.51 (64%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.22 [ 0.14; 0.30]&quot;
+[1] &quot; 0.19 [ 0.11; 0.27]&quot;
 
 $rr_unrounded
 # A tibble: 2 × 4
   cycle_phase estimate conf.low conf.high
   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-1 bc             0.222   0.137      0.303
-2 fc             0.145   0.0965     0.193
+1 bc             0.191   0.106      0.274
+2 fc             0.146   0.0976     0.195
+
+$r_within_bc_imputed
+[1] &quot; 0.16 [ 0.08; 0.25]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.19 [ 0.09; 0.28]&quot;
+
+$rr_within_unrounded
+# A tibble: 2 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.188   0.0912     0.281
+2 fc             0.146   0.0939     0.198
 
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 892 rows containing missing values or values outside the
@@ -3977,13 +4002,19 @@ $r_fc_imputed
 [1] &quot; 0.07 [ 0.02; 0.12]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.15 [ 0.10; 0.19]&quot;
+[1] &quot; 0.15 [ 0.10; 0.20]&quot;
 
 $sd_fc_imputed
 [1] &quot;0.52 (101%)&quot;
 
 $r_diff_fc_imputed_rr
 [1] &quot; 0.15 [ 0.10; 0.19]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.16 [ 0.10; 0.21]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.15 [ 0.09; 0.20]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 150 rows containing missing values or values outside the
@@ -4024,9 +4055,9 @@ select: dropped 7 variables (cycle, bc_day, fc_day, cycle_length, hormone, …)
 group_by: one grouping variable (id)
 summarise: now 384 rows and 2 columns, ungrouped
 filter: removed 730 rows (30%), 1,664 rows remaining
-group_by: 2 grouping variables (id, cycle)
-mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,434 unique values and 0% NA
-                  new variable &#39;log_hormone_diff&#39; (double) with 1,435 unique values and 0% NA
+group_by: one grouping variable (id)
+mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,558 unique values and 0% NA
+                  new variable &#39;log_hormone_diff&#39; (double) with 1,558 unique values and 0% NA
 ungroup: no grouping variables remain
 Joining with `by = join_by(bc_day)`
 left_join: added 26 columns (prc_stirn_bc, prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, …)
@@ -4060,9 +4091,21 @@ Warning: Rows containing NAs were excluded from the model.</code></pre>
 <pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>filter: removed 891 rows (54%), 773 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): removed 49 rows (6%), 724 rows remaining (removed 49 groups, 206 groups remaining)
+mutate (grouped): changed 724 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 724 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain
+Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
 Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>filter: removed 112 rows (7%), 1,552 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): removed 40 rows (3%), 1,512 rows remaining (removed 40 groups, 309 groups remaining)
+mutate (grouped): changed 1,512 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,512 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>$Dataset
 [1] &quot;OCMATE Non-HC&quot;
 
@@ -4233,29 +4276,42 @@ $r_log_bc_stirn
 [1] &quot;-0.27 [-0.33;-0.20]&quot;
 
 $r_diff_bc_stirn
-[1] &quot;-0.32 [-0.38;-0.25]&quot;
+[1] &quot;-0.31 [-0.37;-0.24]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot;-0.35 [-0.41;-0.29]&quot;
+[1] &quot;-0.34 [-0.40;-0.28]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.40 [ 0.34; 0.46]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.46 [ 0.41; 0.52]&quot;
+[1] &quot; 0.48 [ 0.43; 0.54]&quot;
 
 $sd_bc_imputed
 [1] &quot;1.20 (91%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.48 [ 0.42; 0.54]&quot;
+[1] &quot; 0.50 [ 0.45; 0.56]&quot;
 
 $rr_unrounded
 # A tibble: 2 × 4
   cycle_phase estimate conf.low conf.high
   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-1 bc             0.483    0.425     0.537
-2 fc             0.340    0.294     0.385
+1 bc             0.502    0.445     0.555
+2 fc             0.390    0.346     0.433
+
+$r_within_bc_imputed
+[1] &quot; 0.52 [ 0.45; 0.58]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.51 [ 0.44; 0.57]&quot;
+
+$rr_within_unrounded
+# A tibble: 2 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.507    0.442     0.567
+2 fc             0.410    0.362     0.456
 
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 892 rows containing missing values or values outside the
@@ -4323,22 +4379,28 @@ $r_log_fc_stirn
 [1] &quot;-0.17 [-0.22;-0.12]&quot;
 
 $r_diff_fc_stirn
-[1] &quot;-0.23 [-0.27;-0.18]&quot;
+[1] &quot;-0.23 [-0.28;-0.19]&quot;
 
 $r_log_diff_fc_stirn
-[1] &quot;-0.24 [-0.28;-0.19]&quot;
+[1] &quot;-0.25 [-0.29;-0.20]&quot;
 
 $r_fc_imputed
 [1] &quot; 0.29 [ 0.24; 0.34]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.33 [ 0.28; 0.37]&quot;
+[1] &quot; 0.38 [ 0.33; 0.42]&quot;
 
 $sd_fc_imputed
 [1] &quot;1.13 (92%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.34 [ 0.29; 0.39]&quot;
+[1] &quot; 0.39 [ 0.35; 0.43]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.41 [ 0.36; 0.46]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.41 [ 0.36; 0.46]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 150 rows containing missing values or values outside the
@@ -4368,9 +4430,9 @@ select: dropped 7 variables (cycle, bc_day, fc_day, cycle_length, hormone, …)
 group_by: one grouping variable (id)
 summarise: now 276 rows and 2 columns, ungrouped
 filter: removed 415 rows (27%), 1,144 rows remaining
-group_by: 2 grouping variables (id, cycle)
-mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 971 unique values and 0% NA
-                  new variable &#39;log_hormone_diff&#39; (double) with 975 unique values and 0% NA
+group_by: one grouping variable (id)
+mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,070 unique values and 0% NA
+                  new variable &#39;log_hormone_diff&#39; (double) with 1,071 unique values and 0% NA
 ungroup: no grouping variables remain
 Joining with `by = join_by(bc_day)`
 left_join: added 26 columns (prc_stirn_bc, prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, …)
@@ -4407,12 +4469,24 @@ Warning: Rows containing NAs were excluded from the model.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
-<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>filter: removed 637 rows (56%), 507 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): removed 31 rows (6%), 476 rows remaining (removed 31 groups, 143 groups remaining)
+mutate (grouped): changed 476 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 476 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain
+Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
+<pre><code>filter: removed 66 rows (6%), 1,078 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): removed 25 rows (2%), 1,053 rows remaining (removed 25 groups, 226 groups remaining)
+mutate (grouped): changed 1,053 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,053 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>$Dataset
 [1] &quot;OCMATE HC&quot;
 
@@ -4586,29 +4660,42 @@ $r_log_bc_stirn
 [1] &quot;-0.01 [-0.09; 0.08]&quot;
 
 $r_diff_bc_stirn
-[1] &quot;-0.02 [-0.11; 0.06]&quot;
+[1] &quot;-0.03 [-0.12; 0.05]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot;-0.00 [-0.09; 0.08]&quot;
+[1] &quot;-0.02 [-0.11; 0.07]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.03 [-0.06; 0.11]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.03 [-0.06; 0.12]&quot;
+[1] &quot; 0.01 [-0.08; 0.09]&quot;
 
 $sd_bc_imputed
 [1] &quot;0.49 (60%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.04 [-0.07; 0.15]&quot;
+[1] &quot; 0.01 [-0.10; 0.12]&quot;
 
 $rr_unrounded
 # A tibble: 2 × 4
   cycle_phase estimate conf.low conf.high
   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-1 bc            0.0408 -0.0713      0.152
-2 fc            0.0527 -0.00758     0.113
+1 bc           0.00941  -0.102      0.121
+2 fc           0.0437   -0.0166     0.104
+
+$r_within_bc_imputed
+[1] &quot; 0.02 [-0.08; 0.13]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.03 [-0.10; 0.16]&quot;
+
+$rr_within_unrounded
+# A tibble: 2 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc            0.0297  -0.0981     0.156
+2 fc            0.0463  -0.0190     0.111
 
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 637 rows containing missing values or values outside the
@@ -4676,22 +4763,28 @@ $r_log_fc_stirn
 [1] &quot; 0.03 [-0.03; 0.09]&quot;
 
 $r_diff_fc_stirn
-[1] &quot; 0.04 [-0.02; 0.10]&quot;
+[1] &quot; 0.03 [-0.03; 0.09]&quot;
 
 $r_log_diff_fc_stirn
-[1] &quot; 0.03 [-0.03; 0.09]&quot;
+[1] &quot; 0.02 [-0.04; 0.08]&quot;
 
 $r_fc_imputed
 [1] &quot; 0.05 [-0.01; 0.11]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.05 [-0.01; 0.11]&quot;
+[1] &quot; 0.04 [-0.02; 0.10]&quot;
 
 $sd_fc_imputed
 [1] &quot;0.51 (98%)&quot;
 
 $r_diff_fc_imputed_rr
-[1] &quot; 0.05 [-0.01; 0.11]&quot;
+[1] &quot; 0.04 [-0.02; 0.10]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.05 [-0.02; 0.12]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.05 [-0.02; 0.11]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 90 rows containing missing values or values outside the scale
@@ -4721,9 +4814,9 @@ select: dropped 7 variables (cycle, bc_day, fc_day, cycle_length, hormone, …)
 group_by: one grouping variable (id)
 summarise: now 276 rows and 2 columns, ungrouped
 filter: removed 415 rows (27%), 1,144 rows remaining
-group_by: 2 grouping variables (id, cycle)
-mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 976 unique values and 0% NA
-                  new variable &#39;log_hormone_diff&#39; (double) with 977 unique values and 0% NA
+group_by: one grouping variable (id)
+mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,072 unique values and 0% NA
+                  new variable &#39;log_hormone_diff&#39; (double) with 1,072 unique values and 0% NA
 ungroup: no grouping variables remain
 Joining with `by = join_by(bc_day)`
 left_join: added 26 columns (prc_stirn_bc, prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, …)
@@ -4760,12 +4853,24 @@ Warning: Rows containing NAs were excluded from the model.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
-<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>filter: removed 637 rows (56%), 507 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): removed 31 rows (6%), 476 rows remaining (removed 31 groups, 143 groups remaining)
+mutate (grouped): changed 476 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 476 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain
+Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
+<pre><code>filter: removed 66 rows (6%), 1,078 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): removed 25 rows (2%), 1,053 rows remaining (removed 25 groups, 226 groups remaining)
+mutate (grouped): changed 1,053 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,053 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>$Dataset
 [1] &quot;OCMATE HC&quot;
 
@@ -4948,20 +5053,33 @@ $r_bc_imputed
 [1] &quot; 0.08 [-0.00; 0.17]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.13 [ 0.05; 0.22]&quot;
+[1] &quot; 0.13 [ 0.04; 0.21]&quot;
 
 $sd_bc_imputed
 [1] &quot;1.21 (93%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.14 [ 0.05; 0.23]&quot;
+[1] &quot; 0.13 [ 0.04; 0.22]&quot;
 
 $rr_unrounded
 # A tibble: 2 × 4
   cycle_phase estimate conf.low conf.high
   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-1 bc             0.139   0.0493     0.227
-2 fc             0.122   0.0606     0.182
+1 bc             0.133   0.0429     0.221
+2 fc             0.116   0.0554     0.177
+
+$r_within_bc_imputed
+[1] &quot; 0.16 [ 0.06; 0.27]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.15 [ 0.05; 0.25]&quot;
+
+$rr_within_unrounded
+# A tibble: 2 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.153   0.0531     0.249
+2 fc             0.121   0.0551     0.186
 
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 637 rows containing missing values or values outside the
@@ -5029,7 +5147,7 @@ $r_log_fc_stirn
 [1] &quot;-0.04 [-0.10; 0.02]&quot;
 
 $r_diff_fc_stirn
-[1] &quot;-0.06 [-0.12;-0.00]&quot;
+[1] &quot;-0.07 [-0.13;-0.01]&quot;
 
 $r_log_diff_fc_stirn
 [1] &quot;-0.09 [-0.15;-0.03]&quot;
@@ -5038,13 +5156,19 @@ $r_fc_imputed
 [1] &quot; 0.07 [ 0.01; 0.13]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.12 [ 0.06; 0.18]&quot;
+[1] &quot; 0.11 [ 0.05; 0.17]&quot;
 
 $sd_fc_imputed
 [1] &quot;1.14 (95%)&quot;
 
 $r_diff_fc_imputed_rr
 [1] &quot; 0.12 [ 0.06; 0.18]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.12 [ 0.06; 0.19]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.12 [ 0.06; 0.19]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 90 rows containing missing values or values outside the scale
@@ -5056,7 +5180,7 @@ range (`geom_point()`).</code></pre>
 $rmse_fc_imputed
 [1] &quot; 1.83&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb251"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb256"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

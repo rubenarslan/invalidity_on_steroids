@@ -155,6 +155,27 @@ cycle_phase_plot_ep <- function(model, Dataset, custom_limits = NULL, size = 20)
 }
 
 
+# Sensitivity analysis for Equation 1: measured and imputed log hormones both centred within woman,
+# i.e. a repeated-measures correlation (Bakdash & Marusich, 2017). Women with a single sample carry no
+# within-woman information and are left out. The interval uses Fisher's z with N - k - 1 degrees of
+# freedom (N samples, k women), as rmcorr does. sd_within is the pooled within-woman SD of the imputed
+# values, used for the range correction.
+within_woman_cor <- function(id, imputed, measured) {
+  d <- tibble(id = id, x = imputed, y = measured) %>% 
+    filter(!is.na(x), !is.na(y)) %>% 
+    group_by(id) %>% filter(n() > 1) %>% 
+    mutate(x = x - mean(x), y = y - mean(y)) %>% 
+    ungroup()
+  n <- nrow(d)
+  k <- n_distinct(d$id)
+  r <- sum(d$x * d$y) / sqrt(sum(d$x^2) * sum(d$y^2))
+  se <- 1 / sqrt(n - k - 1 - 1)
+  tibble(estimate = r, 
+         conf.low = tanh(atanh(r) - qnorm(0.975) * se), 
+         conf.high = tanh(atanh(r) + qnorm(0.975) * se),
+         sd_within = sqrt(sum(d$x^2) / (n - k)), n = n, women = k)
+}
+
 summarise_hormone <- function(df, 
                               Dataset, 
                               Hormone, 
@@ -250,7 +271,10 @@ summarise_hormone <- function(df,
   stopifnot(all(df$fc_day < 35, na.rm = TRUE))
   stopifnot(all(df$bc_day > -36, na.rm = TRUE))
 
-  df <- df %>% group_by(id, cycle) %>% 
+  # centre within woman, as described in the Methods ("we subtracted the subject mean").
+  # Until 2026 this grouped by woman and cycle, which turned every cycle with a single sample into
+  # an exact zero and removed differences between a woman's cycles from the measured values only.
+  df <- df %>% group_by(id) %>% 
     mutate(hormone_diff = hormone - mean(hormone),
            log_hormone_diff = log(hormone) - mean(log(hormone))) %>% 
     ungroup()
@@ -451,6 +475,15 @@ summarise_hormone <- function(df,
     results$rr_unrounded <- bind_rows(results$rr_unrounded,
       tibble(cycle_phase = "bc", estimate = rr_cor[["unrestricted.estimate"]],
              conf.low = rr_cor[["unrestricted.conf.low"]], conf.high = rr_cor[["unrestricted.conf.high"]]))
+    # sensitivity analysis: imputed values centred within woman as well
+    rm_cor <- within_woman_cor(df$id, df[[paste0("est_", Hormone_name, "_bc")]], log(df$hormone))
+    results$r_within_bc_imputed <- sprintf("% .2f [% .2f;% .2f]", rm_cor$estimate, rm_cor$conf.low, rm_cor$conf.high)
+    rr_within <- psychometric::cRRr(rm_cor[, c("estimate", "conf.low", "conf.high")],
+                                    rm_cor$sd_within, sd_unrestricted)
+    results$r_within_bc_imputed_rr <- sprintf("% .2f [% .2f;% .2f]", rr_within[["unrestricted.estimate"]], rr_within[["unrestricted.conf.low"]], rr_within[["unrestricted.conf.high"]])
+    results$rr_within_unrounded <- bind_rows(results$rr_within_unrounded,
+      tibble(cycle_phase = "bc", estimate = rr_within[["unrestricted.estimate"]],
+             conf.low = rr_within[["unrestricted.conf.low"]], conf.high = rr_within[["unrestricted.conf.high"]]))
     
     
     factor <- compute_factor(df$bc_day, df[[paste0("est_", Hormone_name, "_bc")]], df$hormone, threshold = c(-10, -2))
@@ -507,6 +540,15 @@ summarise_hormone <- function(df,
     results$rr_unrounded <- bind_rows(results$rr_unrounded,
       tibble(cycle_phase = "fc", estimate = rr_cor[["unrestricted.estimate"]],
              conf.low = rr_cor[["unrestricted.conf.low"]], conf.high = rr_cor[["unrestricted.conf.high"]]))
+    # sensitivity analysis: imputed values centred within woman as well
+    rm_cor <- within_woman_cor(df$id, df[[paste0("est_", Hormone_name, "_fc")]], log(df$hormone))
+    results$r_within_fc_imputed <- sprintf("% .2f [% .2f;% .2f]", rm_cor$estimate, rm_cor$conf.low, rm_cor$conf.high)
+    rr_within <- psychometric::cRRr(rm_cor[, c("estimate", "conf.low", "conf.high")],
+                                    rm_cor$sd_within, sd_unrestricted)
+    results$r_within_fc_imputed_rr <- sprintf("% .2f [% .2f;% .2f]", rr_within[["unrestricted.estimate"]], rr_within[["unrestricted.conf.low"]], rr_within[["unrestricted.conf.high"]])
+    results$rr_within_unrounded <- bind_rows(results$rr_within_unrounded,
+      tibble(cycle_phase = "fc", estimate = rr_within[["unrestricted.estimate"]],
+             conf.low = rr_within[["unrestricted.conf.low"]], conf.high = rr_within[["unrestricted.conf.high"]]))
     
     factor <- compute_factor(df$fc_day, df[[paste0("est_", Hormone_name, "_fc")]], df$hormone, threshold = c(20, 28))
     
@@ -563,6 +605,15 @@ summarise_hormone <- function(df,
     results$rr_unrounded <- bind_rows(results$rr_unrounded,
       tibble(cycle_phase = "lh", estimate = rr_cor[["unrestricted.estimate"]],
              conf.low = rr_cor[["unrestricted.conf.low"]], conf.high = rr_cor[["unrestricted.conf.high"]]))
+    # sensitivity analysis: imputed values centred within woman as well
+    rm_cor <- within_woman_cor(df$id, df[[paste0("est_", Hormone_name, "_lh")]], log(df$hormone))
+    results$r_within_lh_imputed <- sprintf("% .2f [% .2f;% .2f]", rm_cor$estimate, rm_cor$conf.low, rm_cor$conf.high)
+    rr_within <- psychometric::cRRr(rm_cor[, c("estimate", "conf.low", "conf.high")],
+                                    rm_cor$sd_within, sd_unrestricted)
+    results$r_within_lh_imputed_rr <- sprintf("% .2f [% .2f;% .2f]", rr_within[["unrestricted.estimate"]], rr_within[["unrestricted.conf.low"]], rr_within[["unrestricted.conf.high"]])
+    results$rr_within_unrounded <- bind_rows(results$rr_within_unrounded,
+      tibble(cycle_phase = "lh", estimate = rr_within[["unrestricted.estimate"]],
+             conf.low = rr_within[["unrestricted.conf.low"]], conf.high = rr_within[["unrestricted.conf.high"]]))
     
     factor <- compute_factor(df$lh_day, df[[paste0("est_", Hormone_name, "_lh")]], df$hormone, threshold = c(2, 10))
     

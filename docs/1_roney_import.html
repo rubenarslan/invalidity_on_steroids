@@ -1821,9 +1821,9 @@ group_by: 2 grouping variables (id, cycle)
 summarise: now 122 rows and 3 columns, one group variable remaining (id)
 ungroup: no grouping variables remain
 filter: removed 1,246 rows (53%), 1,121 rows remaining
-group_by: 2 grouping variables (id, cycle)
-mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 811 unique values and 0% NA
-                  new variable &#39;log_hormone_diff&#39; (double) with 829 unique values and 0% NA
+group_by: one grouping variable (id)
+mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 812 unique values and 0% NA
+                  new variable &#39;log_hormone_diff&#39; (double) with 812 unique values and 0% NA
 ungroup: no grouping variables remain
 Joining with `by = join_by(bc_day)`
 left_join: added 26 columns (prc_stirn_bc, prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, …)
@@ -1855,6 +1855,12 @@ Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>filter: removed 56 rows (5%), 1,065 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+mutate (grouped): changed 1,065 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,065 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
 ℹ Please use tidy evaluation idioms with `aes()`.
 ℹ See also `vignette(&quot;ggplot2-in-packages&quot;)` for more information.
@@ -1862,8 +1868,14 @@ This warning is displayed once per session.
 Call `lifecycle::last_lifecycle_warnings()` to see where this warning
 was generated.</code></pre>
 <pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
+Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>filter: no rows removed
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+mutate (grouped): changed 1,121 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,121 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>$Dataset
 [1] &quot;Roney 2013&quot;
 
@@ -2034,29 +2046,42 @@ $r_log_bc_stirn
 [1] &quot;-0.36 [-0.41;-0.30]&quot;
 
 $r_diff_bc_stirn
-[1] &quot;-0.40 [-0.45;-0.35]&quot;
+[1] &quot;-0.39 [-0.44;-0.34]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot;-0.40 [-0.45;-0.35]&quot;
+[1] &quot;-0.39 [-0.44;-0.34]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.44 [ 0.40; 0.49]&quot;
 
 $r_diff_bc_imputed
-[1] &quot; 0.51 [ 0.47; 0.56]&quot;
+[1] &quot; 0.49 [ 0.45; 0.54]&quot;
 
 $sd_bc_imputed
 [1] &quot;1.20 (91%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.53 [ 0.48; 0.57]&quot;
+[1] &quot; 0.51 [ 0.47; 0.56]&quot;
 
 $rr_unrounded
 # A tibble: 2 × 4
   cycle_phase estimate conf.low conf.high
   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-1 bc             0.531    0.485     0.574
-2 fc             0.571    0.527     0.612
+1 bc             0.513    0.465     0.557
+2 fc             0.550    0.504     0.592
+
+$r_within_bc_imputed
+[1] &quot; 0.51 [ 0.46; 0.55]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.52 [ 0.48; 0.57]&quot;
+
+$rr_within_unrounded
+# A tibble: 2 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.525    0.477     0.569
+2 fc             0.573    0.528     0.615
 
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 58 rows containing missing values or values outside the scale
@@ -2127,18 +2152,24 @@ $r_diff_fc_stirn
 [1] &quot;-0.34 [-0.39;-0.29]&quot;
 
 $r_log_diff_fc_stirn
-[1] &quot;-0.35 [-0.41;-0.30]&quot;
+[1] &quot;-0.35 [-0.40;-0.29]&quot;
 
 $r_fc_imputed
 [1] &quot; 0.48 [ 0.44; 0.53]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.53 [ 0.49; 0.57]&quot;
+[1] &quot; 0.51 [ 0.47; 0.55]&quot;
 
 $sd_fc_imputed
 [1] &quot;1.06 (82%)&quot;
 
 $r_diff_fc_imputed_rr
+[1] &quot; 0.55 [ 0.50; 0.59]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.53 [ 0.49; 0.57]&quot;
+
+$r_within_fc_imputed_rr
 [1] &quot; 0.57 [ 0.53; 0.61]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
@@ -2172,9 +2203,9 @@ group_by: 2 grouping variables (id, cycle)
 summarise: now 122 rows and 3 columns, one group variable remaining (id)
 ungroup: no grouping variables remain
 filter: removed 1,276 rows (54%), 1,091 rows remaining
-group_by: 2 grouping variables (id, cycle)
-mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,078 unique values and 0% NA
-                  new variable &#39;log_hormone_diff&#39; (double) with 1,077 unique values and 0% NA
+group_by: one grouping variable (id)
+mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,084 unique values and 0% NA
+                  new variable &#39;log_hormone_diff&#39; (double) with 1,083 unique values and 0% NA
 ungroup: no grouping variables remain
 Joining with `by = join_by(bc_day)`
 left_join: added 26 columns (prc_stirn_bc, prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, …)
@@ -2206,10 +2237,22 @@ filter (grouped): no rows removed</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
-<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>filter: removed 52 rows (5%), 1,039 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+mutate (grouped): changed 1,039 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,039 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain
+Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
+<pre><code>filter: no rows removed
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+mutate (grouped): changed 1,091 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,091 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>$Dataset
 [1] &quot;Roney 2013&quot;
 
@@ -2383,7 +2426,7 @@ $r_diff_bc_stirn
 [1] &quot;-0.04 [-0.10; 0.02]&quot;
 
 $r_log_diff_bc_stirn
-[1] &quot;-0.04 [-0.10; 0.02]&quot;
+[1] &quot;-0.05 [-0.11; 0.01]&quot;
 
 $r_bc_imputed
 [1] &quot; 0.15 [ 0.09; 0.21]&quot;
@@ -2395,14 +2438,27 @@ $sd_bc_imputed
 [1] &quot;0.50 (63%)&quot;
 
 $r_diff_bc_imputed_rr
-[1] &quot; 0.21 [ 0.14; 0.28]&quot;
+[1] &quot; 0.22 [ 0.14; 0.29]&quot;
 
 $rr_unrounded
 # A tibble: 2 × 4
   cycle_phase estimate conf.low conf.high
   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-1 bc             0.209    0.135     0.281
-2 fc             0.235    0.174     0.294
+1 bc             0.215    0.141     0.287
+2 fc             0.226    0.165     0.285
+
+$r_within_bc_imputed
+[1] &quot; 0.18 [ 0.11; 0.23]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.22 [ 0.14; 0.29]&quot;
+
+$rr_within_unrounded
+# A tibble: 2 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.220    0.144     0.292
+2 fc             0.232    0.170     0.292
 
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 54 rows containing missing values or values outside the scale
@@ -2473,21 +2529,27 @@ $r_log_fc_stirn
 [1] &quot; 0.02 [-0.04; 0.08]&quot;
 
 $r_diff_fc_stirn
-[1] &quot; 0.04 [-0.02; 0.10]&quot;
+[1] &quot; 0.05 [-0.01; 0.11]&quot;
 
 $r_log_diff_fc_stirn
-[1] &quot; 0.03 [-0.03; 0.09]&quot;
+[1] &quot; 0.04 [-0.02; 0.10]&quot;
 
 $r_fc_imputed
 [1] &quot; 0.21 [ 0.15; 0.26]&quot;
 
 $r_diff_fc_imputed
-[1] &quot; 0.22 [ 0.16; 0.28]&quot;
+[1] &quot; 0.21 [ 0.15; 0.27]&quot;
 
 $sd_fc_imputed
 [1] &quot;0.48 (87%)&quot;
 
 $r_diff_fc_imputed_rr
+[1] &quot; 0.23 [ 0.16; 0.29]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.22 [ 0.16; 0.27]&quot;
+
+$r_within_fc_imputed_rr
 [1] &quot; 0.23 [ 0.17; 0.29]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
@@ -2718,7 +2780,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_fc
 [1] &quot;0.35 [0.30;0.39]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb105"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

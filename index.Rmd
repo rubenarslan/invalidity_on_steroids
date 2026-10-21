@@ -52,6 +52,7 @@ summary_table <- function(Hormone) {
     su_df$lh_day_model <- 
     su_df$distribution <- NULL
     su_df$rr_unrounded <- NULL
+    su_df$rr_within_unrounded <- NULL
     su_df$imputed_fc_vs_measured_graph <- 
     su_df$imputed_bc_vs_measured_graph <- 
     su_df$imputed_lh_vs_measured_graph <- 
@@ -97,13 +98,13 @@ summary_table <- function(Hormone) {
            var_id_loo, var_cycle_loo,
            var_id, var_cycle, var_resid,
            r_fc_stirn, r_log_fc_stirn, r_diff_fc_stirn, r_log_diff_fc_stirn, r_loo_fc, r_fc_imputed, 
-           r_diff_fc_imputed, sd_fc_imputed, r_diff_fc_imputed_rr, 
+           r_diff_fc_imputed, sd_fc_imputed, r_diff_fc_imputed_rr, r_within_fc_imputed, r_within_fc_imputed_rr, 
            plot_fc,
            r_bc_stirn, r_log_bc_stirn, r_diff_bc_stirn, r_log_diff_bc_stirn, r_loo_bc, r_bc_imputed, 
-           r_diff_bc_imputed, sd_bc_imputed, r_diff_bc_imputed_rr, 
+           r_diff_bc_imputed, sd_bc_imputed, r_diff_bc_imputed_rr, r_within_bc_imputed, r_within_bc_imputed_rr, 
            plot_bc,
           r_prob_lh, r_log_prob_lh, r_diff_prob_lh, r_log_diff_prob_lh, r_loo_lh, r_lh_imputed, 
-           r_diff_lh_imputed, sd_lh_imputed, r_diff_lh_imputed_rr, 
+           r_diff_lh_imputed, sd_lh_imputed, r_diff_lh_imputed_rr, r_within_lh_imputed, r_within_lh_imputed_rr, 
            plot_lh,
            everything(), -matches("rmse_[^i]"), -contains("_vs_measured"))
   
@@ -138,11 +139,11 @@ summary_table <- function(Hormone) {
                      "mean", "sd", "median", "mad", "range") ~ "Descriptive statistics",
       rowname %in%  c("var_id_loo", "var_cycle_loo", "var_id", "var_cycle", "var_resid") ~ "Interindividual differences",
     rowname %in%  c("r_fc", "r_loo_fc", "plot_fc", "imputed_fc_vs_measured_graph",
-           "r_fc_stirn", "r_log_fc_stirn", "r_diff_fc_stirn", "r_log_diff_fc_stirn", "rmse_fc", "r_fc_imputed", "r_diff_fc_imputed", "sd_fc_imputed", "r_diff_fc_imputed_rr",  "rmse_fc_imputed") ~ "Validity (Forward counting)",
+           "r_fc_stirn", "r_log_fc_stirn", "r_diff_fc_stirn", "r_log_diff_fc_stirn", "rmse_fc", "r_fc_imputed", "r_diff_fc_imputed", "sd_fc_imputed", "r_diff_fc_imputed_rr", "r_within_fc_imputed", "r_within_fc_imputed_rr",  "rmse_fc_imputed") ~ "Validity (Forward counting)",
     rowname %in%  c("r_bc", "r_loo_bc", "plot_bc", "imputed_bc_vs_measured_graph",
-           "r_bc_stirn", "r_log_bc_stirn", "r_diff_bc_stirn", "r_log_diff_bc_stirn", "rmse_bc", "r_bc_imputed", "r_diff_bc_imputed", "sd_bc_imputed", "r_diff_bc_imputed_rr", "rmse_bc_imputed") ~ "Validity (Backward counting)",
+           "r_bc_stirn", "r_log_bc_stirn", "r_diff_bc_stirn", "r_log_diff_bc_stirn", "rmse_bc", "r_bc_imputed", "r_diff_bc_imputed", "sd_bc_imputed", "r_diff_bc_imputed_rr", "r_within_bc_imputed", "r_within_bc_imputed_rr", "rmse_bc_imputed") ~ "Validity (Backward counting)",
     rowname %in%  c("r_lh", "r_loo_lh", "plot_lh", "imputed_lh_vs_measured_graph",
-           "r_prob_lh", "r_log_prob_lh", "r_diff_prob_lh", "r_log_diff_prob_lh", "rmse_lh", "r_lh_imputed", "r_diff_lh_imputed", "sd_lh_imputed", "r_diff_lh_imputed_rr",  "rmse_lh_imputed") ~ "Validity (LH)"
+           "r_prob_lh", "r_log_prob_lh", "r_diff_prob_lh", "r_log_diff_prob_lh", "rmse_lh", "r_lh_imputed", "r_diff_lh_imputed", "sd_lh_imputed", "r_diff_lh_imputed_rr", "r_within_lh_imputed", "r_within_lh_imputed_rr",  "rmse_lh_imputed") ~ "Validity (LH)"
     ))
   
   comp %>% 
@@ -376,6 +377,8 @@ ratio_summary_table()
   - `r_fc/bc/lh` reflects the square root of variance by a spline over cycle day explained after marginalizing inter-individual and cycle-to-cycle variation in means.
   - `r_loo_fc/bc/lh` reflect the same thing, but using approximative leave-one-out cross-validation, which is necessary because the splines can easily overfit to the data. When these yield NaN, this shows the explained variance veered negative, i.e. no LOO-robust explained variance.
   - `r_fc/bc/lh_imputed` reflect a correlation of the raw steroid value with a value _imputed_ from the cycle phase using a model based on the BioCycle serum data.
+  - `r_diff_fc/bc/lh_imputed` correlate the measured log hormone, centred on the woman's mean, with the imputed log hormone. `sd_fc/bc/lh_imputed` gives the SD of the imputed values in the sample (and its variance as a percentage of the variance over a full cycle); `r_diff_fc/bc/lh_imputed_rr` is the correlation corrected for this range restriction. Divided by the BioCycle value, it gives Equation 1 (Figure 4). (Until 2026, the measured values were centred within woman and cycle.)
+  - `r_within_fc/bc/lh_imputed` and `r_within_fc/bc/lh_imputed_rr` are a sensitivity analysis: measured and imputed log hormones both centred on the woman's mean (a repeated-measures correlation), range-corrected with the pooled within-woman SD of the imputed values.
   - `r_fc/bc_stirn` reflect correlations with the imputed probability of being in the fertile window according to the method in Gangestad et al. 2016 (based on Stirnemann's data).
   - `r_prob_lh` reflects correlations with the probability of being in the fertile window according to LH tests, based on the method in Stern et al. 2018 (supplement), which meta-analyzed various probabilities of conception relative to the day of ovulation.
 

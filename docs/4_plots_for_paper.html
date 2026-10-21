@@ -1549,6 +1549,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <li><a href="#figure-4" id="toc-figure-4">Figure 4</a>
 <ul>
 <li><a href="#mini-simulation-to-show-the-assumption-behind-this." id="toc-mini-simulation-to-show-the-assumption-behind-this.">Mini simulation to show the assumption behind this.</a></li>
+<li><a href="#sensitivity-analysis-imputed-values-centred-within-woman-too" id="toc-sensitivity-analysis-imputed-values-centred-within-woman-too">Sensitivity analysis: imputed values centred within woman too</a></li>
 </ul></li>
 <li><a href="#statement-1" id="toc-statement-1">Statement 1</a></li>
 <li><a href="#statement-2" id="toc-statement-2">Statement 2</a>
@@ -1926,6 +1927,7 @@ Show code
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>lh_day_model</span> <span class='op'>&lt;-</span> </span>
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>distribution</span> <span class='op'>&lt;-</span> <span class='cn'>NULL</span></span>
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>rr_unrounded</span> <span class='op'>&lt;-</span> <span class='cn'>NULL</span></span>
+<span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>rr_within_unrounded</span> <span class='op'>&lt;-</span> <span class='cn'>NULL</span></span>
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>imputed_fc_vs_measured_graph</span> <span class='op'>&lt;-</span> </span>
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>imputed_bc_vs_measured_graph</span> <span class='op'>&lt;-</span> </span>
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>imputed_lh_vs_measured_graph</span> <span class='op'>&lt;-</span> </span>
@@ -2326,7 +2328,7 @@ Show code
         new variable &#39;Assay&#39; (character) with 3 unique values and 0% NA
         new variable &#39;Indicators&#39; (character) with 3 unique values and 0% NA
 mutate: new variable &#39;Geometric mean&#39; (character) with 16 unique values and 0% NA
-select: renamed 11 variables (Women, Cycles, Days, Age, In relationship, …) and dropped 65 variables</code></pre>
+select: renamed 11 variables (Women, Cycles, Days, Age, In relationship, …) and dropped 71 variables</code></pre>
 <details>
 <summary>
 Show code
@@ -3756,6 +3758,488 @@ Show code
 </div>
 </details>
 </div>
+<p>The divisors of Equation 1, i.e. the range-corrected correlations of imputed and measured serum hormones in BioCycle (centred within woman like the salivary values):</p>
+<div class="layout-chunk" data-layout="l-body">
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>rr_saliva</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='va'>Dataset</span> <span class='op'>==</span> <span class='st'>"BioCycle"</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>transmute</span><span class='op'>(</span><span class='va'>Hormone</span>, <span class='va'>cycle_phase</span>, divisor <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"%.3f"</span>, <span class='va'>serum</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/arrange.html'>arrange</a></span><span class='op'>(</span><span class='va'>Hormone</span>, <span class='fu'><a href='https://dplyr.tidyverse.org/reference/desc.html'>desc</a></span><span class='op'>(</span><span class='va'>cycle_phase</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
+</div>
+</details>
+<pre><code>ungroup: no grouping variables remain
+filter: removed 34 rows (85%), 6 rows remaining
+transmute: dropped 5 variables (estimate, conf.low, conf.high, Dataset, serum)
+transmute: dropped 5 variables (estimate, conf.low, conf.high, Dataset, serum)
+           new variable &#39;divisor&#39; (character) with 6 unique values and 0% NA</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Hormone</th>
+<th style="text-align: left;">cycle_phase</th>
+<th style="text-align: left;">divisor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.631</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.748</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.787</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.791</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.876</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.902</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="sensitivity-analysis-imputed-values-centred-within-woman-too">Sensitivity analysis: imputed values centred within woman too</h3>
+<p>Figure 4 centres each measured log hormone on the woman’s mean and correlates it with the uncentred imputed value. Here both are centred on the woman’s mean (a repeated-measures correlation, Bakdash &amp; Marusich, 2017), and the range correction uses the pooled within-woman standard deviation of the imputed values. Women with a single sample carry no within-woman information and drop out. The BioCycle divisor is computed the same way.</p>
+<div class="layout-chunk" data-layout="l-body">
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>rr_both</span> <span class='op'>&lt;-</span> <span class='va'>sus</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://purrr.tidyverse.org/reference/map_dfr.html'>map_dfr</a></span><span class='op'>(</span><span class='op'>~</span> <span class='fu'>mutate</span><span class='op'>(</span><span class='va'>.x</span><span class='op'>$</span><span class='va'>rr_within_unrounded</span>, Hormone <span class='op'>=</span> <span class='va'>.x</span><span class='op'>$</span><span class='va'>Hormone</span>, Dataset <span class='op'>=</span> <span class='va'>.x</span><span class='op'>$</span><span class='va'>Dataset</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>mutate</span><span class='op'>(</span>Dataset <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/character.html'>as.character</a></span><span class='op'>(</span><span class='va'>short_names</span><span class='op'>[</span><span class='va'>Dataset</span><span class='op'>]</span><span class='op'>)</span>, levels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rev.html'>rev</a></span><span class='op'>(</span><span class='va'>short_names</span><span class='op'>)</span><span class='op'>)</span>,</span>
+<span>         cycle_phase <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='va'>cycle_phase</span>, levels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rev.html'>rev</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"fc"</span>, <span class='st'>"bc"</span>, <span class='st'>"lh"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>,</span>
+<span>         Hormone <span class='op'>=</span> <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_replace.html'>str_replace</a></span><span class='op'>(</span><span class='va'>Hormone</span>, <span class='st'>"Free "</span>, <span class='st'>""</span><span class='op'>)</span>,</span>
+<span>         Hormone <span class='op'>=</span> <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_replace.html'>str_replace</a></span><span class='op'>(</span><span class='va'>Hormone</span>, <span class='st'>".02"</span>, <span class='st'>""</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>Hormone</span>, <span class='va'>cycle_phase</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>mutate</span><span class='op'>(</span>serum <span class='op'>=</span> <span class='va'>estimate</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/which.html'>which</a></span><span class='op'>(</span><span class='va'>Dataset</span><span class='op'>==</span><span class='st'>"BioCycle"</span><span class='op'>)</span><span class='op'>]</span>,</span>
+<span>         estimate <span class='op'>=</span> <span class='va'>estimate</span><span class='op'>/</span><span class='va'>serum</span>,</span>
+<span>         conf.low <span class='op'>=</span> <span class='va'>conf.low</span><span class='op'>/</span><span class='va'>serum</span>,</span>
+<span>         conf.high <span class='op'>=</span> <span class='va'>conf.high</span><span class='op'>/</span><span class='va'>serum</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
+</div>
+</details>
+<pre><code>mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: new variable &#39;Hormone&#39; (character) with one unique value and 0% NA
+        new variable &#39;Dataset&#39; (character) with one unique value and 0% NA
+mutate: converted &#39;cycle_phase&#39; from character to factor (0 new NA)
+        changed 3 values (8%) of &#39;Hormone&#39; (0 new NAs)
+        converted &#39;Dataset&#39; from character to factor (0 new NA)
+group_by: 2 grouping variables (Hormone, cycle_phase)
+mutate (grouped): changed 40 values (100%) of &#39;estimate&#39; (0 new NAs)
+                  changed 40 values (100%) of &#39;conf.low&#39; (0 new NAs)
+                  changed 40 values (100%) of &#39;conf.high&#39; (0 new NAs)
+                  new variable &#39;serum&#39; (double) with 6 unique values and 0% NA
+ungroup: no grouping variables remain</code></pre>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>rr_both</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>filter</span><span class='op'>(</span><span class='va'>Dataset</span> <span class='op'>!=</span> <span class='st'>"BioCycle"</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>Dataset</span>, <span class='va'>estimate</span>, ymin <span class='op'>=</span> <span class='va'>conf.low</span>, ymax <span class='op'>=</span> <span class='va'>conf.high</span>,</span>
+<span>             color <span class='op'>=</span> <span class='va'>cycle_phase</span>, label <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"%.2f"</span>, <span class='va'>estimate</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> </span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_linerange.html'>geom_pointrange</a></span><span class='op'>(</span>position <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/position_dodge.html'>position_dodge</a></span><span class='op'>(</span><span class='fl'>0.4</span><span class='op'>)</span>, size <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'>ggrepel</span><span class='fu'>::</span><span class='fu'><a href='https://ggrepel.slowkow.com/reference/geom_text_repel.html'>geom_text_repel</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2.5</span>, position <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/position_dodge.html'>position_dodge</a></span><span class='op'>(</span><span class='fl'>0.4</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/facet_wrap.html'>facet_wrap</a></span><span class='op'>(</span><span class='op'>~</span> <span class='va'>Hormone</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/coord_flip.html'>coord_flip</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> </span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/scale_viridis.html'>scale_color_viridis_d</a></span><span class='op'>(</span>begin <span class='op'>=</span> <span class='fl'>0.2</span>, end <span class='op'>=</span> <span class='fl'>0.8</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/scale_continuous.html'>scale_y_continuous</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/expression.html'>expression</a></span><span class='op'>(</span><span class='va'>Estimated</span><span class='op'>~</span><span class='va'>r</span><span class='op'>[</span><span class='va'>Serum</span><span class='op'>]</span><span class='op'>[</span><span class='st'>", "</span><span class='op'>]</span><span class='op'>[</span><span class='va'>Saliva</span><span class='op'>]</span><span class='op'>)</span>, limits <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='cn'>NA</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/theme.html'>theme</a></span><span class='op'>(</span>legend.position<span class='op'>=</span><span class='st'>"none"</span><span class='op'>)</span></span></code></pre>
+</div>
+</details>
+<pre><code>filter: removed 6 rows (15%), 34 rows remaining</code></pre>
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-12-1.png" alt="" width="480" />
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/bind_rows.html'>bind_rows</a></span><span class='op'>(</span>`Figure 4` <span class='op'>=</span> <span class='va'>rr_saliva</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span>, </span>
+<span>          `Both centred` <span class='op'>=</span> <span class='va'>rr_both</span>, .id <span class='op'>=</span> <span class='st'>"centring"</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>mutate</span><span class='op'>(</span>value <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>Dataset</span> <span class='op'>==</span> <span class='st'>"BioCycle"</span>, <span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"%.3f (divisor)"</span>, <span class='va'>serum</span><span class='op'>)</span>,</span>
+<span>                         <span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"%.2f [%.2f; %.2f]"</span>, <span class='va'>estimate</span>, <span class='va'>conf.low</span>, <span class='va'>conf.high</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>select</span><span class='op'>(</span><span class='va'>Hormone</span>, <span class='va'>Dataset</span>, <span class='va'>cycle_phase</span>, <span class='va'>centring</span>, <span class='va'>value</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>pivot_wider</span><span class='op'>(</span>names_from <span class='op'>=</span> <span class='va'>centring</span>, values_from <span class='op'>=</span> <span class='va'>value</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/arrange.html'>arrange</a></span><span class='op'>(</span><span class='va'>Hormone</span>, <span class='fu'><a href='https://dplyr.tidyverse.org/reference/desc.html'>desc</a></span><span class='op'>(</span><span class='va'>Dataset</span><span class='op'>)</span>, <span class='fu'><a href='https://dplyr.tidyverse.org/reference/desc.html'>desc</a></span><span class='op'>(</span><span class='va'>cycle_phase</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
+</div>
+</details>
+<pre><code>ungroup: no grouping variables remain
+mutate: new variable &#39;value&#39; (character) with 77 unique values and 0% NA
+select: dropped 4 variables (estimate, conf.low, conf.high, serum)
+pivot_wider: reorganized (centring, value) into (Figure 4, Both centred) [was 80x5, now 40x5]</code></pre>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 20%" />
+<col style="width: 14%" />
+<col style="width: 24%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Hormone</th>
+<th style="text-align: left;">Dataset</th>
+<th style="text-align: left;">cycle_phase</th>
+<th style="text-align: left;">Figure 4</th>
+<th style="text-align: left;">Both centred</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">BioCycle</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.631 (divisor)</td>
+<td style="text-align: left;">0.623 (divisor)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">BioCycle</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.748 (divisor)</td>
+<td style="text-align: left;">0.748 (divisor)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">BioCycle</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.787 (divisor)</td>
+<td style="text-align: left;">0.788 (divisor)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Roney ’13</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.36 [0.26; 0.45]</td>
+<td style="text-align: left;">0.37 [0.27; 0.47]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Roney ’13</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.29 [0.19; 0.38]</td>
+<td style="text-align: left;">0.29 [0.19; 0.39]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">OCMATE</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.23 [0.15; 0.31]</td>
+<td style="text-align: left;">0.24 [0.15; 0.32]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">OCMATE</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.26 [0.14; 0.37]</td>
+<td style="text-align: left;">0.25 [0.12; 0.38]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Marcinkowska ’20</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.35 [0.25; 0.44]</td>
+<td style="text-align: left;">0.37 [0.27; 0.47]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Marcinkowska ’20</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.36 [0.28; 0.44]</td>
+<td style="text-align: left;">0.38 [0.30; 0.46]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Marcinkowska ’20</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.29 [0.20; 0.37]</td>
+<td style="text-align: left;">0.28 [0.20; 0.36]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Stern ’21</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.11 [-0.03; 0.25]</td>
+<td style="text-align: left;">0.12 [-0.04; 0.28]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Stern ’21</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.04 [-0.07; 0.15]</td>
+<td style="text-align: left;">0.03 [-0.10; 0.16]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Stern ’21</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.17 [0.04; 0.29]</td>
+<td style="text-align: left;">0.21 [0.06; 0.36]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Jünger ’18</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.28 [0.02; 0.53]</td>
+<td style="text-align: left;">0.33 [0.01; 0.61]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Jünger ’18</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.28 [0.11; 0.44]</td>
+<td style="text-align: left;">0.32 [0.12; 0.51]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Jünger ’18</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.12 [-0.06; 0.30]</td>
+<td style="text-align: left;">0.16 [-0.07; 0.37]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Blake ’17</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.25 [-0.08; 0.56]</td>
+<td style="text-align: left;">0.27 [-0.15; 0.65]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Blake ’17</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.17 [-0.13; 0.45]</td>
+<td style="text-align: left;">0.18 [-0.21; 0.54]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Blake ’17</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.12 [-0.22; 0.45]</td>
+<td style="text-align: left;">0.18 [-0.28; 0.59]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Estradiol</td>
+<td style="text-align: left;">Grebe ’16</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">-0.09 [-0.50; 0.34]</td>
+<td style="text-align: left;">-0.09 [-0.61; 0.45]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">BioCycle</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.791 (divisor)</td>
+<td style="text-align: left;">0.810 (divisor)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">BioCycle</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.876 (divisor)</td>
+<td style="text-align: left;">0.889 (divisor)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">BioCycle</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.902 (divisor)</td>
+<td style="text-align: left;">0.914 (divisor)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Roney ’13</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.70 [0.64; 0.75]</td>
+<td style="text-align: left;">0.71 [0.65; 0.76]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Roney ’13</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.59 [0.53; 0.64]</td>
+<td style="text-align: left;">0.59 [0.54; 0.64]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">OCMATE</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.49 [0.44; 0.55]</td>
+<td style="text-align: left;">0.51 [0.45; 0.56]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">OCMATE</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.57 [0.51; 0.63]</td>
+<td style="text-align: left;">0.57 [0.50; 0.64]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Marcinkowska ’20</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.56 [0.50; 0.62]</td>
+<td style="text-align: left;">0.60 [0.54; 0.66]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Marcinkowska ’20</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.64 [0.59; 0.68]</td>
+<td style="text-align: left;">0.65 [0.61; 0.70]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Marcinkowska ’20</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.57 [0.51; 0.62]</td>
+<td style="text-align: left;">0.60 [0.54; 0.65]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Stern ’21</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.84 [0.78; 0.89]</td>
+<td style="text-align: left;">0.86 [0.80; 0.91]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Stern ’21</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.80 [0.76; 0.84]</td>
+<td style="text-align: left;">0.83 [0.79; 0.87]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Stern ’21</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.80 [0.75; 0.84]</td>
+<td style="text-align: left;">0.79 [0.73; 0.84]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Jünger ’18</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.93 [0.86; 0.99]</td>
+<td style="text-align: left;">0.92 [0.84; 0.98]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Jünger ’18</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.88 [0.84; 0.92]</td>
+<td style="text-align: left;">0.88 [0.83; 0.92]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Jünger ’18</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.84 [0.78; 0.89]</td>
+<td style="text-align: left;">0.82 [0.76; 0.88]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Blake ’17</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.04 [-0.26; 0.33]</td>
+<td style="text-align: left;">0.07 [-0.37; 0.49]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Blake ’17</td>
+<td style="text-align: left;">bc</td>
+<td style="text-align: left;">0.14 [-0.09; 0.37]</td>
+<td style="text-align: left;">0.20 [-0.12; 0.49]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Blake ’17</td>
+<td style="text-align: left;">lh</td>
+<td style="text-align: left;">0.33 [0.07; 0.55]</td>
+<td style="text-align: left;">0.29 [-0.04; 0.58]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Progesterone</td>
+<td style="text-align: left;">Grebe ’16</td>
+<td style="text-align: left;">fc</td>
+<td style="text-align: left;">0.12 [-0.23; 0.44]</td>
+<td style="text-align: left;">0.14 [-0.32; 0.57]</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>rr_both</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>filter</span><span class='op'>(</span><span class='va'>Dataset</span> <span class='op'>!=</span> <span class='st'>"BioCycle"</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>Hormone</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>summarise</span><span class='op'>(</span>median <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/median.html'>median</a></span><span class='op'>(</span><span class='va'>estimate</span><span class='op'>)</span>, min <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>estimate</span><span class='op'>)</span>, max <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>estimate</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+</details>
+<pre><code>filter: removed 6 rows (15%), 34 rows remaining
+group_by: one grouping variable (Hormone)
+summarise: now 2 rows and 4 columns, ungrouped</code></pre>
+<pre><code># A tibble: 2 × 4
+  Hormone      median     min   max
+  &lt;chr&gt;         &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+1 Estradiol     0.251 -0.0904 0.381
+2 Progesterone  0.599  0.0652 0.917</code></pre>
+</div>
 <h2 id="statement-1">Statement 1</h2>
 <div class="layout-chunk" data-layout="l-body">
 <details>
@@ -3835,25 +4319,25 @@ filter (grouped): removed 17 rows (50%), 17 rows remaining (removed 3 groups, 3 
  Descriptive statistics by group 
 group: lh
    vars n mean   sd median trimmed  mad  min  max range skew kurtosis
-X1    1 4 0.12 0.12   0.08    0.12 0.08 0.02 0.28  0.26 0.46     -1.9
+X1    1 4 0.17 0.08   0.15    0.17 0.03 0.12 0.29  0.16 0.59     -1.8
      se
-X1 0.06
+X1 0.04
 ---------------------------------------------------- 
 group: bc
-   vars n mean   sd median trimmed mad  min  max range  skew kurtosis
-X1    1 6 0.22 0.12   0.26    0.22 0.1 0.06 0.36  0.29 -0.31     -1.9
-     se
-X1 0.05
+   vars n mean   sd median trimmed  mad  min  max range  skew
+X1    1 6 0.23 0.11   0.27    0.23 0.08 0.04 0.36  0.32 -0.58
+   kurtosis   se
+X1     -1.3 0.05
 ---------------------------------------------------- 
 group: fc
    vars n mean   sd median trimmed  mad   min  max range  skew
-X1    1 7 0.18 0.18   0.23    0.18 0.21 -0.08 0.37  0.45 -0.25
+X1    1 7 0.21 0.16   0.25    0.21 0.15 -0.09 0.36  0.44 -0.84
    kurtosis   se
-X1     -1.9 0.07</code></pre>
+X1    -0.82 0.06</code></pre>
 <pre><code>   vars  n mean   sd median trimmed  mad   min  max range  skew
-X1    1 17 0.18 0.14   0.23    0.18 0.19 -0.08 0.37  0.45 -0.18
+X1    1 17 0.21 0.12   0.25    0.22 0.12 -0.09 0.36  0.45 -0.76
    kurtosis   se
-X1     -1.5 0.03</code></pre>
+X1    -0.19 0.03</code></pre>
 </div>
 <h3 id="p4">P4</h3>
 <div class="layout-chunk" data-layout="l-body">
@@ -3875,26 +4359,26 @@ filter (grouped): removed 17 rows (50%), 17 rows remaining (removed 3 groups, 3 
 <pre><code>
  Descriptive statistics by group 
 group: lh
-   vars n mean   sd median trimmed  mad  min max range  skew kurtosis
-X1    1 4 0.53 0.32   0.63    0.53 0.17 0.07 0.8  0.73 -0.57     -1.8
+   vars n mean   sd median trimmed mad  min  max range skew kurtosis
+X1    1 4 0.64 0.24   0.69    0.64 0.2 0.33 0.84  0.51 -0.3     -2.1
      se
-X1 0.16
+X1 0.12
 ---------------------------------------------------- 
 group: bc
-   vars n mean   sd median trimmed  mad  min  max range skew kurtosis
-X1    1 6  0.5 0.35   0.62     0.5 0.07 -0.2 0.78  0.98 -1.2    -0.28
-     se
-X1 0.14
+   vars n mean   sd median trimmed  mad  min  max range  skew
+X1    1 6  0.6 0.26   0.61     0.6 0.17 0.14 0.88  0.74 -0.67
+   kurtosis  se
+X1       -1 0.1
 ---------------------------------------------------- 
 group: fc
    vars n mean   sd median trimmed  mad  min  max range  skew
-X1    1 7 0.42 0.39   0.56    0.42 0.24 -0.3 0.81   1.1 -0.74
+X1    1 7 0.52 0.34   0.56    0.52 0.41 0.04 0.93  0.89 -0.29
    kurtosis   se
-X1       -1 0.15</code></pre>
-<pre><code>   vars  n mean   sd median trimmed mad  min  max range skew kurtosis
-X1    1 17 0.47 0.34   0.59     0.5 0.2 -0.3 0.81   1.1 -1.1    -0.19
-     se
-X1 0.08</code></pre>
+X1     -1.7 0.13</code></pre>
+<pre><code>   vars  n mean   sd median trimmed  mad  min  max range  skew
+X1    1 17 0.58 0.28   0.59    0.59 0.32 0.04 0.93  0.89 -0.62
+   kurtosis   se
+X1    -0.93 0.07</code></pre>
 </div>
 <h2 id="statement-3">Statement 3</h2>
 <p>In all salivary immunoassay datasets, the variance explained by cycle phase was much lower. The leave-one-out-adjusted r never exceeded x, was indistinguishable from zero more often than not, and not systematically larger for more valid measures of cycle phase.</p>
@@ -3913,7 +4397,7 @@ Show code
 <span>  <span class='fu'>mutate</span><span class='op'>(</span>Hormone <span class='op'>=</span> <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_replace.html'>str_replace</a></span><span class='op'>(</span><span class='va'>Hormone</span>, <span class='st'>".02"</span>, <span class='st'>""</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<pre><code>select: dropped 75 variables (Citation, Method, Limit of detection, LOQ, Intraassay CV, …)
+<pre><code>select: dropped 81 variables (Citation, Method, Limit of detection, LOQ, Intraassay CV, …)
 pivot_longer: reorganized (r_loo_bc, r_loo_fc, r_loo_lh) into (name, value) [was 16x5, now 48x4]
 mutate: changed 48 values (100%) of &#39;name&#39; (0 new NAs)
 rename: renamed one variable (cycle_phase)
@@ -4338,7 +4822,7 @@ Show code
 <span>  <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<pre><code>select: dropped 76 variables (Citation, Method, Limit of detection, LOQ, Intraassay CV, …)
+<pre><code>select: dropped 82 variables (Citation, Method, Limit of detection, LOQ, Intraassay CV, …)
 pivot_longer: reorganized (var_id_loo, var_cycle_loo) into (name, value) [was 16x4, now 32x4]
 rename: renamed one variable (cycle_phase)
 mutate: changed 2 values (6%) of &#39;Hormone&#39; (0 new NAs)
@@ -4636,11 +5120,11 @@ Show code
 <span>  <span class='fu'>mutate</span><span class='op'>(</span>Hormone <span class='op'>=</span> <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_replace.html'>str_replace</a></span><span class='op'>(</span><span class='va'>Hormone</span>, <span class='st'>".02"</span>, <span class='st'>""</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<pre><code>select: dropped 75 variables (Citation, Method, Limit of detection, LOQ, Intraassay CV, …)
-pivot_longer: reorganized (r_diff_bc_imputed_rr, r_diff_fc_imputed_rr, r_diff_lh_imputed_rr) into (name, value) [was 16x5, now 48x4]
-mutate: changed 48 values (100%) of &#39;name&#39; (0 new NAs)
+<pre><code>select: dropped 78 variables (Citation, Method, Limit of detection, LOQ, Intraassay CV, …)
+pivot_longer: reorganized (r_diff_bc_imputed_rr, r_within_bc_imputed_rr, r_diff_fc_imputed_rr, r_within_fc_imputed_rr, r_diff_lh_imputed_rr, …) into (name, value) [was 16x8, now 96x4]
+mutate: changed 96 values (100%) of &#39;name&#39; (0 new NAs)
 rename: renamed one variable (cycle_phase)
-mutate: changed 3 values (6%) of &#39;Hormone&#39; (0 new NAs)
+mutate: changed 6 values (6%) of &#39;Hormone&#39; (0 new NAs)
 mutate: no changes</code></pre>
 <details>
 <summary>
@@ -4652,21 +5136,21 @@ Show code
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/arrange.html'>arrange</a></span><span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/desc.html'>desc</a></span><span class='op'>(</span><span class='va'>estimate</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<pre><code>filter: removed 27 rows (56%), 21 rows remaining</code></pre>
-<pre><code># A tibble: 21 × 6
+<pre><code>filter: removed 54 rows (56%), 42 rows remaining</code></pre>
+<pre><code># A tibble: 42 × 6
    Hormone   Dataset          cycle_phase estimate conf.low conf.high
    &lt;chr&gt;     &lt;fct&gt;            &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
- 1 Estradiol Marcinkowska &#39;20 bc              0.27     0.21      0.33
- 2 Estradiol Roney &#39;13        fc              0.23     0.17      0.29
- 3 Estradiol Marcinkowska &#39;20 fc              0.22     0.16      0.28
- 4 Estradiol Marcinkowska &#39;20 lh              0.22     0.16      0.29
- 5 Estradiol OCMATE           bc              0.22     0.14      0.3 
- 6 Estradiol Roney &#39;13        bc              0.21     0.14      0.28
- 7 Estradiol Jünger &#39;18       fc              0.2      0.04      0.35
- 8 Estradiol Jünger &#39;18       bc              0.18     0.05      0.31
- 9 Estradiol OCMATE           fc              0.15     0.1       0.19
-10 Estradiol Stern &#39;21        lh              0.1      0         0.2 
-# ℹ 11 more rows</code></pre>
+ 1 Estradiol Marcinkowska &#39;20 r_within_bc     0.29     0.22      0.34
+ 2 Estradiol Marcinkowska &#39;20 bc              0.27     0.21      0.33
+ 3 Estradiol Jünger &#39;18       r_within_bc     0.24     0.09      0.38
+ 4 Estradiol Marcinkowska &#39;20 r_within_fc     0.23     0.17      0.29
+ 5 Estradiol Roney &#39;13        fc              0.23     0.16      0.29
+ 6 Estradiol Roney &#39;13        r_within_fc     0.23     0.17      0.29
+ 7 Estradiol Marcinkowska &#39;20 fc              0.22     0.16      0.28
+ 8 Estradiol Marcinkowska &#39;20 lh              0.22     0.16      0.29
+ 9 Estradiol Marcinkowska &#39;20 r_within_lh     0.22     0.15      0.29
+10 Estradiol Roney &#39;13        bc              0.22     0.14      0.29
+# ℹ 32 more rows</code></pre>
 </div>
 <h2 id="statement-4">Statement 4</h2>
 <div class="layout-chunk" data-layout="l-body">
@@ -4687,7 +5171,7 @@ Show code
 <span>  <span class='fu'>mutate</span><span class='op'>(</span>Hormone <span class='op'>=</span> <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_replace.html'>str_replace</a></span><span class='op'>(</span><span class='va'>Hormone</span>, <span class='st'>".02"</span>, <span class='st'>""</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<pre><code>select: dropped 66 variables (Citation, Method, Limit of detection, LOQ, Intraassay CV, …)
+<pre><code>select: dropped 72 variables (Citation, Method, Limit of detection, LOQ, Intraassay CV, …)
 pivot_longer: reorganized (r_bc_stirn, r_log_bc_stirn, r_diff_bc_stirn, r_log_diff_bc_stirn, r_fc_stirn, …) into (name, value) [was 16x14, now 192x4]
 mutate: changed 192 values (100%) of &#39;name&#39; (0 new NAs)
 mutate: changed 12 values (6%) of &#39;Hormone&#39; (0 new NAs)
@@ -4711,16 +5195,16 @@ group_by: one grouping variable (Hormone)
 mutate (grouped): new variable &#39;max_diff&#39; (double) with 2 unique values and 0% NA</code></pre>
 <pre><code># A tibble: 8 × 5
 # Groups:   Hormone [2]
-  Hormone      transformation median   mean max_diff
-  &lt;chr&gt;        &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;
-1 Estradiol    &quot;diff&quot;          0.025  0.066   0.028 
-2 Estradiol    &quot;log_diff&quot;      0.03   0.071   0.028 
-3 Estradiol    &quot;&quot;              0.035  0.082   0.028 
-4 Estradiol    &quot;log&quot;           0.06   0.094   0.028 
-5 Progesterone &quot;diff&quot;         -0.29  -0.278   0.0455
-6 Progesterone &quot;&quot;             -0.3   -0.279   0.0455
-7 Progesterone &quot;log&quot;          -0.315 -0.324   0.0455
-8 Progesterone &quot;log_diff&quot;     -0.35  -0.324   0.0455</code></pre>
+  Hormone      transformation median    mean max_diff
+  &lt;chr&gt;        &lt;chr&gt;           &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
+1 Estradiol    &quot;&quot;              0.035  0.082     0.013
+2 Estradiol    &quot;diff&quot;          0.045  0.0905    0.013
+3 Estradiol    &quot;log&quot;           0.06   0.094     0.013
+4 Estradiol    &quot;log_diff&quot;      0.05   0.095     0.013
+5 Progesterone &quot;&quot;             -0.3   -0.279     0.085
+6 Progesterone &quot;diff&quot;         -0.335 -0.316     0.085
+7 Progesterone &quot;log&quot;          -0.315 -0.324     0.085
+8 Progesterone &quot;log_diff&quot;     -0.345 -0.364     0.085</code></pre>
 <details>
 <summary>
 Show code
@@ -4750,7 +5234,7 @@ mutate: converted &#39;cycle_phase&#39; from character to factor (0 new NA)
 mutate: new variable &#39;log&#39; (character) with 2 unique values and 0% NA</code></pre>
 <pre><code>Warning: Removed 32 rows containing missing values or values outside the scale
 range (`geom_pointrange()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-15-1.png" alt="" width="624" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-17-1.png" alt="" width="624" />
 <details>
 <summary>
 Show code
@@ -4785,7 +5269,7 @@ Show code
 </details>
 <pre><code>Warning: Removed 32 rows containing missing values or values outside the scale
 range (`geom_pointrange()`).</code></pre>
-<p><img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-15-2.png" alt="" width="624" /></p>
+<p><img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-17-2.png" alt="" width="624" /></p>
 </div>
 <h2 id="supplementary-figure-1">Supplementary Figure 1</h2>
 <p>Forward-counting for all datasets, including Grebe and Blake.</p>
@@ -4982,7 +5466,7 @@ Show code
 <pre><code># A tibble: 1 × 7
   format width height colorspace matte filesize density
   &lt;chr&gt;  &lt;int&gt;  &lt;int&gt; &lt;chr&gt;      &lt;lgl&gt;    &lt;int&gt; &lt;chr&gt;  
-1 PNG     4590   2700 sRGB       TRUE   2492224 72x72  </code></pre>
+1 PNG     4590   2700 sRGB       TRUE   2492902 72x72  </code></pre>
 <details>
 <summary>
 Show code
@@ -5027,7 +5511,7 @@ range (`geom_hline()`).</code></pre>
 • colour : &quot;NA&quot;</code></pre>
 <pre><code>Warning: Removed 1 row containing missing values or values outside the scale
 range (`geom_hline()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-17-1.png" alt="" width="624" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-19-1.png" alt="" width="624" />
 <details>
 <summary>
 Show code
@@ -5198,7 +5682,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 172 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-1.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-1.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5215,7 +5699,7 @@ Show code
 (`stat_smooth()`).
 Removed 172 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-2.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-2.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5232,7 +5716,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 135 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-3.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-3.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5297,7 +5781,7 @@ Show code
 (`stat_smooth()`).
 Removed 135 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-4.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-4.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5314,7 +5798,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 299 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-5.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-5.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5331,7 +5815,7 @@ Show code
 (`stat_smooth()`).
 Removed 299 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-6.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-6.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5348,7 +5832,7 @@ was generated.</code></pre>
 `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
 <pre><code>Warning: Removed 32 rows containing non-finite outside the scale range
 (`stat_bin()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-7.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-7.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5359,7 +5843,7 @@ Show code
 </details>
 <pre><code>filter (grouped): removed 3,203 rows (87%), 479 rows remaining (removed 2 groups, 479 groups remaining)
 `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-8.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-8.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5370,7 +5854,7 @@ Show code
 </details>
 <pre><code>filter (grouped): removed 3,408 rows (93%), 274 rows remaining (removed 207 groups, 274 groups remaining)
 `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-9.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-9.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5383,7 +5867,7 @@ Show code
 `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
 <pre><code>Warning: Removed 52 rows containing non-finite outside the scale range
 (`stat_bin()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-10.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-10.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5396,7 +5880,7 @@ Show code
 `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
 <pre><code>Warning: Removed 38 rows containing non-finite outside the scale range
 (`stat_bin()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-11.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-11.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5409,7 +5893,7 @@ Show code
 `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
 <pre><code>Warning: Removed 139 rows containing non-finite outside the scale range
 (`stat_bin()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-12.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-12.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5442,7 +5926,7 @@ Show code
 `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
 <pre><code>Warning: Removed 2 rows containing non-finite outside the scale range
 (`stat_bin()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-13.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-13.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5459,7 +5943,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 76 rows containing missing values or values outside the scale
 range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-14.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-14.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5476,7 +5960,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 50 rows containing missing values or values outside the scale
 range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-15.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-15.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5493,7 +5977,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 64 rows containing missing values or values outside the scale
 range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-16.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-16.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5559,7 +6043,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 37 rows containing missing values or values outside the scale
 range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-17.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-17.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5576,7 +6060,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 50 rows containing missing values or values outside the scale
 range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-18.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-18.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5593,7 +6077,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 82 rows containing missing values or values outside the scale
 range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-19.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-19.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5610,7 +6094,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 55 rows containing missing values or values outside the scale
 range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-20.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-20.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5633,7 +6117,7 @@ Show code
 </details>
 <pre><code>filter (grouped): removed 2,060 rows (95%), 103 rows remaining (removed 0 groups, 100 groups remaining)
 `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-21.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-21.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5722,7 +6206,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 535 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-22.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-22.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5739,7 +6223,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 675 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-23.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-23.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5756,7 +6240,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 543 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-24.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-24.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5822,7 +6306,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 682 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-25.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-25.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5839,7 +6323,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 675 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-26.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-26.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5856,7 +6340,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 609 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-27.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-27.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5873,7 +6357,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 689 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-28.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-28.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5967,7 +6451,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 227 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-29.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-29.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -5984,7 +6468,7 @@ Show code
 (`stat_smooth()`).
 Removed 227 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-30.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-30.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -6001,7 +6485,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 243 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-31.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-31.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -6066,7 +6550,7 @@ Show code
 (`stat_smooth()`).
 Removed 243 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-32.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-32.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -6083,7 +6567,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 197 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-33.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-33.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -6100,7 +6584,7 @@ Show code
 (`stat_smooth()`).
 Removed 197 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-34.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-34.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -6292,7 +6776,7 @@ Ignoring unknown labels:
 • colour : &quot;NA&quot;
 Ignoring unknown labels:
 • colour : &quot;NA&quot;</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-18-35.png" alt="" width="1365.12" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-35.png" alt="" width="1365.12" />
 <details>
 <summary>
 Show code
@@ -6493,7 +6977,7 @@ range (`geom_hline()`).</code></pre>
 • colour : &quot;NA&quot;</code></pre>
 <pre><code>Warning: Removed 1 row containing missing values or values outside the scale
 range (`geom_hline()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-19-1.png" alt="" width="624" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-21-1.png" alt="" width="624" />
 <details>
 <summary>
 Show code
@@ -6999,7 +7483,7 @@ Show code
 372x5, now 124x6]</code></pre>
 <pre><code>Warning: Removed 2 rows containing missing values or values outside the scale
 range (`geom_pointrange()`).</code></pre>
-<p><img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-1.png" alt="" width="624" /></p>
+<p><img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-22-1.png" alt="" width="624" /></p>
 </div>
 <h2 id="supplementary-note-9">Supplementary Note 9</h2>
 <div class="layout-chunk" data-layout="l-body">
@@ -7193,7 +7677,7 @@ Show code
 (`stat_smooth()`).</code></pre>
 <pre><code>Warning: Removed 1 row containing missing values or values outside the scale
 range (`geom_point()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-21-1.png" alt="" width="624" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-23-1.png" alt="" width="624" />
 <details>
 <summary>
 Show code
@@ -7324,7 +7808,7 @@ Show code
 </div>
 </details>
 <pre><code>`geom_smooth()` using method = &#39;loess&#39; and formula = &#39;y ~ x&#39;</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-22-1.png" alt="" width="624" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-24-1.png" alt="" width="624" />
 <details>
 <summary>
 Show code
@@ -7462,8 +7946,8 @@ Show code
 <span><span class='va'>fcd</span></span></code></pre>
 </div>
 </details>
-<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-25-1"></span>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-25-1.png" alt="Relationship between days relative to LH surge and fertile window probability" width="624" />
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-27-1"></span>
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-27-1.png" alt="Relationship between days relative to LH surge and fertile window probability" width="624" />
 <p class="caption">
 Figure 1: Relationship between days relative to LH surge and fertile window probability
 </p>
@@ -7476,8 +7960,8 @@ Show code
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>bcd</span></span></code></pre>
 </div>
 </details>
-<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-25-2"></span>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-25-2.png" alt="Relationship between days relative to LH surge and fertile window probability" width="624" />
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-27-2"></span>
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-27-2.png" alt="Relationship between days relative to LH surge and fertile window probability" width="624" />
 <p class="caption">
 Figure 2: Relationship between days relative to LH surge and fertile window probability
 </p>
@@ -7490,8 +7974,8 @@ Show code
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>lhd</span></span></code></pre>
 </div>
 </details>
-<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-25-3"></span>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-25-3.png" alt="Relationship between days relative to LH surge and fertile window probability" width="624" />
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-27-3"></span>
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-27-3.png" alt="Relationship between days relative to LH surge and fertile window probability" width="624" />
 <p class="caption">
 Figure 3: Relationship between days relative to LH surge and fertile window probability
 </p>
@@ -7760,7 +8244,7 @@ Show code
 Ignoring unknown labels:
 • fill : &quot;NA&quot;
 • colour : &quot;NA&quot;</code></pre>
-<p><img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-26-1.png" alt="" width="624" /></p>
+<p><img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-28-1.png" alt="" width="624" /></p>
 <pre><code>Ignoring unknown labels:
 • fill : &quot;NA&quot;
 • colour : &quot;NA&quot;
@@ -7773,7 +8257,7 @@ Ignoring unknown labels:
 Ignoring unknown labels:
 • fill : &quot;NA&quot;
 • colour : &quot;NA&quot;</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-26-2.png" alt="" width="624" /><img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-26-3.png" alt="" width="624" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-28-2.png" alt="" width="624" /><img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-28-3.png" alt="" width="624" />
 <details>
 <summary>
 Show code
@@ -8066,7 +8550,7 @@ range (`geom_hline()`).</code></pre>
 • colour : &quot;NA&quot;</code></pre>
 <pre><code>Warning: Removed 1 row containing missing values or values outside the scale
 range (`geom_hline()`).</code></pre>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-28-1.png" alt="" width="624" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-30-1.png" alt="" width="624" />
 <details>
 <summary>
 Show code
@@ -8168,7 +8652,7 @@ Show code
 <span><span class='va'>ll</span></span></code></pre>
 </div>
 </details>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-29-1.png" alt="" width="624" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-31-1.png" alt="" width="624" />
 <details>
 <summary>
 Show code
@@ -8233,7 +8717,7 @@ Show code
 <span>       rightAxisLabels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"%.0f%%"</span>, <span class='va'>var_comps_ss</span><span class='op'>$</span><span class='va'>cycle_phase</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-29-2.png" alt="" width="624" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-31-2.png" alt="" width="624" />
 <details>
 <summary>
 Show code
@@ -8299,7 +8783,7 @@ Show code
 <span><span class='va'>llb</span></span></code></pre>
 </div>
 </details>
-<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-29-3.png" alt="" width="624" />
+<img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-31-3.png" alt="" width="624" />
 <details>
 <summary>
 Show code
@@ -8351,7 +8835,7 @@ Caused by warning in `mean.default()`:
 ℹ Run `dplyr::last_dplyr_warnings()` to see the 1 remaining warning.</code></pre>
 <pre><code>summarise_all: now 2 rows and 6 columns, ungrouped
 select: dropped one variable (Dataset)</code></pre>
-<p><img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-29-4.png" alt="" width="624" /></p>
+<p><img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-31-4.png" alt="" width="624" /></p>
 </div>
 <h2 id="supplementary-note-7">Supplementary Note 7</h2>
 <h2 id="s-table-1">S Table 1</h2>
@@ -8404,6 +8888,7 @@ Show code
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>lh_day_model</span> <span class='op'>&lt;-</span> </span>
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>distribution</span> <span class='op'>&lt;-</span> <span class='cn'>NULL</span></span>
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>rr_unrounded</span> <span class='op'>&lt;-</span> <span class='cn'>NULL</span></span>
+<span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>rr_within_unrounded</span> <span class='op'>&lt;-</span> <span class='cn'>NULL</span></span>
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>imputed_fc_vs_measured_graph</span> <span class='op'>&lt;-</span> </span>
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>imputed_bc_vs_measured_graph</span> <span class='op'>&lt;-</span> </span>
 <span>    <span class='va'>su_df</span><span class='op'>$</span><span class='va'>imputed_lh_vs_measured_graph</span> <span class='op'>&lt;-</span> </span>
@@ -8783,7 +9268,7 @@ Show code
         new variable &#39;Assay manufacturer&#39; (character) with 6 unique values and 12% NA
         new variable &#39;Sampling time&#39; (character) with one unique value and 0% NA
         new variable &#39;Avoid&#39; (character) with one unique value and 0% NA
-select: renamed 2 variables (Days, Limit of quantitation) and dropped 72 variables</code></pre>
+select: renamed 2 variables (Days, Limit of quantitation) and dropped 78 variables</code></pre>
 <details>
 <summary>
 Show code
@@ -10133,7 +10618,7 @@ mutate: converted &#39;Dataset&#39; from factor to character (0 new NA)</code></
 </table>
 </div>
 </div>
-<div class="sourceCode" id="cb552"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb558"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

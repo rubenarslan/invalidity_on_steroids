@@ -3247,7 +3247,7 @@ group_by: 2 grouping variables (id, cycle)
 summarise: now 102 rows and 3 columns, one group variable remaining (id)
 ungroup: no grouping variables remain
 filter (grouped): removed 715 rows (32%), 1,550 rows remaining (removed 3 groups, 99 groups remaining)
-group_by: 2 grouping variables (id, cycle)
+group_by: one grouping variable (id)
 mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,545 unique values and 0% NA
                   new variable &#39;log_hormone_diff&#39; (double) with 1,545 unique values and 0% NA
 ungroup: no grouping variables remain
@@ -3289,6 +3289,12 @@ Warning: Results may not be meaningful for censored models.</code></pre>
 Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
 Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>filter: no rows removed
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+mutate (grouped): changed 1,550 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,550 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
 ℹ Please use tidy evaluation idioms with `aes()`.
 ℹ See also `vignette(&quot;ggplot2-in-packages&quot;)` for more information.
@@ -3296,12 +3302,24 @@ This warning is displayed once per session.
 Call `lifecycle::last_lifecycle_warnings()` to see where this warning
 was generated.</code></pre>
 <pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.
+Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
-<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>filter: no rows removed
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+mutate (grouped): changed 1,550 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,550 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain
+Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>filter: removed 417 rows (27%), 1,133 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+mutate (grouped): changed 1,133 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,133 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>$Dataset
 [1] &quot;Marcinkowska 2020&quot;
 
@@ -3485,6 +3503,20 @@ $rr_unrounded
 2 fc             0.443    0.394     0.489
 3 lh             0.515    0.463     0.563
 
+$r_within_bc_imputed
+[1] &quot; 0.50 [ 0.46; 0.54]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.58 [ 0.54; 0.62]&quot;
+
+$rr_within_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.581    0.540     0.619
+2 fc             0.486    0.436     0.532
+3 lh             0.547    0.495     0.594
+
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 3 rows containing missing values or values outside the scale
 range (`geom_smooth()`).</code></pre>
@@ -3561,6 +3593,12 @@ $sd_fc_imputed
 
 $r_diff_fc_imputed_rr
 [1] &quot; 0.44 [ 0.39; 0.49]&quot;
+
+$r_within_fc_imputed
+[1] &quot; 0.40 [ 0.36; 0.44]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.49 [ 0.44; 0.53]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 20 rows containing missing values or values outside the scale
@@ -3639,6 +3677,12 @@ $sd_lh_imputed
 $r_diff_lh_imputed_rr
 [1] &quot; 0.52 [ 0.46; 0.56]&quot;
 
+$r_within_lh_imputed
+[1] &quot; 0.46 [ 0.42; 0.51]&quot;
+
+$r_within_lh_imputed_rr
+[1] &quot; 0.55 [ 0.49; 0.59]&quot;
+
 $imputed_lh_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 417 rows containing missing values or values outside the
 scale range (`geom_smooth()`).</code></pre>
@@ -3675,7 +3719,7 @@ group_by: 2 grouping variables (id, cycle)
 summarise: now 102 rows and 3 columns, one group variable remaining (id)
 ungroup: no grouping variables remain
 filter (grouped): removed 618 rows (27%), 1,647 rows remaining (removed 2 groups, 100 groups remaining)
-group_by: 2 grouping variables (id, cycle)
+group_by: one grouping variable (id)
 mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,640 unique values and 0% NA
                   new variable &#39;log_hormone_diff&#39; (double) with 1,640 unique values and 0% NA
 ungroup: no grouping variables remain
@@ -3720,18 +3764,36 @@ Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
-<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>filter: no rows removed
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+mutate (grouped): changed 1,647 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,647 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain
+Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
-<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>filter: no rows removed
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+mutate (grouped): changed 1,647 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,647 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain
+Recomputing &#39;bayes_R2&#39;</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Estimate&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q97.5&quot;]): NaNs produced</code></pre>
+<pre><code>filter: removed 426 rows (26%), 1,221 rows remaining
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+mutate (grouped): changed 1,221 values (100%) of &#39;x&#39; (0 new NAs)
+                  changed 1,221 values (100%) of &#39;y&#39; (0 new NAs)
+ungroup: no grouping variables remain</code></pre>
 <pre><code>$Dataset
 [1] &quot;Marcinkowska 2020&quot;
 
@@ -3915,6 +3977,20 @@ $rr_unrounded
 2 fc             0.220    0.160     0.277
 3 lh             0.225    0.158     0.289
 
+$r_within_bc_imputed
+[1] &quot; 0.22 [ 0.17; 0.26]&quot;
+
+$r_within_bc_imputed_rr
+[1] &quot; 0.29 [ 0.22; 0.34]&quot;
+
+$rr_within_unrounded
+# A tibble: 3 × 4
+  cycle_phase estimate conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 bc             0.285    0.224     0.344
+2 fc             0.233    0.171     0.293
+3 lh             0.222    0.155     0.287
+
 $imputed_bc_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 3 rows containing missing values or values outside the scale
 range (`geom_smooth()`).</code></pre>
@@ -3992,6 +4068,12 @@ $sd_fc_imputed
 $r_diff_fc_imputed_rr
 [1] &quot; 0.22 [ 0.16; 0.28]&quot;
 
+$r_within_fc_imputed
+[1] &quot; 0.18 [ 0.13; 0.23]&quot;
+
+$r_within_fc_imputed_rr
+[1] &quot; 0.23 [ 0.17; 0.29]&quot;
+
 $imputed_fc_vs_measured_graph</code></pre>
 <p><img src="1_marcinkowska_import_files/figure-html5/unnamed-chunk-13-7.png" alt="" width="624" /></p>
 <pre><code>
@@ -4064,6 +4146,12 @@ $sd_lh_imputed
 
 $r_diff_lh_imputed_rr
 [1] &quot; 0.22 [ 0.16; 0.29]&quot;
+
+$r_within_lh_imputed
+[1] &quot; 0.18 [ 0.13; 0.24]&quot;
+
+$r_within_lh_imputed_rr
+[1] &quot; 0.22 [ 0.15; 0.29]&quot;
 
 $imputed_lh_vs_measured_graph</code></pre>
 <pre><code>Warning: Removed 426 rows containing missing values or values outside the
@@ -4365,7 +4453,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_lh
 [1] &quot;0.24 [0.15;0.31]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb606"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb608"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
