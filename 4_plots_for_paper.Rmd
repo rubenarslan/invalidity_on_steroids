@@ -219,7 +219,7 @@ cycle_phase_plot(p4_summaries[["GOCD2"]], "lh_day_model", custom_limits = log(c(
 
 x.grob <- textGrob("Days relative to LH surge (day 0)", 
                    gp=gpar(fontface="bold", col="black", fontsize=15))
-pdf("plots/Figure1.pdf", width = 10, height = 7.1, units = "in")
+pdf("plots/Figure1.pdf", width = 10, height = 7.1)
 grid.arrange(arrangeGrob(multiplot, bottom = x.grob))
 dev.off()
 
