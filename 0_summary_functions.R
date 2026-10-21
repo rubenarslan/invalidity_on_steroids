@@ -447,6 +447,10 @@ summarise_hormone <- function(df,
     rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
                                  sd_observed, sd_unrestricted)
     results$r_diff_bc_imputed_rr <- sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+    # unrounded, so that Equation 1 (Figure 4) divides unrounded values
+    results$rr_unrounded <- bind_rows(results$rr_unrounded,
+      tibble(cycle_phase = "bc", estimate = rr_cor[["unrestricted.estimate"]],
+             conf.low = rr_cor[["unrestricted.conf.low"]], conf.high = rr_cor[["unrestricted.conf.high"]]))
     
     
     factor <- compute_factor(df$bc_day, df[[paste0("est_", Hormone_name, "_bc")]], df$hormone, threshold = c(-10, -2))
@@ -499,6 +503,10 @@ summarise_hormone <- function(df,
     rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
                                  sd_observed, sd_unrestricted)
     results$r_diff_fc_imputed_rr <- sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+    # unrounded, so that Equation 1 (Figure 4) divides unrounded values
+    results$rr_unrounded <- bind_rows(results$rr_unrounded,
+      tibble(cycle_phase = "fc", estimate = rr_cor[["unrestricted.estimate"]],
+             conf.low = rr_cor[["unrestricted.conf.low"]], conf.high = rr_cor[["unrestricted.conf.high"]]))
     
     factor <- compute_factor(df$fc_day, df[[paste0("est_", Hormone_name, "_fc")]], df$hormone, threshold = c(20, 28))
     
@@ -551,6 +559,10 @@ summarise_hormone <- function(df,
     rr_cor <- psychometric::cRRr(cor_imp[,c("estimate", "conf.low", "conf.high")],
                                  sd_observed, sd_unrestricted)
     results$r_diff_lh_imputed_rr <- sprintf("% .2f [% .2f;% .2f]", rr_cor["unrestricted.estimate"], rr_cor["unrestricted.conf.low"], rr_cor["unrestricted.conf.high"])
+    # unrounded, so that Equation 1 (Figure 4) divides unrounded values
+    results$rr_unrounded <- bind_rows(results$rr_unrounded,
+      tibble(cycle_phase = "lh", estimate = rr_cor[["unrestricted.estimate"]],
+             conf.low = rr_cor[["unrestricted.conf.low"]], conf.high = rr_cor[["unrestricted.conf.high"]]))
     
     factor <- compute_factor(df$lh_day, df[[paste0("est_", Hormone_name, "_lh")]], df$hormone, threshold = c(2, 10))
     

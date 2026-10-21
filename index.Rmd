@@ -51,6 +51,7 @@ summary_table <- function(Hormone) {
     su_df$fc_day_model <- 
     su_df$lh_day_model <- 
     su_df$distribution <- NULL
+    su_df$rr_unrounded <- NULL
     su_df$imputed_fc_vs_measured_graph <- 
     su_df$imputed_bc_vs_measured_graph <- 
     su_df$imputed_lh_vs_measured_graph <- 

@@ -74,6 +74,7 @@ for(s in seq_along(summaries)) {
     su_df$fc_day_model <- 
     su_df$lh_day_model <- 
     su_df$distribution <- NULL
+    su_df$rr_unrounded <- NULL
     su_df$imputed_fc_vs_measured_graph <- 
     su_df$imputed_bc_vs_measured_graph <- 
     su_df$imputed_lh_vs_measured_graph <- 
@@ -382,13 +383,11 @@ study_names <- c("BioCycle", "Roney 2013", "OCMATE Non-HC", "Marcinkowska 2020",
 short_names <- c("BioCycle", "Roney '13", "OCMATE", "Marcinkowska '20", "Stern '21", "Jünger '18", "Blake '17", "Grebe '16")
 names(short_names) <- study_names
 all_stats$Dataset <- factor(as.character(short_names[all_stats$Dataset]), levels = short_names)
-rr_saliva <- all_stats %>% select(Hormone, Dataset, contains("_imputed_rr")) %>% pivot_longer(c(-Hormone, -Dataset)) %>% 
-  mutate(name = str_replace(name, "^r_diff_", ""),
-         name = str_replace(name, "_imputed_rr$", "")) %>% 
-  rename(cycle_phase = name) %>% 
+# Equation 1 divides the unrounded range-corrected correlations stored in the summaries
+# (the two-decimal strings in all_stats were divided before)
+rr_saliva <- sus %>% map_dfr(~ mutate(.x$rr_unrounded, Hormone = .x$Hormone, Dataset = .x$Dataset)) %>% 
+  mutate(Dataset = factor(as.character(short_names[Dataset]), levels = short_names)) %>% 
   mutate(cycle_phase = factor(cycle_phase, levels = rev(c("fc", "bc", "lh")))) %>% 
-  extract(value, into = c("estimate", "conf.low", "conf.high"), regex = "([^\\[]+) \\[([^;]+);([^(]+)\\]",
-          convert = TRUE) %>% 
   mutate(Hormone = str_replace(Hormone, "Free ", "")) %>% 
   mutate(Hormone = str_replace(Hormone, ".02", "")) %>% 
   mutate(Dataset = factor(Dataset, rev(short_names))) %>%
@@ -1525,6 +1524,7 @@ for(s in seq_along(summaries)) {
     su_df$fc_day_model <- 
     su_df$lh_day_model <- 
     su_df$distribution <- NULL
+    su_df$rr_unrounded <- NULL
     su_df$imputed_fc_vs_measured_graph <- 
     su_df$imputed_bc_vs_measured_graph <- 
     su_df$imputed_lh_vs_measured_graph <- 
