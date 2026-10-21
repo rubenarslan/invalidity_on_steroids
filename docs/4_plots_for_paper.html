@@ -2304,7 +2304,8 @@ Show code
 <span>           <span class='fu'><a href='https://dplyr.tidyverse.org/reference/case-and-replace-when.html'>case_when</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>r_bc_stirn</span><span class='op'>)</span> <span class='op'>~</span> <span class='st'>"FC"</span>,</span>
 <span>                     <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>r_prob_lh</span><span class='op'>)</span> <span class='op'>~</span> <span class='st'>"FC+BC"</span>,</span>
 <span>                     <span class='cn'>TRUE</span> <span class='op'>~</span> <span class='st'>"FC+BC+LH"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
-<span>  <span class='fu'>mutate</span><span class='op'>(</span>`Geometric mean` <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"%.2f"</span>,<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='va'>logmean</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='co'># exponentiate the unrounded log mean (logmean in comp_wide is already rounded to two decimals)</span></span>
+<span>  <span class='fu'>mutate</span><span class='op'>(</span>`Geometric mean` <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"%.2f"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dbl</a></span><span class='op'>(</span><span class='va'>Sample</span>, <span class='op'>~</span> <span class='va'>sus</span><span class='op'>[[</span><span class='va'>.x</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>logmean</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
 <span>    <span class='fu'>select</span><span class='op'>(</span><span class='va'>Sample</span>, <span class='va'>Dataset</span>,<span class='va'>Hormone</span>,</span>
 <span>           Women <span class='op'>=</span> <span class='va'>n_women</span>,</span>
 <span>           Cycles <span class='op'>=</span> <span class='va'>n_cycles</span>,</span>
@@ -2999,13 +3000,13 @@ Show code
 <td headers="Estradiol stub_1_12 Blake 2017" class="gt_row gt_left">114</td>
 <td headers="Estradiol stub_1_12 Grebe et al. 2016" class="gt_row gt_left">58</td></tr>
     <tr><th id="stub_1_13" scope="row" class="gt_row gt_left gt_stub">Geometric mean</th>
-<td headers="Estradiol stub_1_13 BioCycle" class="gt_row gt_left">1.49</td>
-<td headers="Estradiol stub_1_13 OCMATE Non-HC" class="gt_row gt_left">3.10</td>
-<td headers="Estradiol stub_1_13 Roney 2013" class="gt_row gt_left">2.83</td>
-<td headers="Estradiol stub_1_13 Marcinkowska 2020" class="gt_row gt_left">5.47</td>
+<td headers="Estradiol stub_1_13 BioCycle" class="gt_row gt_left">1.50</td>
+<td headers="Estradiol stub_1_13 OCMATE Non-HC" class="gt_row gt_left">3.08</td>
+<td headers="Estradiol stub_1_13 Roney 2013" class="gt_row gt_left">2.84</td>
+<td headers="Estradiol stub_1_13 Marcinkowska 2020" class="gt_row gt_left">5.49</td>
 <td headers="Estradiol stub_1_13 GOL2" class="gt_row gt_left">3.63</td>
-<td headers="Estradiol stub_1_13 GOCD2" class="gt_row gt_left">4.81</td>
-<td headers="Estradiol stub_1_13 Blake 2017" class="gt_row gt_left">6.30</td>
+<td headers="Estradiol stub_1_13 GOCD2" class="gt_row gt_left">4.80</td>
+<td headers="Estradiol stub_1_13 Blake 2017" class="gt_row gt_left">6.27</td>
 <td headers="Estradiol stub_1_13 Grebe et al. 2016" class="gt_row gt_left">2.27</td></tr>
     <tr><th id="stub_1_14" scope="row" class="gt_row gt_left gt_stub">Mean</th>
 <td headers="Estradiol stub_1_14 BioCycle" class="gt_row gt_left">2.13</td>
@@ -3065,14 +3066,14 @@ Show code
 <td headers="Progesterone stub_1_19 Blake 2017" class="gt_row gt_left">114</td>
 <td headers="Progesterone stub_1_19 Grebe et al. 2016" class="gt_row gt_left">57</td></tr>
     <tr><th id="stub_1_20" scope="row" class="gt_row gt_left gt_stub">Geometric mean</th>
-<td headers="Progesterone stub_1_20 BioCycle" class="gt_row gt_left">1394.09</td>
-<td headers="Progesterone stub_1_20 OCMATE Non-HC" class="gt_row gt_left">122.73</td>
-<td headers="Progesterone stub_1_20 Roney 2013" class="gt_row gt_left">42.95</td>
-<td headers="Progesterone stub_1_20 Marcinkowska 2020" class="gt_row gt_left">70.81</td>
-<td headers="Progesterone stub_1_20 GOL2" class="gt_row gt_left">9.58</td>
-<td headers="Progesterone stub_1_20 GOCD2" class="gt_row gt_left">17.64</td>
-<td headers="Progesterone stub_1_20 Blake 2017" class="gt_row gt_left">117.92</td>
-<td headers="Progesterone stub_1_20 Grebe et al. 2016" class="gt_row gt_left">48.42</td></tr>
+<td headers="Progesterone stub_1_20 BioCycle" class="gt_row gt_left">1393.35</td>
+<td headers="Progesterone stub_1_20 OCMATE Non-HC" class="gt_row gt_left">122.17</td>
+<td headers="Progesterone stub_1_20 Roney 2013" class="gt_row gt_left">43.11</td>
+<td headers="Progesterone stub_1_20 Marcinkowska 2020" class="gt_row gt_left">71.12</td>
+<td headers="Progesterone stub_1_20 GOL2" class="gt_row gt_left">9.54</td>
+<td headers="Progesterone stub_1_20 GOCD2" class="gt_row gt_left">17.72</td>
+<td headers="Progesterone stub_1_20 Blake 2017" class="gt_row gt_left">117.52</td>
+<td headers="Progesterone stub_1_20 Grebe et al. 2016" class="gt_row gt_left">48.60</td></tr>
     <tr><th id="stub_1_21" scope="row" class="gt_row gt_left gt_stub">Mean</th>
 <td headers="Progesterone stub_1_21 BioCycle" class="gt_row gt_left">3437.53</td>
 <td headers="Progesterone stub_1_21 OCMATE Non-HC" class="gt_row gt_left">158.54</td>

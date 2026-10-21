@@ -115,7 +115,8 @@ comp_wide <- comp_wide %>%
            case_when(is.na(r_bc_stirn) ~ "FC",
                      is.na(r_prob_lh) ~ "FC+BC",
                      TRUE ~ "FC+BC+LH")) %>% 
-  mutate(`Geometric mean` = sprintf("%.2f",exp(as.numeric(logmean)))) %>% 
+  # exponentiate the unrounded log mean (logmean in comp_wide is already rounded to two decimals)
+  mutate(`Geometric mean` = sprintf("%.2f", exp(map_dbl(Sample, ~ sus[[.x]]$logmean)))) %>% 
     select(Sample, Dataset,Hormone,
            Women = n_women,
            Cycles = n_cycles,
