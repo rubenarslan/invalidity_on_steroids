@@ -1636,6 +1636,29 @@ select: dropped 4 variables (I pomiar, II pomiar, średnia, ...8)</code></pre>
 </div>
 <pre><code>[1] 102</code></pre>
 <div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># Three women's IDs differ between the estradiol and progesterone files only by whitespace</span></span>
+<span><span class='co'># ("P1225" vs "P 1225"). Until 2026 this split 32 of their days into an estradiol row and a</span></span>
+<span><span class='co'># progesterone row. Remove whitespace before the checks and the join.</span></span>
+<span><span class='va'>m_e2</span> <span class='op'>&lt;-</span> <span class='va'>m_e2</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>mutate</span><span class='op'>(</span>ID <span class='op'>=</span> <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_remove.html'>str_remove_all</a></span><span class='op'>(</span><span class='va'>ID</span>, <span class='st'>"\\s+"</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>mutate: changed 1,534 values (100%) of &#39;ID&#39; (0 new NAs)</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>m_e2_2</span> <span class='op'>&lt;-</span> <span class='va'>m_e2_2</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>mutate</span><span class='op'>(</span>ID <span class='op'>=</span> <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_remove.html'>str_remove_all</a></span><span class='op'>(</span><span class='va'>ID</span>, <span class='st'>"\\s+"</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>mutate: changed 1,718 values (90%) of &#39;ID&#39; (0 new NAs)</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>m_p4</span> <span class='op'>&lt;-</span> <span class='va'>m_p4</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>mutate</span><span class='op'>(</span>ID <span class='op'>=</span> <span class='fu'><a href='https://stringr.tidyverse.org/reference/str_remove.html'>str_remove_all</a></span><span class='op'>(</span><span class='va'>ID</span>, <span class='st'>"\\s+"</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>mutate: changed 1,681 values (92%) of &#39;ID&#39; (0 new NAs)</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/n_distinct.html'>n_distinct</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/na.fail.html'>na.omit</a></span><span class='op'>(</span><span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>[1] 102</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/n_distinct.html'>n_distinct</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/na.fail.html'>na.omit</a></span><span class='op'>(</span><span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>[1] 102</code></pre>
+<div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>m_p4</span> <span class='op'>&lt;-</span> <span class='va'>m_p4</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://stringr.tidyverse.org/reference/str_detect.html'>str_detect</a></span><span class='op'>(</span><span class='va'>data</span>, <span class='st'>"brak"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://stringr.tidyverse.org/reference/str_detect.html'>str_detect</a></span><span class='op'>(</span><span class='va'>data</span>, <span class='st'>"BRAK"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
 <span>  <span class='fu'>mutate</span><span class='op'>(</span>date <span class='op'>=</span> <span class='fu'>lubridate</span><span class='fu'>::</span><span class='fu'><a href='https://lubridate.tidyverse.org/reference/ymd.html'>dmy</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
 <span>  <span class='fu'>filter</span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>date</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
@@ -1704,8 +1727,8 @@ filter (grouped): removed 1,622 rows (&gt;99%), 2 rows remaining (removed 1,622 
 # Groups:   ID, date [1]
   batch                        ID    data  `pg/ml` Meetings date      
   &lt;chr&gt;                        &lt;chr&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;date&gt;    
-1 progesteron 2 K 03 25 28 30… P 38  10 1…    58.3 S3       2015-12-10
-2 progesteron 2 K 03 25 28 30… P 38  10 1…    59.4 &lt;NA&gt;     2015-12-10</code></pre>
+1 progesteron 2 K 03 25 28 30… P38   10 1…    58.3 S3       2015-12-10
+2 progesteron 2 K 03 25 28 30… P38   10 1…    59.4 &lt;NA&gt;     2015-12-10</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>m_p4</span> <span class='op'>&lt;-</span> <span class='va'>m_p4</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>ID</span>, <span class='va'>date</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/row_number.html'>row_number</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>==</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
@@ -1761,39 +1784,35 @@ select: dropped 13 variables (data, Pom1, Pom2, Avrg, St.Dev., …)</code></pre>
 </div>
 <pre><code>
  K  P 
-41 64 </code></pre>
+41 61 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'><a href='https://stringr.tidyverse.org/reference/str_sub.html'>str_sub</a></span><span class='op'>(</span><span class='va'>all_ids</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
-   01    02    03    04    05    06    07    08    09    10    11 
-    1     1     1     1     1     1     1     1     1     1     1 
- 1196  1198  1199    12  1200  1201  1202  1205  1207  1208  1210 
-    1     1     1     1     1     1     1     1     1     1     1 
- 1211  1212  1215  1217  1218  1220  1221  1222  1223  1224  1225 
-    1     1     1     1     1     1     1     1     1     1     1 
- 1229  1230  1231  1232  1234  1236  1237  1238  1241  1243  1245 
-    1     1     1     1     1     1     1     1     1     1     1 
-   13    14    15    16    17    18    19    20    21    22    23 
-    1     1     1     1     1     1     1     1     1     1     1 
-   24    25    26    27    28    29    30    31    32    33    35 
-    1     1     1     1     1     1     1     1     1     1     1 
-   36    37    38    39    40    41    42    43    44    45    46 
-    1     1     1     1     1     1     1     1     1     1     1 
-   47    48    49    50    51    52    53    54    55    56    57 
-    1     1     1     1     1     1     1     1     1     1     1 
-   58    59    60    61    62    63    65    66    67    68    69 
-    1     1     1     1     1     1     1     1     1     1     1 
-   70    71    72  1201  1225  1229 
-    1     1     1     1     1     1 </code></pre>
+  01   02   03   04   05   06   07   08   09   10   11 1196 1198 1199 
+   1    1    1    1    1    1    1    1    1    1    1    1    1    1 
+  12 1200 1201 1202 1205 1207 1208 1210 1211 1212 1215 1217 1218 1220 
+   1    1    1    1    1    1    1    1    1    1    1    1    1    1 
+1221 1222 1223 1224 1225 1229 1230 1231 1232 1234 1236 1237 1238 1241 
+   1    1    1    1    1    1    1    1    1    1    1    1    1    1 
+1243 1245   13   14   15   16   17   18   19   20   21   22   23   24 
+   1    1    1    1    1    1    1    1    1    1    1    1    1    1 
+  25   26   27   28   29   30   31   32   33   35   36   37   38   39 
+   1    1    1    1    1    1    1    1    1    1    1    1    1    1 
+  40   41   42   43   44   45   46   47   48   49   50   51   52   53 
+   1    1    1    1    1    1    1    1    1    1    1    1    1    1 
+  54   55   56   57   58   59   60   61   62   63   65   66   67   68 
+   1    1    1    1    1    1    1    1    1    1    1    1    1    1 
+  69   70   71   72 
+   1    1    1    1 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>union</a></span><span class='op'>(</span><span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>union</a></span><span class='op'>(</span><span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>[1] 105</code></pre>
+<pre><code>[1] 102</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>union</a></span><span class='op'>(</span><span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>[1] 105</code></pre>
+<pre><code>[1] 102</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>union</a></span><span class='op'>(</span><span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
@@ -1801,83 +1820,77 @@ select: dropped 13 variables (data, Pom1, Pom2, Avrg, St.Dev., …)</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>union</a></span><span class='op'>(</span><span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>[1] 105</code></pre>
+<pre><code>[1] 102</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>intersect</a></span><span class='op'>(</span><span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code> [1] &quot;P 02&quot;   &quot;P 07&quot;   &quot;P 27&quot;   &quot;P 45&quot;   &quot;P 46&quot;   &quot;P 47&quot;   &quot;P 53&quot;  
- [8] &quot;P 03&quot;   &quot;P 25&quot;   &quot;P 28&quot;   &quot;P 30&quot;   &quot;P 32&quot;   &quot;P 35&quot;   &quot;P 37&quot;  
-[15] &quot;P 38&quot;   &quot;P 48&quot;   &quot;K 21&quot;   &quot;K 31&quot;   &quot;K 36&quot;   &quot;K 39&quot;   &quot;K 42&quot;  
-[22] &quot;K 51&quot;   &quot;K 52&quot;   &quot;K 58&quot;   &quot;K 66&quot;   &quot;K 04&quot;   &quot;K 09&quot;   &quot;K 16&quot;  
-[29] &quot;K 23&quot;   &quot;K 26&quot;   &quot;K 50&quot;   &quot;K 57&quot;   &quot;K 11&quot;   &quot;K 14&quot;   &quot;K 15&quot;  
-[36] &quot;K 17&quot;   &quot;K 40&quot;   &quot;K 41&quot;   &quot;K 56&quot;   &quot;K 67&quot;   &quot;K 68&quot;   &quot;K 69&quot;  
-[43] &quot;K 70&quot;   &quot;K 71&quot;   &quot;K 72&quot;   &quot;K 13&quot;   &quot;K 49&quot;   &quot;K 54&quot;   &quot;K 55&quot;  
-[50] &quot;K 63&quot;   &quot;K 65&quot;   &quot;K 43&quot;   &quot;K 44&quot;   &quot;K 59&quot;   &quot;K 60&quot;   &quot;K 61&quot;  
-[57] &quot;K 62&quot;   &quot;P 1196&quot; &quot;P 1199&quot; &quot;P 1200&quot; &quot;P 1208&quot; &quot;P 1220&quot; &quot;P 1225&quot;
-[64] &quot;P 1201&quot; &quot;P 1229&quot; &quot;P 1222&quot; &quot;P 1198&quot; &quot;P 1237&quot; &quot;P 1238&quot; &quot;P 1245&quot;
-[71] &quot;P 1210&quot; &quot;P 1231&quot; &quot;P 1236&quot; &quot;P 1230&quot; &quot;P 1212&quot; &quot;P 1211&quot; &quot;P 1207&quot;
-[78] &quot;P 1232&quot; &quot;P 1217&quot; &quot;P 1218&quot; &quot;P 1223&quot; &quot;P 1215&quot; &quot;P 1234&quot; &quot;P 1241&quot;
-[85] &quot;P 1243&quot; &quot;P 1224&quot; &quot;P 1221&quot;</code></pre>
+<pre><code> [1] &quot;P02&quot;   &quot;P07&quot;   &quot;P27&quot;   &quot;P45&quot;   &quot;P46&quot;   &quot;P47&quot;   &quot;P53&quot;   &quot;P03&quot;  
+ [9] &quot;P25&quot;   &quot;P28&quot;   &quot;P30&quot;   &quot;P32&quot;   &quot;P35&quot;   &quot;P37&quot;   &quot;P38&quot;   &quot;P48&quot;  
+[17] &quot;K21&quot;   &quot;K31&quot;   &quot;K36&quot;   &quot;K39&quot;   &quot;K42&quot;   &quot;K51&quot;   &quot;K52&quot;   &quot;K58&quot;  
+[25] &quot;K66&quot;   &quot;K04&quot;   &quot;K09&quot;   &quot;K16&quot;   &quot;K23&quot;   &quot;K26&quot;   &quot;K50&quot;   &quot;K57&quot;  
+[33] &quot;K11&quot;   &quot;K14&quot;   &quot;K15&quot;   &quot;K17&quot;   &quot;K40&quot;   &quot;K41&quot;   &quot;K56&quot;   &quot;K67&quot;  
+[41] &quot;K68&quot;   &quot;K69&quot;   &quot;K70&quot;   &quot;K71&quot;   &quot;K72&quot;   &quot;K13&quot;   &quot;K49&quot;   &quot;K54&quot;  
+[49] &quot;K55&quot;   &quot;K63&quot;   &quot;K65&quot;   &quot;K43&quot;   &quot;K44&quot;   &quot;K59&quot;   &quot;K60&quot;   &quot;K61&quot;  
+[57] &quot;K62&quot;   &quot;P1196&quot; &quot;P1199&quot; &quot;P1200&quot; &quot;P1208&quot; &quot;P1220&quot; &quot;P1225&quot; &quot;P1201&quot;
+[65] &quot;P1229&quot; &quot;P1222&quot; &quot;P1198&quot; &quot;P1237&quot; &quot;P1238&quot; &quot;P1245&quot; &quot;P1210&quot; &quot;P1231&quot;
+[73] &quot;P1236&quot; &quot;P1230&quot; &quot;P1212&quot; &quot;P1211&quot; &quot;P1207&quot; &quot;P1232&quot; &quot;P1217&quot; &quot;P1218&quot;
+[81] &quot;P1223&quot; &quot;P1215&quot; &quot;P1234&quot; &quot;P1241&quot; &quot;P1243&quot; &quot;P1224&quot; &quot;P1221&quot;</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>[1] &quot;P 1205&quot;</code></pre>
+<pre><code>[1] &quot;P1205&quot;</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code> [1] &quot;P 08&quot;   &quot;P 19&quot;   &quot;P 18&quot;   &quot;P 22&quot;   &quot;P 12&quot;   &quot;P 10&quot;   &quot;P 33&quot;  
- [8] &quot;P 1202&quot; &quot;P 01&quot;   &quot;P 05&quot;   &quot;P 06&quot;   &quot;P 20&quot;   &quot;P 24&quot;   &quot;P 29&quot;  </code></pre>
+<pre><code> [1] &quot;P08&quot;   &quot;P19&quot;   &quot;P18&quot;   &quot;P22&quot;   &quot;P12&quot;   &quot;P10&quot;   &quot;P33&quot;   &quot;P1202&quot;
+ [9] &quot;P01&quot;   &quot;P05&quot;   &quot;P06&quot;   &quot;P20&quot;   &quot;P24&quot;   &quot;P29&quot;  </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>intersect</a></span><span class='op'>(</span><span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code> [1] &quot;P 27&quot;   &quot;P 07&quot;   &quot;P 46&quot;   &quot;P 47&quot;   &quot;P 45&quot;   &quot;P 53&quot;   &quot;P 02&quot;  
- [8] &quot;P 1236&quot; &quot;P 1231&quot; &quot;P 1210&quot; &quot;P 1230&quot; &quot;P 1212&quot; &quot;P 1211&quot; &quot;P 1207&quot;
-[15] &quot;P 1232&quot; &quot;P 1217&quot; &quot;P 1218&quot; &quot;P 1223&quot; &quot;P 1215&quot; &quot;P 1234&quot; &quot;P 1241&quot;
-[22] &quot;P 1243&quot; &quot;P 1224&quot; &quot;P 1221&quot; &quot;P 28&quot;   &quot;P 37&quot;   &quot;P 32&quot;   &quot;P 03&quot;  
-[29] &quot;P 48&quot;   &quot;P 25&quot;   &quot;P 30&quot;   &quot;P 35&quot;   &quot;P 38&quot;   &quot;K 04&quot;   &quot;K 21&quot;  
-[36] &quot;K 31&quot;   &quot;K 36&quot;   &quot;K 39&quot;   &quot;K 42&quot;   &quot;K 51&quot;   &quot;K 52&quot;   &quot;K 58&quot;  
-[43] &quot;K 66&quot;   &quot;K 09&quot;   &quot;K 16&quot;   &quot;K 23&quot;   &quot;K 26&quot;   &quot;K 50&quot;   &quot;K 57&quot;  
-[50] &quot;K 11&quot;   &quot;K 14&quot;   &quot;K 15&quot;   &quot;K 17&quot;   &quot;K 40&quot;   &quot;K 41&quot;   &quot;K 56&quot;  
-[57] &quot;K 67&quot;   &quot;K 68&quot;   &quot;K 69&quot;   &quot;K 70&quot;   &quot;K 71&quot;   &quot;K 72&quot;   &quot;K 13&quot;  
-[64] &quot;K 63&quot;   &quot;K 65&quot;   &quot;K 54&quot;   &quot;K 55&quot;   &quot;K 49&quot;   &quot;K 59&quot;   &quot;K 60&quot;  
-[71] &quot;K 61&quot;   &quot;K 44&quot;   &quot;K 43&quot;   &quot;K 62&quot;   &quot;P 1220&quot; &quot;P 1200&quot; &quot;P 1196&quot;
-[78] &quot;P 1199&quot; &quot;P 1208&quot; &quot;P 1198&quot; &quot;P 1245&quot; &quot;P 1222&quot; &quot;P 1237&quot; &quot;P 1238&quot;
-[85] &quot;P 08&quot;   &quot;P 19&quot;   &quot;P 18&quot;   &quot;P 22&quot;   &quot;P 12&quot;   &quot;P 10&quot;   &quot;P 33&quot;  
-[92] &quot;P 1202&quot; &quot;P 01&quot;   &quot;P 05&quot;   &quot;P 06&quot;   &quot;P 20&quot;   &quot;P 24&quot;   &quot;P 29&quot;  </code></pre>
+<pre><code>  [1] &quot;P27&quot;   &quot;P07&quot;   &quot;P46&quot;   &quot;P47&quot;   &quot;P45&quot;   &quot;P53&quot;   &quot;P02&quot;   &quot;P1236&quot;
+  [9] &quot;P1231&quot; &quot;P1210&quot; &quot;P1230&quot; &quot;P1212&quot; &quot;P1211&quot; &quot;P1207&quot; &quot;P1232&quot; &quot;P1217&quot;
+ [17] &quot;P1218&quot; &quot;P1223&quot; &quot;P1215&quot; &quot;P1234&quot; &quot;P1241&quot; &quot;P1243&quot; &quot;P1224&quot; &quot;P1221&quot;
+ [25] &quot;P28&quot;   &quot;P37&quot;   &quot;P32&quot;   &quot;P03&quot;   &quot;P48&quot;   &quot;P25&quot;   &quot;P30&quot;   &quot;P35&quot;  
+ [33] &quot;P38&quot;   &quot;K04&quot;   &quot;K21&quot;   &quot;K31&quot;   &quot;K36&quot;   &quot;K39&quot;   &quot;K42&quot;   &quot;K51&quot;  
+ [41] &quot;K52&quot;   &quot;K58&quot;   &quot;K66&quot;   &quot;K09&quot;   &quot;K16&quot;   &quot;K23&quot;   &quot;K26&quot;   &quot;K50&quot;  
+ [49] &quot;K57&quot;   &quot;K11&quot;   &quot;K14&quot;   &quot;K15&quot;   &quot;K17&quot;   &quot;K40&quot;   &quot;K41&quot;   &quot;K56&quot;  
+ [57] &quot;K67&quot;   &quot;K68&quot;   &quot;K69&quot;   &quot;K70&quot;   &quot;K71&quot;   &quot;K72&quot;   &quot;K13&quot;   &quot;K63&quot;  
+ [65] &quot;K65&quot;   &quot;K54&quot;   &quot;K55&quot;   &quot;K49&quot;   &quot;K59&quot;   &quot;K60&quot;   &quot;K61&quot;   &quot;K44&quot;  
+ [73] &quot;K43&quot;   &quot;K62&quot;   &quot;P1225&quot; &quot;P1220&quot; &quot;P1229&quot; &quot;P1201&quot; &quot;P1200&quot; &quot;P1196&quot;
+ [81] &quot;P1199&quot; &quot;P1208&quot; &quot;P1198&quot; &quot;P1245&quot; &quot;P1222&quot; &quot;P1237&quot; &quot;P1238&quot; &quot;P08&quot;  
+ [89] &quot;P19&quot;   &quot;P18&quot;   &quot;P22&quot;   &quot;P12&quot;   &quot;P10&quot;   &quot;P33&quot;   &quot;P1202&quot; &quot;P01&quot;  
+ [97] &quot;P05&quot;   &quot;P06&quot;   &quot;P20&quot;   &quot;P24&quot;   &quot;P29&quot;  </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>[1] &quot;P 1205&quot; &quot;P1225&quot;  &quot;P1229&quot;  &quot;P1201&quot; </code></pre>
+<pre><code>[1] &quot;P1205&quot;</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>[1] &quot;P 1229&quot; &quot;P 1201&quot; &quot;P 1225&quot;</code></pre>
+<pre><code>character(0)</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>intersect</a></span><span class='op'>(</span><span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code> [1] &quot;P 27&quot;   &quot;P 07&quot;   &quot;P 46&quot;   &quot;P 47&quot;   &quot;P 45&quot;   &quot;P 53&quot;   &quot;P 02&quot;  
- [8] &quot;P 1236&quot; &quot;P 1231&quot; &quot;P 1210&quot; &quot;P 1205&quot; &quot;P 1230&quot; &quot;P 1212&quot; &quot;P 1211&quot;
-[15] &quot;P 1207&quot; &quot;P 1232&quot; &quot;P 1217&quot; &quot;P 1218&quot; &quot;P 1223&quot; &quot;P 1215&quot; &quot;P 1234&quot;
-[22] &quot;P 1241&quot; &quot;P 1243&quot; &quot;P 1224&quot; &quot;P 1221&quot; &quot;P 28&quot;   &quot;P 37&quot;   &quot;P 32&quot;  
-[29] &quot;P 03&quot;   &quot;P 48&quot;   &quot;P 25&quot;   &quot;P 30&quot;   &quot;P 35&quot;   &quot;P 38&quot;   &quot;K 04&quot;  
-[36] &quot;K 21&quot;   &quot;K 31&quot;   &quot;K 36&quot;   &quot;K 39&quot;   &quot;K 42&quot;   &quot;K 51&quot;   &quot;K 52&quot;  
-[43] &quot;K 58&quot;   &quot;K 66&quot;   &quot;K 09&quot;   &quot;K 16&quot;   &quot;K 23&quot;   &quot;K 26&quot;   &quot;K 50&quot;  
-[50] &quot;K 57&quot;   &quot;K 11&quot;   &quot;K 14&quot;   &quot;K 15&quot;   &quot;K 17&quot;   &quot;K 40&quot;   &quot;K 41&quot;  
-[57] &quot;K 56&quot;   &quot;K 67&quot;   &quot;K 68&quot;   &quot;K 69&quot;   &quot;K 70&quot;   &quot;K 71&quot;   &quot;K 72&quot;  
-[64] &quot;K 13&quot;   &quot;K 63&quot;   &quot;K 65&quot;   &quot;K 54&quot;   &quot;K 55&quot;   &quot;K 49&quot;   &quot;K 59&quot;  
-[71] &quot;K 60&quot;   &quot;K 61&quot;   &quot;K 44&quot;   &quot;K 43&quot;   &quot;K 62&quot;   &quot;P 1220&quot; &quot;P 1200&quot;
-[78] &quot;P 1196&quot; &quot;P 1199&quot; &quot;P 1208&quot; &quot;P 1198&quot; &quot;P 1245&quot; &quot;P 1222&quot; &quot;P 1237&quot;
-[85] &quot;P 1238&quot;</code></pre>
+<pre><code> [1] &quot;P27&quot;   &quot;P07&quot;   &quot;P46&quot;   &quot;P47&quot;   &quot;P45&quot;   &quot;P53&quot;   &quot;P02&quot;   &quot;P1236&quot;
+ [9] &quot;P1231&quot; &quot;P1210&quot; &quot;P1205&quot; &quot;P1230&quot; &quot;P1212&quot; &quot;P1211&quot; &quot;P1207&quot; &quot;P1232&quot;
+[17] &quot;P1217&quot; &quot;P1218&quot; &quot;P1223&quot; &quot;P1215&quot; &quot;P1234&quot; &quot;P1241&quot; &quot;P1243&quot; &quot;P1224&quot;
+[25] &quot;P1221&quot; &quot;P28&quot;   &quot;P37&quot;   &quot;P32&quot;   &quot;P03&quot;   &quot;P48&quot;   &quot;P25&quot;   &quot;P30&quot;  
+[33] &quot;P35&quot;   &quot;P38&quot;   &quot;K04&quot;   &quot;K21&quot;   &quot;K31&quot;   &quot;K36&quot;   &quot;K39&quot;   &quot;K42&quot;  
+[41] &quot;K51&quot;   &quot;K52&quot;   &quot;K58&quot;   &quot;K66&quot;   &quot;K09&quot;   &quot;K16&quot;   &quot;K23&quot;   &quot;K26&quot;  
+[49] &quot;K50&quot;   &quot;K57&quot;   &quot;K11&quot;   &quot;K14&quot;   &quot;K15&quot;   &quot;K17&quot;   &quot;K40&quot;   &quot;K41&quot;  
+[57] &quot;K56&quot;   &quot;K67&quot;   &quot;K68&quot;   &quot;K69&quot;   &quot;K70&quot;   &quot;K71&quot;   &quot;K72&quot;   &quot;K13&quot;  
+[65] &quot;K63&quot;   &quot;K65&quot;   &quot;K54&quot;   &quot;K55&quot;   &quot;K49&quot;   &quot;K59&quot;   &quot;K60&quot;   &quot;K61&quot;  
+[73] &quot;K44&quot;   &quot;K43&quot;   &quot;K62&quot;   &quot;P1225&quot; &quot;P1220&quot; &quot;P1229&quot; &quot;P1201&quot; &quot;P1200&quot;
+[81] &quot;P1196&quot; &quot;P1199&quot; &quot;P1208&quot; &quot;P1198&quot; &quot;P1245&quot; &quot;P1222&quot; &quot;P1237&quot; &quot;P1238&quot;</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code> [1] &quot;P1225&quot;  &quot;P1229&quot;  &quot;P1201&quot;  &quot;P 08&quot;   &quot;P 19&quot;   &quot;P 18&quot;   &quot;P 22&quot;  
- [8] &quot;P 12&quot;   &quot;P 10&quot;   &quot;P 33&quot;   &quot;P 1202&quot; &quot;P 01&quot;   &quot;P 05&quot;   &quot;P 06&quot;  
-[15] &quot;P 20&quot;   &quot;P 24&quot;   &quot;P 29&quot;  </code></pre>
+<pre><code> [1] &quot;P08&quot;   &quot;P19&quot;   &quot;P18&quot;   &quot;P22&quot;   &quot;P12&quot;   &quot;P10&quot;   &quot;P33&quot;   &quot;P1202&quot;
+ [9] &quot;P01&quot;   &quot;P05&quot;   &quot;P06&quot;   &quot;P20&quot;   &quot;P24&quot;   &quot;P29&quot;  </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>[1] &quot;P 1225&quot; &quot;P 1201&quot; &quot;P 1229&quot;</code></pre>
+<pre><code>character(0)</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span>, <span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>union</a></span><span class='op'>(</span><span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
@@ -1885,7 +1898,7 @@ select: dropped 13 variables (data, Pom1, Pom2, Avrg, St.Dev., …)</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>union</a></span><span class='op'>(</span><span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_e2_2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span>, <span class='va'>m_p4</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>[1] &quot;P 1205&quot; &quot;P1225&quot;  &quot;P1229&quot;  &quot;P1201&quot; </code></pre>
+<pre><code>[1] &quot;P1205&quot;</code></pre>
 </div>
 <h3 id="bind-e2-files">Bind E2 files</h3>
 <div class="layout-chunk" data-layout="l-body">
@@ -1907,11 +1920,11 @@ select: dropped 13 variables (data, Pom1, Pom2, Avrg, St.Dev., …)</code></pre>
 <pre><code>rename: renamed one variable (estradiol)
 rename: renamed one variable (progesterone)
 full_join: added 7 columns (batch.x, data.x, Meetings.x, batch.y, data.y, …)
-           &gt; rows only in x                            658
-           &gt; rows only in m_p4 %&gt;% rename(progest..    544
-           &gt; matched rows                            1,079
+           &gt; rows only in x                            626
+           &gt; rows only in m_p4 %&gt;% rename(progest..    512
+           &gt; matched rows                            1,111
            &gt;                                        =======
-           &gt; rows total                              2,281</code></pre>
+           &gt; rows total                              2,249</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>marc</span><span class='op'>$</span><span class='va'>estradiol</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span></span></code></pre>
 </div>
@@ -1927,13 +1940,13 @@ full_join: added 7 columns (batch.x, data.x, Meetings.x, batch.y, data.y, …)
     Pearson&#39;s product-moment correlation
 
 data:  log(marc$estradiol) and log(marc$progesterone)
-t = 10.726, df = 1059, p-value &lt; 2.2e-16
+t = 10.642, df = 1091, p-value &lt; 2.2e-16
 alternative hypothesis: true correlation is not equal to 0
 95 percent confidence interval:
- 0.2577184 0.3663289
+ 0.2519395 0.3594150
 sample estimates:
       cor 
-0.3130468 </code></pre>
+0.3066544 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/stats/xtabs.html'>xtabs</a></span><span class='op'>(</span><span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>date</span><span class='op'>)</span>, <span class='va'>marc</span><span class='op'>)</span></span></code></pre>
 </div>
@@ -1941,8 +1954,8 @@ sample estimates:
 
                 is.na(progesterone)
 is.na(estradiol) FALSE TRUE
-           FALSE  1061  627
-           TRUE    527   66</code></pre>
+           FALSE  1093  595
+           TRUE    495   66</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># m_p4 %&gt;% filter(is.na(date)) %&gt;% select(ID, data) %&gt;% View</span></span>
 <span></span>
@@ -1957,9 +1970,9 @@ is.na(estradiol) FALSE TRUE
 <span>  <span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>mutate: changed 14 values (1%) of &#39;estradiol&#39; (0 new NAs)
-        new variable &#39;estradiol_cens&#39; (character) with 3 unique values and 26% NA
+        new variable &#39;estradiol_cens&#39; (character) with 3 unique values and 25% NA
 mutate: changed 16 values (1%) of &#39;progesterone&#39; (0 new NAs)
-        new variable &#39;progesterone_cens&#39; (character) with 3 unique values and 30% NA</code></pre>
+        new variable &#39;progesterone_cens&#39; (character) with 3 unique values and 29% NA</code></pre>
 </div>
 <h3 id="calendar">Calendar</h3>
 <p>The legend for colours:
@@ -2706,40 +2719,31 @@ mutate: new variable &#39;date&#39; (Date) with 345 unique values and 0% NA</cod
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>intersect</a></span><span class='op'>(</span><span class='va'>mensdates_orig</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>character(0)</code></pre>
+<pre><code> [1] &quot;K04&quot; &quot;K09&quot; &quot;K11&quot; &quot;K13&quot; &quot;K14&quot; &quot;K15&quot; &quot;K16&quot; &quot;K17&quot; &quot;K21&quot; &quot;K23&quot; &quot;K26&quot;
+[12] &quot;K31&quot; &quot;K36&quot; &quot;K39&quot; &quot;K40&quot; &quot;K41&quot; &quot;K42&quot; &quot;K43&quot; &quot;K44&quot; &quot;K49&quot; &quot;K50&quot; &quot;K51&quot;
+[23] &quot;K52&quot; &quot;K54&quot; &quot;K55&quot; &quot;K56&quot; &quot;K58&quot; &quot;K59&quot; &quot;K60&quot; &quot;K61&quot; &quot;K62&quot; &quot;K63&quot; &quot;K65&quot;
+[34] &quot;K66&quot; &quot;K67&quot; &quot;K68&quot; &quot;K69&quot; &quot;K70&quot; &quot;K71&quot; &quot;K72&quot;</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>mensdates_orig</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>  [1] &quot;1196&quot; &quot;1198&quot; &quot;1199&quot; &quot;1200&quot; &quot;1201&quot; &quot;1202&quot; &quot;1205&quot; &quot;1207&quot; &quot;1208&quot;
- [10] &quot;1210&quot; &quot;1211&quot; &quot;1212&quot; &quot;1215&quot; &quot;1217&quot; &quot;1218&quot; &quot;1220&quot; &quot;1221&quot; &quot;1222&quot;
- [19] &quot;1223&quot; &quot;1224&quot; &quot;1225&quot; &quot;1229&quot; &quot;1230&quot; &quot;1231&quot; &quot;1232&quot; &quot;1234&quot; &quot;1236&quot;
- [28] &quot;1237&quot; &quot;1238&quot; &quot;1241&quot; &quot;1243&quot; &quot;1245&quot; &quot;K01&quot;  &quot;K02&quot;  &quot;K03&quot;  &quot;K04&quot; 
- [37] &quot;K05&quot;  &quot;K06&quot;  &quot;K07&quot;  &quot;K08&quot;  &quot;K09&quot;  &quot;K10&quot;  &quot;K11&quot;  &quot;K12&quot;  &quot;K13&quot; 
- [46] &quot;K14&quot;  &quot;K15&quot;  &quot;K16&quot;  &quot;K17&quot;  &quot;K18&quot;  &quot;K19&quot;  &quot;K20&quot;  &quot;K21&quot;  &quot;K22&quot; 
- [55] &quot;K23&quot;  &quot;K24&quot;  &quot;K25&quot;  &quot;K26&quot;  &quot;K27&quot;  &quot;K28&quot;  &quot;K29&quot;  &quot;K30&quot;  &quot;K31&quot; 
- [64] &quot;K32&quot;  &quot;K33&quot;  &quot;K35&quot;  &quot;K36&quot;  &quot;K37&quot;  &quot;K38&quot;  &quot;K39&quot;  &quot;K40&quot;  &quot;K41&quot; 
- [73] &quot;K42&quot;  &quot;K43&quot;  &quot;K44&quot;  &quot;K45&quot;  &quot;K46&quot;  &quot;K47&quot;  &quot;K48&quot;  &quot;K49&quot;  &quot;K50&quot; 
- [82] &quot;K51&quot;  &quot;K52&quot;  &quot;K53&quot;  &quot;K54&quot;  &quot;K55&quot;  &quot;K56&quot;  &quot;k57&quot;  &quot;K58&quot;  &quot;K59&quot; 
- [91] &quot;K60&quot;  &quot;K61&quot;  &quot;K62&quot;  &quot;K63&quot;  &quot;K65&quot;  &quot;K66&quot;  &quot;K67&quot;  &quot;K68&quot;  &quot;K69&quot; 
-[100] &quot;K70&quot;  &quot;K71&quot;  &quot;K72&quot;  NA    </code></pre>
+<pre><code> [1] &quot;1196&quot; &quot;1198&quot; &quot;1199&quot; &quot;1200&quot; &quot;1201&quot; &quot;1202&quot; &quot;1205&quot; &quot;1207&quot; &quot;1208&quot;
+[10] &quot;1210&quot; &quot;1211&quot; &quot;1212&quot; &quot;1215&quot; &quot;1217&quot; &quot;1218&quot; &quot;1220&quot; &quot;1221&quot; &quot;1222&quot;
+[19] &quot;1223&quot; &quot;1224&quot; &quot;1225&quot; &quot;1229&quot; &quot;1230&quot; &quot;1231&quot; &quot;1232&quot; &quot;1234&quot; &quot;1236&quot;
+[28] &quot;1237&quot; &quot;1238&quot; &quot;1241&quot; &quot;1243&quot; &quot;1245&quot; &quot;K01&quot;  &quot;K02&quot;  &quot;K03&quot;  &quot;K05&quot; 
+[37] &quot;K06&quot;  &quot;K07&quot;  &quot;K08&quot;  &quot;K10&quot;  &quot;K12&quot;  &quot;K18&quot;  &quot;K19&quot;  &quot;K20&quot;  &quot;K22&quot; 
+[46] &quot;K24&quot;  &quot;K25&quot;  &quot;K27&quot;  &quot;K28&quot;  &quot;K29&quot;  &quot;K30&quot;  &quot;K32&quot;  &quot;K33&quot;  &quot;K35&quot; 
+[55] &quot;K37&quot;  &quot;K38&quot;  &quot;K45&quot;  &quot;K46&quot;  &quot;K47&quot;  &quot;K48&quot;  &quot;K53&quot;  &quot;k57&quot;  NA    </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>m_e2</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>mensdates_orig</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>  [1] &quot;P 27&quot;   &quot;P 07&quot;   &quot;P 46&quot;   &quot;P 47&quot;   &quot;P 45&quot;   &quot;P 53&quot;   &quot;P 02&quot;  
-  [8] &quot;P 1236&quot; &quot;P 1231&quot; &quot;P 1210&quot; &quot;P 1205&quot; &quot;P 1230&quot; &quot;P 1212&quot; &quot;P 1211&quot;
- [15] &quot;P 1207&quot; &quot;P 1232&quot; &quot;P 1217&quot; &quot;P 1218&quot; &quot;P 1223&quot; &quot;P 1215&quot; &quot;P 1234&quot;
- [22] &quot;P 1241&quot; &quot;P 1243&quot; &quot;P 1224&quot; &quot;P 1221&quot; &quot;P 28&quot;   &quot;P 37&quot;   &quot;P 32&quot;  
- [29] &quot;P 03&quot;   &quot;P 48&quot;   &quot;P 25&quot;   &quot;P 30&quot;   &quot;P 35&quot;   &quot;P 38&quot;   &quot;K 04&quot;  
- [36] &quot;K 21&quot;   &quot;K 31&quot;   &quot;K 36&quot;   &quot;K 39&quot;   &quot;K 42&quot;   &quot;K 51&quot;   &quot;K 52&quot;  
- [43] &quot;K 58&quot;   &quot;K 66&quot;   &quot;K 09&quot;   &quot;K 16&quot;   &quot;K 23&quot;   &quot;K 26&quot;   &quot;K 50&quot;  
- [50] &quot;K 57&quot;   &quot;K 11&quot;   &quot;K 14&quot;   &quot;K 15&quot;   &quot;K 17&quot;   &quot;K 40&quot;   &quot;K 41&quot;  
- [57] &quot;K 56&quot;   &quot;K 67&quot;   &quot;K 68&quot;   &quot;K 69&quot;   &quot;K 70&quot;   &quot;K 71&quot;   &quot;K 72&quot;  
- [64] &quot;K 13&quot;   &quot;K 63&quot;   &quot;K 65&quot;   &quot;K 54&quot;   &quot;K 55&quot;   &quot;K 49&quot;   &quot;K 59&quot;  
- [71] &quot;K 60&quot;   &quot;K 61&quot;   &quot;K 44&quot;   &quot;K 43&quot;   &quot;K 62&quot;   &quot;P1225&quot;  &quot;P 1220&quot;
- [78] &quot;P1229&quot;  &quot;P1201&quot;  &quot;P 1200&quot; &quot;P 1196&quot; &quot;P 1199&quot; &quot;P 1208&quot; &quot;P 1198&quot;
- [85] &quot;P 1245&quot; &quot;P 1222&quot; &quot;P 1237&quot; &quot;P 1238&quot; &quot;P 08&quot;   &quot;P 19&quot;   &quot;P 18&quot;  
- [92] &quot;P 22&quot;   &quot;P 12&quot;   &quot;P 10&quot;   &quot;P 33&quot;   &quot;P 1202&quot; &quot;P 01&quot;   &quot;P 05&quot;  
- [99] &quot;P 06&quot;   &quot;P 20&quot;   &quot;P 24&quot;   &quot;P 29&quot;  </code></pre>
+<pre><code> [1] &quot;P27&quot;   &quot;P07&quot;   &quot;P46&quot;   &quot;P47&quot;   &quot;P45&quot;   &quot;P53&quot;   &quot;P02&quot;   &quot;P1236&quot;
+ [9] &quot;P1231&quot; &quot;P1210&quot; &quot;P1205&quot; &quot;P1230&quot; &quot;P1212&quot; &quot;P1211&quot; &quot;P1207&quot; &quot;P1232&quot;
+[17] &quot;P1217&quot; &quot;P1218&quot; &quot;P1223&quot; &quot;P1215&quot; &quot;P1234&quot; &quot;P1241&quot; &quot;P1243&quot; &quot;P1224&quot;
+[25] &quot;P1221&quot; &quot;P28&quot;   &quot;P37&quot;   &quot;P32&quot;   &quot;P03&quot;   &quot;P48&quot;   &quot;P25&quot;   &quot;P30&quot;  
+[33] &quot;P35&quot;   &quot;P38&quot;   &quot;K57&quot;   &quot;P1225&quot; &quot;P1220&quot; &quot;P1229&quot; &quot;P1201&quot; &quot;P1200&quot;
+[41] &quot;P1196&quot; &quot;P1199&quot; &quot;P1208&quot; &quot;P1198&quot; &quot;P1245&quot; &quot;P1222&quot; &quot;P1237&quot; &quot;P1238&quot;
+[49] &quot;P08&quot;   &quot;P19&quot;   &quot;P18&quot;   &quot;P22&quot;   &quot;P12&quot;   &quot;P10&quot;   &quot;P33&quot;   &quot;P1202&quot;
+[57] &quot;P01&quot;   &quot;P05&quot;   &quot;P06&quot;   &quot;P20&quot;   &quot;P24&quot;   &quot;P29&quot;  </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>mensdates</span> <span class='op'>&lt;-</span> <span class='va'>mensdates_orig</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span>   </span>
 <span>  <span class='fu'>filter</span><span class='op'>(</span><span class='va'>value</span> <span class='op'>==</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
@@ -2906,9 +2910,21 @@ filter (grouped): removed all rows (100%)</code></pre>
 <pre><code>left_join: added 9 columns (cycle_length, LH_peak, LHpeakPresent, WeakLinesPresent, WeakLinesWhen, …)
            &gt; rows only in x                0
            &gt; rows only in cycle_days (33,286)
-           &gt; matched rows              2,281
+           &gt; matched rows              2,249
            &gt;                         ========
-           &gt; rows total                2,281</code></pre>
+           &gt; rows total                2,249</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># check: one row per woman and day, so that estradiol and progesterone of the same day share a row</span></span>
+<span><span class='va'>marc</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>count</span><span class='op'>(</span><span class='va'>ID</span>, <span class='va'>date</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='va'>n</span> <span class='op'>&gt;</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>count: now 2,249 rows and 3 columns, ungrouped
+filter: removed all rows (100%)</code></pre>
+<pre><code>[1] 0</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/stopifnot.html'>stopifnot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>marc</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>count</span><span class='op'>(</span><span class='va'>ID</span>, <span class='va'>date</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='va'>n</span> <span class='op'>&gt;</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>==</span> <span class='fl'>0</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>count: now 2,249 rows and 3 columns, ungrouped
+filter: removed all rows (100%)</code></pre>
 </div>
 <h2 id="cycle-days">Cycle days</h2>
 <div class="layout-chunk" data-layout="l-body">
@@ -2923,11 +2939,11 @@ filter (grouped): removed all rows (100%)</code></pre>
 <pre><code>group_by: one grouping variable (ID)
 mutate (grouped): new variable &#39;bc_day&#39; (double) with 37 unique values and 0% NA
                   new variable &#39;fc_day&#39; (double) with 37 unique values and 0% NA
-                  new variable &#39;lh_day&#39; (double) with 40 unique values and 25% NA</code></pre>
+                  new variable &#39;lh_day&#39; (double) with 40 unique values and 26% NA</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>marc</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='va'>fc_day</span> <span class='op'>&lt;</span> <span class='fl'>0</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>ID</span>, <span class='va'>date</span>, <span class='va'>fc_day</span>,<span class='va'>last_menstrual_onset</span>, <span class='va'>next_menstrual_onset</span>, <span class='va'>bc_day</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>filter (grouped): removed 2,280 rows (&gt;99%), one row remaining (removed 101 groups, one group remaining)
+<pre><code>filter (grouped): removed 2,248 rows (&gt;99%), one row remaining (removed 101 groups, one group remaining)
 select: dropped 17 variables (batch.x, data.x, Meetings.x, batch.y, data.y, …)</code></pre>
 <pre><code># A tibble: 1 × 8
 # Groups:   ID [1]
@@ -2939,13 +2955,13 @@ select: dropped 17 variables (batch.x, data.x, Meetings.x, batch.y, data.y, …)
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>marc</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='va'>bc_day</span> <span class='op'>&gt;</span> <span class='op'>-</span><span class='fl'>1</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>ID</span>, <span class='va'>date</span>, <span class='va'>fc_day</span>, <span class='va'>bc_day</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>filter (grouped): removed 2,266 rows (99%), 15 rows remaining (removed 88 groups, 14 groups remaining)
+<pre><code>filter (grouped): removed 2,234 rows (99%), 15 rows remaining (removed 88 groups, 14 groups remaining)
 select: dropped 19 variables (batch.x, data.x, Meetings.x, batch.y, data.y, …)</code></pre>
 <pre><code>[1] 15</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>marc</span> <span class='op'>&lt;-</span> <span class='va'>marc</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='va'>bc_day</span> <span class='op'>&lt;</span> <span class='fl'>0</span>, <span class='va'>fc_day</span> <span class='op'>&gt;=</span> <span class='fl'>0</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>filter (grouped): removed 16 rows (1%), 2,265 rows remaining (removed
+<pre><code>filter (grouped): removed 16 rows (1%), 2,233 rows remaining (removed
 0 groups, 102 groups remaining)</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/qplot.html'>qplot</a></span><span class='op'>(</span><span class='va'>marc</span><span class='op'>$</span><span class='va'>date</span><span class='op'>)</span></span></code></pre>
@@ -3024,13 +3040,13 @@ mutate (grouped): new variable &#39;lh_surge_date_2&#39; (Date) with 31 unique v
 </div>
 <pre><code>
 FALSE  TRUE  &lt;NA&gt; 
-   76   697  1492 </code></pre>
+   64   697  1472 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>marc</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='va'>lh_surge_date</span> <span class='op'>!=</span> <span class='va'>lh_surge_date_2</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>ID</span>, <span class='va'>lh_surge_date</span>, <span class='va'>lh_surge_date_2</span>, <span class='va'>date</span>, <span class='va'>Meetings.x</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>filter (grouped): removed 2,189 rows (97%), 76 rows remaining (removed 99 groups, 3 groups remaining)
+<pre><code>filter (grouped): removed 2,169 rows (97%), 64 rows remaining (removed 99 groups, 3 groups remaining)
 select: dropped 21 variables (batch.x, data.x, estradiol, batch.y, data.y, …)</code></pre>
-<pre><code># A tibble: 76 × 5
+<pre><code># A tibble: 64 × 5
 # Groups:   ID [3]
       ID lh_surge_date lh_surge_date_2 date       Meetings.x
    &lt;dbl&gt; &lt;date&gt;        &lt;date&gt;          &lt;date&gt;     &lt;chr&gt;     
@@ -3044,7 +3060,7 @@ select: dropped 21 variables (batch.x, data.x, estradiol, batch.y, data.y, …)<
  8    37 2015-11-10    2015-11-12      2015-11-12 O         
  9    37 2015-11-10    2015-11-12      2015-11-13 S2        
 10    37 2015-11-10    2015-11-12      2015-11-14 &lt;NA&gt;      
-# ℹ 66 more rows</code></pre>
+# ℹ 54 more rows</code></pre>
 </div>
 <h2 id="validate-again">Validate again</h2>
 <div class="layout-chunk" data-layout="l-body">
@@ -3054,10 +3070,10 @@ select: dropped 21 variables (batch.x, data.x, estradiol, batch.y, data.y, …)<
 </div>
 <pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
 &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 714 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 682 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
 <pre><code>No summary function supplied, defaulting to `mean_se()`</code></pre>
-<pre><code>Warning: Removed 714 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 682 rows containing non-finite outside the scale range
 (`stat_summary()`).</code></pre>
 <img src="1_marcinkowska_import_files/figure-html5/unnamed-chunk-10-1.png" alt="" width="624" />
 <div class="sourceCode">
@@ -3066,10 +3082,10 @@ select: dropped 21 variables (batch.x, data.x, estradiol, batch.y, data.y, …)<
 </div>
 <pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
 &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 690 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 658 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
 <pre><code>No summary function supplied, defaulting to `mean_se()`</code></pre>
-<pre><code>Warning: Removed 690 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 658 rows containing non-finite outside the scale range
 (`stat_summary()`).</code></pre>
 <img src="1_marcinkowska_import_files/figure-html5/unnamed-chunk-10-2.png" alt="" width="624" />
 <div class="sourceCode">
@@ -3078,10 +3094,10 @@ select: dropped 21 variables (batch.x, data.x, estradiol, batch.y, data.y, …)<
 </div>
 <pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
 &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1140 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 1108 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
 <pre><code>No summary function supplied, defaulting to `mean_se()`</code></pre>
-<pre><code>Warning: Removed 1140 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 1108 rows containing non-finite outside the scale range
 (`stat_summary()`).</code></pre>
 <pre><code>Warning: Removed 1 row containing missing values or values outside the scale
 range (`geom_segment()`).</code></pre>
@@ -3092,10 +3108,10 @@ range (`geom_segment()`).</code></pre>
 </div>
 <pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
 &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 585 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 553 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
 <pre><code>No summary function supplied, defaulting to `mean_se()`</code></pre>
-<pre><code>Warning: Removed 585 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 553 rows containing non-finite outside the scale range
 (`stat_summary()`).</code></pre>
 <img src="1_marcinkowska_import_files/figure-html5/unnamed-chunk-10-4.png" alt="" width="624" />
 <div class="sourceCode">
@@ -3104,10 +3120,10 @@ range (`geom_segment()`).</code></pre>
 </div>
 <pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
 &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 590 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 558 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
 <pre><code>No summary function supplied, defaulting to `mean_se()`</code></pre>
-<pre><code>Warning: Removed 590 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 558 rows containing non-finite outside the scale range
 (`stat_summary()`).</code></pre>
 <img src="1_marcinkowska_import_files/figure-html5/unnamed-chunk-10-5.png" alt="" width="624" />
 <div class="sourceCode">
@@ -3116,10 +3132,10 @@ range (`geom_segment()`).</code></pre>
 </div>
 <pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
 &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1029 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 997 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
 <pre><code>No summary function supplied, defaulting to `mean_se()`</code></pre>
-<pre><code>Warning: Removed 1029 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 997 rows containing non-finite outside the scale range
 (`stat_summary()`).</code></pre>
 <img src="1_marcinkowska_import_files/figure-html5/unnamed-chunk-10-6.png" alt="" width="624" />
 <div class="sourceCode">
@@ -3143,11 +3159,11 @@ summarise: now one row and 2 columns, ungrouped</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>marc</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='va'>Meetings.x</span> <span class='op'>!=</span> <span class='va'>Meetings.y</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>Meetings.x</span>, <span class='va'>Meetings.y</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>filter (grouped): removed 2,246 rows (99%), 19 rows remaining (removed 85 groups, 17 groups remaining)
+<pre><code>filter (grouped): removed 2,213 rows (99%), 20 rows remaining (removed 84 groups, 18 groups remaining)
 Adding missing grouping variables: `id`
 select: dropped 23 variables (batch.x, data.x, estradiol, date, batch.y, …)</code></pre>
-<pre><code># A tibble: 19 × 3
-# Groups:   id [17]
+<pre><code># A tibble: 20 × 3
+# Groups:   id [18]
       id Meetings.x Meetings.y
    &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;     
  1  1236 SPotk3     Spotk3    
@@ -3167,14 +3183,15 @@ select: dropped 23 variables (batch.x, data.x, estradiol, date, batch.y, …)</c
 15    16 O S2       S2        
 16    26 O S2       S2        
 17    55 O          S2        
-18  1199 SPotk1     Spotk1    
-19     1 S1         Spotk1    </code></pre>
+18  1201 OWULACJA   Spotk2    
+19  1199 SPotk1     Spotk1    
+20     1 S1         Spotk1    </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>marc</span><span class='op'>$</span><span class='va'>Meetings.x</span><span class='op'>==</span><span class='va'>marc</span><span class='op'>$</span><span class='va'>Meetings.y</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 FALSE  TRUE 
-   19   264 </code></pre>
+   20   272 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>marc</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='fu'><a href='https://tidyselect.r-lib.org/reference/starts_with.html'>contains</a></span><span class='op'>(</span><span class='st'>"date"</span><span class='op'>)</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, <span class='va'>estradiol</span>, <span class='va'>estradiol_cens</span>, <span class='va'>progesterone</span>, <span class='va'>progesterone_cens</span>, <span class='va'>cycle_length</span>, Meetings_E2 <span class='op'>=</span> <span class='va'>Meetings.x</span>, Meetings_P4 <span class='op'>=</span> <span class='va'>Meetings.y</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
 <span><span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='http://gesistsa.github.io/rio/reference/export.html'>export</a></span><span class='op'>(</span><span class='st'>"data/marcinkowska/manual_clean/ula_merged.xlsx"</span><span class='op'>)</span></span></code></pre>
@@ -3246,7 +3263,7 @@ variables</code></pre>
 group_by: 2 grouping variables (id, cycle)
 summarise: now 102 rows and 3 columns, one group variable remaining (id)
 ungroup: no grouping variables remain
-filter (grouped): removed 715 rows (32%), 1,550 rows remaining (removed 3 groups, 99 groups remaining)
+filter (grouped): removed 683 rows (31%), 1,550 rows remaining (removed 3 groups, 99 groups remaining)
 group_by: one grouping variable (id)
 mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,545 unique values and 0% NA
                   new variable &#39;log_hormone_diff&#39; (double) with 1,545 unique values and 0% NA
@@ -3355,7 +3372,7 @@ $LH_test
 
 $distribution</code></pre>
 <pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
-<pre><code>Warning: Removed 686 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 654 rows containing non-finite outside the scale range
 (`stat_bin()`).</code></pre>
 <p><img src="1_marcinkowska_import_files/figure-html5/unnamed-chunk-13-1.png" alt="" width="624" /></p>
 <pre><code>
@@ -3381,7 +3398,7 @@ $range
 [1] &quot;2.50, 875.96&quot;
 
 $missing
-[1] 686
+[1] 654
 
 $outliers
 [1] 0
@@ -3396,7 +3413,7 @@ $n_cycles
 [1] 102
 
 $n_days
-[1] 2265
+[1] 2233
 
 $age
 [1] NA
@@ -3718,7 +3735,7 @@ variables</code></pre>
 group_by: 2 grouping variables (id, cycle)
 summarise: now 102 rows and 3 columns, one group variable remaining (id)
 ungroup: no grouping variables remain
-filter (grouped): removed 618 rows (27%), 1,647 rows remaining (removed 2 groups, 100 groups remaining)
+filter (grouped): removed 586 rows (26%), 1,647 rows remaining (removed 2 groups, 100 groups remaining)
 group_by: one grouping variable (id)
 mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,640 unique values and 0% NA
                   new variable &#39;log_hormone_diff&#39; (double) with 1,640 unique values and 0% NA
@@ -3829,7 +3846,7 @@ $LH_test
 
 $distribution</code></pre>
 <pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
-<pre><code>Warning: Removed 585 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 553 rows containing non-finite outside the scale range
 (`stat_bin()`).</code></pre>
 <p><img src="1_marcinkowska_import_files/figure-html5/unnamed-chunk-13-5.png" alt="" width="624" /></p>
 <pre><code>
@@ -3855,7 +3872,7 @@ $range
 [1] &quot;0.40, 46.52&quot;
 
 $missing
-[1] 585
+[1] 553
 
 $outliers
 [1] 0
@@ -3870,7 +3887,7 @@ $n_cycles
 [1] 102
 
 $n_days
-[1] 2265
+[1] 2233
 
 $age
 [1] NA
@@ -4170,28 +4187,28 @@ mutate (grouped): new variable &#39;hormone_cens&#39; (character) with one uniqu
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>summarise_hormones</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"Marcinkowska 2020"</span>, Method <span class='op'>=</span> <span class='st'>"Salivary immunoassay (DRG)"</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>filter (grouped): removed 1,231 rows (54%), 1,034 rows remaining (removed 6 groups, 96 groups remaining)
+<pre><code>filter (grouped): removed 1,167 rows (52%), 1,066 rows remaining (removed 3 groups, 99 groups remaining)
 select: dropped 25 variables (prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, est_estradiol_bc_high, …)
 Joining with `by = join_by(bc_day)`
 left_join: added one column (prc_stirn_bc)
            &gt; rows only in df           0
            &gt; rows only in bc_days (    9)
-           &gt; matched rows          1,034
+           &gt; matched rows          1,066
            &gt;                      =======
-           &gt; rows total            1,034
+           &gt; rows total            1,066
 select: dropped 25 variables (prc_wcx_fc, est_estradiol_fc, est_estradiol_fc_se, est_estradiol_fc_low, est_estradiol_fc_high, …)
 left_join: added one column (prc_stirn_fc)
            &gt; rows only in df           0
            &gt; rows only in fc_days (    9)
-           &gt; matched rows          1,034
+           &gt; matched rows          1,066
            &gt;                      =======
-           &gt; rows total            1,034
+           &gt; rows total            1,066
 left_join: added 22 columns (conception_risk_lh, fertile_lh, est_estradiol_lh, est_estradiol_lh_se, est_estradiol_lh_low, …)
            &gt; rows only in x          291
            &gt; rows only in lh_days (    0)
-           &gt; matched rows            743
+           &gt; matched rows            775
            &gt;                      =======
-           &gt; rows total            1,034
+           &gt; rows total            1,066
 group_by: one grouping variable (id)
 filter (grouped): removed all rows (100%)
 group_by: one grouping variable (id)
@@ -4209,7 +4226,7 @@ $Method
 [1] &quot;Salivary immunoassay (DRG)&quot;
 
 $scatterplot</code></pre>
-<pre><code>Warning: Removed 1211 rows containing missing values or values outside the
+<pre><code>Warning: Removed 1147 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
 <p><img src="1_marcinkowska_import_files/figure-html5/unnamed-chunk-13-9.png" alt="" width="624" /></p>
 <pre><code>
@@ -4220,98 +4237,98 @@ $n_cycles
 [1] 102
 
 $n_days
-[1] 2265
+[1] 2233
 
 $r_ep
-[1] &quot; 0.34 [ 0.29; 0.40]&quot;
+[1] &quot; 0.33 [ 0.28; 0.38]&quot;
 
 $r_log_ep
-[1] &quot; 0.31 [ 0.26; 0.37]&quot;
+[1] &quot; 0.31 [ 0.25; 0.36]&quot;
 
 $r_e_ratio
 [1] &quot; 0.17 [ 0.11; 0.23]&quot;
 
 $r_log_e_ratio
-[1] &quot; 0.47 [ 0.42; 0.51]&quot;
+[1] &quot; 0.47 [ 0.42; 0.52]&quot;
 
 $r_p_ratio
-[1] &quot;-0.30 [-0.35;-0.24]&quot;
+[1] &quot;-0.30 [-0.35;-0.25]&quot;
 
 $r_log_p_ratio
-[1] &quot;-0.69 [-0.72;-0.66]&quot;
+[1] &quot;-0.70 [-0.73;-0.66]&quot;
 
 $usable_n
-[1] 1034
+[1] 1066
 
 $r_bc_ratio
 [1] &quot; 0.14 [ 0.08; 0.20]&quot;
 
 $r_bc_log_ratio
-[1] &quot; 0.24 [ 0.18; 0.30]&quot;
+[1] &quot; 0.24 [ 0.19; 0.30]&quot;
 
 $m_bc_prob_rat
  Family: gaussian 
   Links: mu = identity 
 Formula: prc_stirn_bc ~ log(estradiol) + log(ratio) 
-   Data: df (Number of observations: 1034) 
+   Data: df (Number of observations: 1066) 
   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
 Regression Coefficients:
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept        0.28      0.02     0.23     0.32 1.00     2699
-logestradiol    -0.00      0.01    -0.02     0.01 1.00     2713
-logratio         0.04      0.01     0.03     0.05 1.00     3056
+Intercept        0.28      0.02     0.24     0.32 1.00     2417
+logestradiol    -0.00      0.01    -0.02     0.01 1.00     2760
+logratio         0.04      0.00     0.03     0.05 1.00     2616
              Tail_ESS
-Intercept        2630
-logestradiol     2403
-logratio         2853
+Intercept        2054
+logestradiol     2433
+logratio         2321
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.16      0.00     0.15     0.16 1.00     2937     2405
+sigma     0.16      0.00     0.15     0.17 1.00     2633     2422
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_erat_bc
-[1] &quot;0.23 [0.16;0.28]&quot;
+[1] &quot;0.23 [0.16;0.29]&quot;
 
 $m_bc_prob
  Family: gaussian 
   Links: mu = identity 
 Formula: prc_stirn_bc ~ s(log(estradiol), log(progesterone)) 
-   Data: df (Number of observations: 1034) 
+   Data: df (Number of observations: 1066) 
   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
 Smoothing Spline Hyperparameters:
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.18      0.05     0.09
+sds(slogestradiollogprogesterone_1)     0.19      0.06     0.10
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.30 1.00     1044     1720
+sds(slogestradiollogprogesterone_1)     0.32 1.00     1356     2306
 
 Regression Coefficients:
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.18      0.00     0.17     0.19
-slogestradiollogprogesterone_1    -0.76      0.27    -1.32    -0.24
-slogestradiollogprogesterone_2     0.47      0.31    -0.14     1.06
+slogestradiollogprogesterone_1    -0.80      0.27    -1.35    -0.28
+slogestradiollogprogesterone_2    -0.28      0.31    -0.88     0.32
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     7627     2942
-slogestradiollogprogesterone_1 1.00     2188     2258
-slogestradiollogprogesterone_2 1.00     2243     2532
+Intercept                      1.00     8768     2715
+slogestradiollogprogesterone_1 1.00     2617     2478
+slogestradiollogprogesterone_2 1.00     2734     2719
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.15      0.00     0.15     0.16 1.00     4669     2821
+sigma     0.15      0.00     0.15     0.16 1.00     6073     2745
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_loo_bc
-[1] &quot;0.29 [0.22;0.34]&quot;
+[1] &quot;0.30 [0.23;0.35]&quot;
 
 $r_fc_ratio
 [1] &quot; 0.06 [ 0.00; 0.12]&quot;
@@ -4323,137 +4340,137 @@ $m_fc_prob_rat
  Family: gaussian 
   Links: mu = identity 
 Formula: prc_stirn_fc ~ log(estradiol) + log(ratio) 
-   Data: df (Number of observations: 1034) 
+   Data: df (Number of observations: 1066) 
   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
 Regression Coefficients:
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept        0.23      0.02     0.18     0.27 1.00     2351
-logestradiol     0.01      0.01    -0.01     0.02 1.00     2656
-logratio         0.02      0.01     0.01     0.03 1.00     2721
+Intercept        0.23      0.02     0.18     0.27 1.00     2571
+logestradiol     0.01      0.01    -0.01     0.02 1.00     2908
+logratio         0.02      0.01     0.01     0.03 1.00     2918
              Tail_ESS
-Intercept        2032
-logestradiol     2648
-logratio         2511
+Intercept        2648
+logestradiol     2886
+logratio         2641
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.18      0.00     0.17     0.18 1.00     2968     2565
+sigma     0.18      0.00     0.17     0.19 1.00     2749     2332
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_erat_fc
-[1] &quot;0.12 [NaN;0.18]&quot;
+[1] &quot;0.13 [NaN;0.18]&quot;
 
 $m_fc_prob
  Family: gaussian 
   Links: mu = identity 
 Formula: prc_stirn_fc ~ s(log(estradiol), log(progesterone)) 
-   Data: df (Number of observations: 1034) 
+   Data: df (Number of observations: 1066) 
   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
 Smoothing Spline Hyperparameters:
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.22      0.06     0.12
+sds(slogestradiollogprogesterone_1)     0.24      0.06     0.13
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.36 1.00     1336     1928
+sds(slogestradiollogprogesterone_1)     0.38 1.00     1424     2281
 
 Regression Coefficients:
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.19      0.01     0.18     0.20
-slogestradiollogprogesterone_1    -0.58      0.33    -1.27     0.03
-slogestradiollogprogesterone_2    -0.13      0.36    -0.86     0.56
+slogestradiollogprogesterone_1    -0.53      0.33    -1.18     0.10
+slogestradiollogprogesterone_2     0.30      0.36    -0.40     1.03
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     9020     2629
-slogestradiollogprogesterone_1 1.00     2275     2591
-slogestradiollogprogesterone_2 1.00     2745     2985
+Intercept                      1.00     6808     3184
+slogestradiollogprogesterone_1 1.00     2154     2683
+slogestradiollogprogesterone_2 1.00     2298     2392
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.17      0.00     0.17     0.18 1.00     6457     2778
+sigma     0.17      0.00     0.17     0.18 1.00     5394     2404
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_loo_fc
-[1] &quot;0.21 [0.13;0.27]&quot;
+[1] &quot;0.22 [0.15;0.28]&quot;
 
 $r_lh_ratio
-[1] &quot; 0.12 [ 0.05; 0.19]&quot;
+[1] &quot; 0.12 [ 0.05; 0.18]&quot;
 
 $r_lh_log_ratio
-[1] &quot; 0.20 [ 0.13; 0.27]&quot;
+[1] &quot; 0.21 [ 0.14; 0.28]&quot;
 
 $m_lh_prob_rat
  Family: gaussian 
   Links: mu = identity 
 Formula: fertile_lh ~ log(estradiol) + log(ratio) 
-   Data: df (Number of observations: 743) 
+   Data: df (Number of observations: 775) 
   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
 Regression Coefficients:
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept        0.28      0.04     0.20     0.37 1.00     2239
-logestradiol    -0.00      0.01    -0.03     0.02 1.00     2520
-logratio         0.05      0.01     0.03     0.07 1.00     2582
+Intercept        0.29      0.04     0.21     0.37 1.00     1842
+logestradiol    -0.00      0.01    -0.03     0.02 1.00     2215
+logratio         0.05      0.01     0.03     0.07 1.00     2496
              Tail_ESS
-Intercept        1919
-logestradiol     2030
-logratio         2442
+Intercept        2336
+logestradiol     2357
+logratio         2532
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.26      0.01     0.25     0.28 1.00     3225     2381
+sigma     0.26      0.01     0.25     0.28 1.00     2559     2333
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_erat_lh
-[1] &quot;0.18 [0.07;0.25]&quot;
+[1] &quot;0.19 [0.08;0.25]&quot;
 
 $m_lh_prob
  Family: gaussian 
   Links: mu = identity 
 Formula: fertile_lh ~ s(log(estradiol), log(progesterone)) 
-   Data: df (Number of observations: 743) 
+   Data: df (Number of observations: 775) 
   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
 Smoothing Spline Hyperparameters:
                                     Estimate Est.Error l-95% CI
-sds(slogestradiollogprogesterone_1)     0.26      0.09     0.12
+sds(slogestradiollogprogesterone_1)     0.29      0.09     0.14
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.46 1.00     1378     2309
+sds(slogestradiollogprogesterone_1)     0.49 1.00     1469     2438
 
 Regression Coefficients:
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.16      0.01     0.14     0.18
-slogestradiollogprogesterone_1    -0.95      0.48    -1.91    -0.03
-slogestradiollogprogesterone_2     0.57      0.50    -0.36     1.60
+slogestradiollogprogesterone_1    -1.00      0.51    -2.02     0.02
+slogestradiollogprogesterone_2     0.54      0.50    -0.42     1.58
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.01     7718     2496
-slogestradiollogprogesterone_1 1.00     3114     2570
-slogestradiollogprogesterone_2 1.00     2759     2921
+Intercept                      1.00     7063     2279
+slogestradiollogprogesterone_1 1.00     2458     2857
+slogestradiollogprogesterone_2 1.00     2709     2597
 
 Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.26      0.01     0.25     0.27 1.00     6724     2656
+sigma     0.26      0.01     0.25     0.27 1.00     6485     2880
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_loo_lh
-[1] &quot;0.24 [0.15;0.31]&quot;</code></pre>
+[1] &quot;0.26 [0.18;0.32]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb608"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb616"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

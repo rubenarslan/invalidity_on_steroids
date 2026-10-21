@@ -2906,7 +2906,7 @@ Show code
 <td headers="Sample stub_1_3 BioCycle" class="gt_row gt_left">4072</td>
 <td headers="Sample stub_1_3 OCMATE Non-HC" class="gt_row gt_left">2394</td>
 <td headers="Sample stub_1_3 Roney 2013" class="gt_row gt_left">2367</td>
-<td headers="Sample stub_1_3 Marcinkowska 2020" class="gt_row gt_left">2265</td>
+<td headers="Sample stub_1_3 Marcinkowska 2020" class="gt_row gt_left">2233</td>
 <td headers="Sample stub_1_3 GOL2" class="gt_row gt_left">1028</td>
 <td headers="Sample stub_1_3 GOCD2" class="gt_row gt_left">628</td>
 <td headers="Sample stub_1_3 Blake 2017" class="gt_row gt_left">120</td>
@@ -4259,7 +4259,7 @@ Show code
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>e2_summaries</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"n_days"</span><span class='op'>)</span>, .default <span class='op'>=</span> <span class='cn'>NA</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/r/base/unlist.html'>unlist</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<pre><code>[1] 12940</code></pre>
+<pre><code>[1] 12908</code></pre>
 <details>
 <summary>
 Show code
@@ -5582,7 +5582,7 @@ Show code
 <span>                      <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>cycle_length</span><span class='op'>)</span> <span class='op'>|</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/between.html'>between</a></span><span class='op'>(</span><span class='va'>cycle_length</span>, <span class='fl'>20</span>,<span class='fl'>35</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<pre><code>filter: removed 102 rows (5%), 2,163 rows remaining</code></pre>
+<pre><code>filter: removed 102 rows (5%), 2,131 rows remaining</code></pre>
 <details>
 <summary>
 Show code
@@ -5592,14 +5592,14 @@ Show code
 </div>
 </details>
 <pre><code>group_by: 2 grouping variables (id, cycle)
-mutate (grouped): new variable &#39;e2_cm&#39; (double) with 1,198 unique values and 44% NA
+mutate (grouped): new variable &#39;e2_cm&#39; (double) with 1,198 unique values and 43% NA
                   new variable &#39;drop&#39; (double) with 1,113 unique values and 48% NA
                   new variable &#39;day_of_drop&#39; (double) with 13 unique values and 0% NA
                   new variable &#39;day_of_peak&#39; (double) with 14 unique values and 0% NA
                   new variable &#39;ed_day&#39; (double) with 42 unique values and 0% NA
                   new variable &#39;ep_day&#39; (double) with 42 unique values and 0% NA
-mutate (grouped): new variable &#39;p4_cm&#39; (double) with 776 unique values and 64% NA
-                  new variable &#39;rise&#39; (double) with 652 unique values and 70% NA
+mutate (grouped): new variable &#39;p4_cm&#39; (double) with 776 unique values and 63% NA
+                  new variable &#39;rise&#39; (double) with 650 unique values and 69% NA
                   new variable &#39;day_of_rise&#39; (double) with 13 unique values and 3% NA
                   new variable &#39;pr_day&#39; (double) with 43 unique values and 3% NA</code></pre>
 <details>
@@ -6115,7 +6115,7 @@ Show code
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>marc</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='va'>ed_day</span> <span class='op'>==</span> <span class='fl'>0</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/pull.html'>pull</a></span><span class='op'>(</span><span class='va'>bc_day</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/qplot.html'>qplot</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<pre><code>filter (grouped): removed 2,060 rows (95%), 103 rows remaining (removed 0 groups, 100 groups remaining)
+<pre><code>filter (grouped): removed 2,031 rows (95%), 100 rows remaining (removed 0 groups, 100 groups remaining)
 `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
 <img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-21.png" alt="" width="1365.12" />
 <details>
@@ -6175,9 +6175,9 @@ Show code
 </details>
 <pre><code>ungroup: no grouping variables remain
 select: dropped 18 variables (cycle, date, lh_surge_date, lh_surge_date_2, estradiol, …)
-mutate: changed 2,163 values (100%) of &#39;bc_day&#39; (0 new NAs)
-        changed 2,163 values (100%) of &#39;fc_day&#39; (0 new NAs)
-distinct: removed 32 rows (1%), 2,131 rows remaining
+mutate: changed 2,131 values (100%) of &#39;bc_day&#39; (0 new NAs)
+        changed 2,131 values (100%) of &#39;fc_day&#39; (0 new NAs)
+distinct: no rows removed
 pivot_longer: reorganized (ep_day, ed_day, pr_day, bc_day, fc_day) into (method, day) [was 2131x7, now 10655x4]
 mutate: changed 10,212 values (96%) of &#39;day&#39; (2,624 new NAs)
 group_by: one grouping variable (method)
@@ -6202,9 +6202,9 @@ Show code
 </div>
 </details>
 <pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 535 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 503 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
-<pre><code>Warning: Removed 535 rows containing missing values or values outside the
+<pre><code>Warning: Removed 503 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
 <img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-22.png" alt="" width="1365.12" />
 <details>
@@ -6219,9 +6219,9 @@ Show code
 </div>
 </details>
 <pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 675 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 643 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
-<pre><code>Warning: Removed 675 rows containing missing values or values outside the
+<pre><code>Warning: Removed 643 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
 <img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-23.png" alt="" width="1365.12" />
 <details>
@@ -6236,9 +6236,9 @@ Show code
 </div>
 </details>
 <pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 543 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 511 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
-<pre><code>Warning: Removed 543 rows containing missing values or values outside the
+<pre><code>Warning: Removed 511 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
 <img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-24.png" alt="" width="1365.12" />
 <details>
@@ -6253,10 +6253,10 @@ Show code
 <span>         <span class='fu'><a href='https://paulbuerkner.com/brms/reference/add_criterion.html'>add_criterion</a></span><span class='op'>(</span><span class='st'>"bayes_R2"</span>, re_formula <span class='op'>=</span> <span class='cn'>NA</span><span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<pre><code>mutate (grouped): changed 1,880 values (87%) of &#39;lh_day&#39; (533 fewer NAs)
-                  new variable &#39;hormone&#39; (double) with 1,619 unique values and 24% NA
-                  new variable &#39;hormone_cens&#39; (character) with 3 unique values and 24% NA
-filter (grouped): removed 72 rows (3%), 2,091 rows remaining (removed 0 groups, 100 groups remaining)</code></pre>
+<pre><code>mutate (grouped): changed 1,859 values (87%) of &#39;lh_day&#39; (533 fewer NAs)
+                  new variable &#39;hormone&#39; (double) with 1,619 unique values and 23% NA
+                  new variable &#39;hormone_cens&#39; (character) with 3 unique values and 23% NA
+filter (grouped): removed 72 rows (3%), 2,059 rows remaining (removed 0 groups, 100 groups remaining)</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
 <details>
 <summary>
@@ -6302,9 +6302,9 @@ Show code
 </div>
 </details>
 <pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 682 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 650 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
-<pre><code>Warning: Removed 682 rows containing missing values or values outside the
+<pre><code>Warning: Removed 650 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
 <img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-25.png" alt="" width="1365.12" />
 <details>
@@ -6319,9 +6319,9 @@ Show code
 </div>
 </details>
 <pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 675 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 643 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
-<pre><code>Warning: Removed 675 rows containing missing values or values outside the
+<pre><code>Warning: Removed 643 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
 <img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-26.png" alt="" width="1365.12" />
 <details>
@@ -6336,9 +6336,9 @@ Show code
 </div>
 </details>
 <pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 609 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 577 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
-<pre><code>Warning: Removed 609 rows containing missing values or values outside the
+<pre><code>Warning: Removed 577 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
 <img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-27.png" alt="" width="1365.12" />
 <details>
@@ -6353,9 +6353,9 @@ Show code
 </div>
 </details>
 <pre><code>`geom_smooth()` using formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 689 rows containing non-finite outside the scale range
+<pre><code>Warning: Removed 657 rows containing non-finite outside the scale range
 (`stat_smooth()`).</code></pre>
-<pre><code>Warning: Removed 689 rows containing missing values or values outside the
+<pre><code>Warning: Removed 657 rows containing missing values or values outside the
 scale range (`geom_point()`).</code></pre>
 <img src="4_plots_for_paper_files/figure-html5/unnamed-chunk-20-28.png" alt="" width="1365.12" />
 <details>
@@ -6624,7 +6624,7 @@ full_join: added one column (mean_e_biocycle)
            &gt;                                        ====
            &gt; rows total                              31
 group_by: one grouping variable (ed_day)
-filter (grouped): removed 62 rows (3%), 2,101 rows remaining (removed 11 groups, 31 groups remaining)
+filter (grouped): removed 62 rows (3%), 2,069 rows remaining (removed 11 groups, 31 groups remaining)
 summarise: now 31 rows and 2 columns, ungrouped
 full_join: added one column (mean_e_marc)
            &gt; rows only in x                           0
@@ -6682,7 +6682,7 @@ full_join: added one column (mean_e_biocycle)
            &gt;                                        ====
            &gt; rows total                              31
 group_by: one grouping variable (ep_day)
-filter (grouped): removed 72 rows (3%), 2,091 rows remaining (removed 11 groups, 31 groups remaining)
+filter (grouped): removed 72 rows (3%), 2,059 rows remaining (removed 11 groups, 31 groups remaining)
 summarise: now 31 rows and 2 columns, ungrouped
 full_join: added one column (mean_e_marc)
            &gt; rows only in x                           0
@@ -6740,7 +6740,7 @@ full_join: added one column (mean_p_biocycle)
            &gt;                                        ====
            &gt; rows total                              31
 group_by: one grouping variable (ed_day)
-filter (grouped): removed 62 rows (3%), 2,101 rows remaining (removed 11 groups, 31 groups remaining)
+filter (grouped): removed 62 rows (3%), 2,069 rows remaining (removed 11 groups, 31 groups remaining)
 summarise: now 31 rows and 2 columns, ungrouped
 full_join: added one column (mean_p_marc)
            &gt; rows only in x                           0
