@@ -2900,7 +2900,7 @@ Show code
 <td headers="Sample stub_1_2 Marcinkowska 2020" class="gt_row gt_left">102</td>
 <td headers="Sample stub_1_2 GOL2" class="gt_row gt_left">454</td>
 <td headers="Sample stub_1_2 GOCD2" class="gt_row gt_left">398</td>
-<td headers="Sample stub_1_2 Blake 2017" class="gt_row gt_left">109</td>
+<td headers="Sample stub_1_2 Blake 2017" class="gt_row gt_left">86</td>
 <td headers="Sample stub_1_2 Grebe et al. 2016" class="gt_row gt_left">33</td></tr>
     <tr><th id="stub_1_3" scope="row" class="gt_row gt_left gt_stub">Days</th>
 <td headers="Sample stub_1_3 BioCycle" class="gt_row gt_left">4072</td>
@@ -2948,7 +2948,7 @@ Show code
 <td headers="Cycle phase stub_1_7 Marcinkowska 2020" class="gt_row gt_left">28.2±2.99</td>
 <td headers="Cycle phase stub_1_7 GOL2" class="gt_row gt_left">30.0±4.75</td>
 <td headers="Cycle phase stub_1_7 GOCD2" class="gt_row gt_left">29.5±6.54</td>
-<td headers="Cycle phase stub_1_7 Blake 2017" class="gt_row gt_left">29.2±2.50</td>
+<td headers="Cycle phase stub_1_7 Blake 2017" class="gt_row gt_left">29.2±2.39</td>
 <td headers="Cycle phase stub_1_7 Grebe et al. 2016" class="gt_row gt_left">28.8±3.71</td></tr>
     <tr><th id="stub_1_8" scope="row" class="gt_row gt_left gt_stub">Indicators</th>
 <td headers="Cycle phase stub_1_8 BioCycle" class="gt_row gt_left">FC+BC+LH</td>
@@ -4068,8 +4068,8 @@ pivot_wider: reorganized (centring, value) into (Figure 4, Both centred) [was 80
 <td style="text-align: left;">Estradiol</td>
 <td style="text-align: left;">Blake ’17</td>
 <td style="text-align: left;">lh</td>
-<td style="text-align: left;">0.01 [-0.35; 0.38]</td>
-<td style="text-align: left;">-0.02 [-0.54; 0.50]</td>
+<td style="text-align: left;">0.06 [-0.35; 0.46]</td>
+<td style="text-align: left;">-0.00 [-0.57; 0.57]</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Estradiol</td>
@@ -4208,8 +4208,8 @@ pivot_wider: reorganized (centring, value) into (Figure 4, Both centred) [was 80
 <td style="text-align: left;">Progesterone</td>
 <td style="text-align: left;">Blake ’17</td>
 <td style="text-align: left;">lh</td>
-<td style="text-align: left;">0.13 [-0.22; 0.44]</td>
-<td style="text-align: left;">0.21 [-0.26; 0.60]</td>
+<td style="text-align: left;">0.19 [-0.17; 0.50]</td>
+<td style="text-align: left;">0.31 [-0.18; 0.68]</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Progesterone</td>
@@ -4318,10 +4318,10 @@ filter (grouped): removed 17 rows (50%), 17 rows remaining (removed 3 groups, 3 
 <pre><code>
  Descriptive statistics by group 
 group: lh
-   vars n mean   sd median trimmed  mad  min  max range skew kurtosis
-X1    1 4 0.15 0.11   0.15    0.15 0.11 0.01 0.29  0.27 0.04     -1.9
+   vars n mean  sd median trimmed  mad  min  max range skew kurtosis
+X1    1 4 0.16 0.1   0.15    0.16 0.08 0.06 0.29  0.23 0.28     -1.9
      se
-X1 0.06
+X1 0.05
 ---------------------------------------------------- 
 group: bc
    vars n mean   sd median trimmed  mad  min  max range  skew
@@ -4335,9 +4335,9 @@ X1    1 7 0.21 0.16   0.25    0.21 0.15 -0.09 0.36  0.44 -0.84
    kurtosis   se
 X1    -0.82 0.06</code></pre>
 <pre><code>   vars  n mean   sd median trimmed  mad   min  max range  skew
-X1    1 17  0.2 0.13   0.25    0.21 0.12 -0.09 0.36  0.45 -0.68
+X1    1 17 0.21 0.13   0.25    0.22 0.12 -0.09 0.36  0.45 -0.69
    kurtosis   se
-X1    -0.63 0.03</code></pre>
+X1    -0.49 0.03</code></pre>
 </div>
 <h3 id="p4">P4</h3>
 <div class="layout-chunk" data-layout="l-body">
@@ -4359,10 +4359,10 @@ filter (grouped): removed 17 rows (50%), 17 rows remaining (removed 3 groups, 3 
 <pre><code>
  Descriptive statistics by group 
 group: lh
-   vars n mean   sd median trimmed mad  min  max range  skew kurtosis
-X1    1 4 0.58 0.33   0.69    0.58 0.2 0.13 0.84  0.71 -0.49     -1.9
+   vars n mean  sd median trimmed mad  min  max range  skew kurtosis
+X1    1 4  0.6 0.3   0.69     0.6 0.2 0.19 0.84  0.65 -0.45       -2
      se
-X1 0.16
+X1 0.15
 ---------------------------------------------------- 
 group: bc
    vars n mean   sd median trimmed  mad  min  max range  skew
@@ -4376,7 +4376,7 @@ X1    1 7 0.52 0.34   0.56    0.52 0.41 0.04 0.93  0.89 -0.29
    kurtosis   se
 X1     -1.7 0.13</code></pre>
 <pre><code>   vars  n mean   sd median trimmed  mad  min  max range  skew
-X1    1 17 0.57 0.29   0.59    0.58 0.32 0.04 0.93  0.89 -0.59
+X1    1 17 0.57 0.29   0.59    0.58 0.32 0.04 0.93  0.89 -0.58
    kurtosis   se
 X1     -1.1 0.07</code></pre>
 </div>
@@ -4465,7 +4465,7 @@ Show code
 <td style="text-align: left;">fc</td>
 <td style="text-align: right;">NaN</td>
 <td style="text-align: right;">NaN</td>
-<td style="text-align: right;">NaN</td>
+<td style="text-align: right;">0.09</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Estradiol</td>
@@ -4747,7 +4747,7 @@ Show code
 <td style="text-align: left;">bc</td>
 <td style="text-align: right;">NaN</td>
 <td style="text-align: right;">NaN</td>
-<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.26</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Progesterone</td>
@@ -4755,7 +4755,7 @@ Show code
 <td style="text-align: left;">fc</td>
 <td style="text-align: right;">NaN</td>
 <td style="text-align: right;">NaN</td>
-<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">0.25</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Progesterone</td>
@@ -4763,7 +4763,7 @@ Show code
 <td style="text-align: left;">lh</td>
 <td style="text-align: right;">NaN</td>
 <td style="text-align: right;">NaN</td>
-<td style="text-align: right;">NaN</td>
+<td style="text-align: right;">0.21</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Progesterone</td>
@@ -4891,9 +4891,9 @@ mutate: no changes</code></pre>
 <td style="text-align: left;">Estradiol</td>
 <td style="text-align: left;">Blake ’17</td>
 <td style="text-align: left;">var_cycle_loo</td>
-<td style="text-align: right;">0.04</td>
-<td style="text-align: right;">-0.01</td>
-<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">-0.05</td>
+<td style="text-align: right;">-0.08</td>
+<td style="text-align: right;">-0.03</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Progesterone</td>
@@ -4907,9 +4907,9 @@ mutate: no changes</code></pre>
 <td style="text-align: left;">Progesterone</td>
 <td style="text-align: left;">Blake ’17</td>
 <td style="text-align: left;">var_cycle_loo</td>
-<td style="text-align: right;">-0.01</td>
-<td style="text-align: right;">-0.07</td>
-<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">-0.03</td>
+<td style="text-align: right;">-0.08</td>
+<td style="text-align: right;">0.02</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Estradiol</td>
@@ -5197,14 +5197,14 @@ mutate (grouped): new variable &#39;max_diff&#39; (double) with 2 unique values 
 # Groups:   Hormone [2]
   Hormone      transformation median    mean max_diff
   &lt;chr&gt;        &lt;chr&gt;           &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
-1 Estradiol    &quot;&quot;              0.035  0.0785   0.0155
-2 Estradiol    &quot;diff&quot;          0.045  0.088    0.0155
-3 Estradiol    &quot;log&quot;           0.06   0.093    0.0155
-4 Estradiol    &quot;log_diff&quot;      0.05   0.094    0.0155
-5 Progesterone &quot;&quot;             -0.3   -0.274    0.0840
-6 Progesterone &quot;diff&quot;         -0.335 -0.31     0.0840
-7 Progesterone &quot;log&quot;          -0.315 -0.318    0.0840
-8 Progesterone &quot;log_diff&quot;     -0.345 -0.358    0.0840</code></pre>
+1 Estradiol    &quot;&quot;              0.035  0.078    0.0160
+2 Estradiol    &quot;diff&quot;          0.045  0.088    0.0160
+3 Estradiol    &quot;log&quot;           0.06   0.0925   0.0160
+4 Estradiol    &quot;log_diff&quot;      0.05   0.094    0.0160
+5 Progesterone &quot;&quot;             -0.3   -0.274    0.085 
+6 Progesterone &quot;diff&quot;         -0.335 -0.311    0.085 
+7 Progesterone &quot;log&quot;          -0.315 -0.319    0.085 
+8 Progesterone &quot;log_diff&quot;     -0.345 -0.360    0.085 </code></pre>
 <details>
 <summary>
 Show code
@@ -5466,7 +5466,7 @@ Show code
 <pre><code># A tibble: 1 × 7
   format width height colorspace matte filesize density
   &lt;chr&gt;  &lt;int&gt;  &lt;int&gt; &lt;chr&gt;      &lt;lgl&gt;    &lt;int&gt; &lt;chr&gt;  
-1 PNG     4590   2700 sRGB       TRUE   2492902 72x72  </code></pre>
+1 PNG     4590   2700 sRGB       TRUE   2491905 72x72  </code></pre>
 <details>
 <summary>
 Show code
@@ -10004,28 +10004,22 @@ Show code
 <span>    <span class='op'>)</span></span></code></pre>
 </div>
 </details>
-<pre><code>Warning: There were 9 divergent transitions after warmup. Increasing
-adapt_delta above 0.99 may help. See
-http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
 <pre><code>Warning: There were 5 divergent transitions after warmup. Increasing
 adapt_delta above 0.99 may help. See
 http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
 <pre><code>Warning: There were 1 divergent transitions after warmup. Increasing
 adapt_delta above 0.99 may help. See
 http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
-<pre><code>Warning: There were 143 divergent transitions after warmup.
-Increasing adapt_delta above 0.99 may help. See
+<pre><code>Warning: There were 4 divergent transitions after warmup. Increasing
+adapt_delta above 0.99 may help. See
 http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
 <pre><code>Warning: There were 1 divergent transitions after warmup. Increasing
 adapt_delta above 0.99 may help. See
-http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
-<pre><code>Warning: Parts of the model have not converged (some Rhats are &gt;
-1.05). Be careful when analysing the results! We recommend running
-more iterations and/or setting stronger priors.</code></pre>
-<pre><code>Warning: There were 3 divergent transitions after warmup. Increasing
-adapt_delta above 0.99 may help. See
 http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
-Warning: There were 3 divergent transitions after warmup. Increasing
+Warning: There were 1 divergent transitions after warmup. Increasing
+adapt_delta above 0.99 may help. See
+http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
+<pre><code>Warning: There were 3 divergent transitions after warmup. Increasing
 adapt_delta above 0.99 may help. See
 http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
 <pre><code>Warning: There were 1 divergent transitions after warmup. Increasing
@@ -10598,14 +10592,14 @@ mutate: converted &#39;Dataset&#39; from factor to character (0 new NA)</code></
 <td headers="lh_day" class="gt_row gt_right">412/247/143</td></tr>
     <tr><td headers="Dataset" class="gt_row gt_left">Blake '17</td>
 <td headers="Hormone" class="gt_row gt_left">Estradiol</td>
-<td headers="fc_day" class="gt_row gt_right">114/103/58</td>
-<td headers="bc_day" class="gt_row gt_right">110/99/58</td>
-<td headers="lh_day" class="gt_row gt_right">92/85/58</td></tr>
+<td headers="fc_day" class="gt_row gt_right">114/84/58</td>
+<td headers="bc_day" class="gt_row gt_right">110/83/58</td>
+<td headers="lh_day" class="gt_row gt_right">88/58/58</td></tr>
     <tr><td headers="Dataset" class="gt_row gt_left"></td>
 <td headers="Hormone" class="gt_row gt_left">Progesterone</td>
-<td headers="fc_day" class="gt_row gt_right">114/103/58</td>
-<td headers="bc_day" class="gt_row gt_right">110/99/58</td>
-<td headers="lh_day" class="gt_row gt_right">92/85/58</td></tr>
+<td headers="fc_day" class="gt_row gt_right">114/84/58</td>
+<td headers="bc_day" class="gt_row gt_right">110/83/58</td>
+<td headers="lh_day" class="gt_row gt_right">88/58/58</td></tr>
     <tr><td headers="Dataset" class="gt_row gt_left">Grebe '16</td>
 <td headers="Hormone" class="gt_row gt_left">Estradiol</td>
 <td headers="fc_day" class="gt_row gt_right">58/31</td>
@@ -10621,7 +10615,7 @@ mutate: converted &#39;Dataset&#39; from factor to character (0 new NA)</code></
 </table>
 </div>
 </div>
-<div class="sourceCode" id="cb558"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb556"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

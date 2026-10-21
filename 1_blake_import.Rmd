@@ -36,7 +36,7 @@ blake <- blake %>%
 
 qplot(blake$date_nonfertile_session, blake$date_fertile_session) + geom_abline()
 
-blake_long <- blake_long %>% left_join(blake %>% mutate(partner = if_else(RelStat == "single", 0, 1)) %>%  select(SUBJECT = Subject, LengthRep, date_fertile_session, date_nonfertile_session, date_first, age = Age, partner))
+blake_long <- blake_long %>% left_join(blake %>% mutate(partner = if_else(RelStat == "single", 0, 1)) %>%  select(SUBJECT = Subject, LengthRep, CycleDiff, date_fertile_session, date_nonfertile_session, date_first, age = Age, partner))
 
 blake_long <- blake_long %>% 
   mutate(date = if_else(Fertility == 1, date_fertile_session, date_nonfertile_session),
@@ -48,8 +48,19 @@ blake_long <- blake_long %>%
   # which put the surge after the session and shifted every LH day by twice that number)
   mutate(date_lh_peak = na.omit(date - DaysAfterPeak),
          lh_day = as.numeric(date - date_lh_peak),
-         cycle_no = if_else(rep(lh_day[1] < lh_day[2] &
-                            Day[1] < Day[2], 2), 1, Session + 1))
+         # sessions belong to the same cycle if they share the reported menstrual onset.
+         # (Until 2026, the rule compared the two rows in file order, which split cycles and merged others.)
+         onset = date - (Day - 1),
+         cycle_no = dense_rank(onset),
+         # days relative to the LH surge only for sessions in the cycle of the surge
+         lh_day = if_else(cycle_no == cycle_no[Fertility == 1], lh_day, NA_real_)) %>% 
+  ungroup()
+
+# check: the grouping by onset reproduces Blake et al.'s own cycle labels (CycleDiff = 0: same cycle)
+blake_cycles <- blake_long %>% group_by(SUBJECT) %>% 
+  summarise(one_cycle = n_distinct(cycle_no) == 1, same_cycle_blake = first(CycleDiff) == 0)
+xtabs(~ one_cycle + same_cycle_blake, blake_cycles)
+stopifnot(all(blake_cycles$one_cycle == blake_cycles$same_cycle_blake))
 
 qplot(Day, data = blake_long) + facet_wrap(~ Fertility)
 qplot(lh_day, data = blake_long,binwidth = 1) + facet_wrap(~ Fertility)
