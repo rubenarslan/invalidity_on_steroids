@@ -381,6 +381,7 @@ ratio_summary_table()
   - `r_within_fc/bc/lh_imputed` and `r_within_fc/bc/lh_imputed_rr` are a sensitivity analysis: measured and imputed log hormones both centred on the woman's mean (a repeated-measures correlation), range-corrected with the pooled within-woman SD of the imputed values.
   - `r_fc/bc_stirn` reflect correlations with the imputed probability of being in the fertile window according to the method in Gangestad et al. 2016 (based on Stirnemann's data).
   - `r_prob_lh` reflects correlations with the probability of being in the fertile window according to LH tests, based on the method in Stern et al. 2018 (supplement), which meta-analyzed various probabilities of conception relative to the day of ovulation.
+- Jünger '18's saliva samples were also assayed for estradiol by LC-MS/MS (`Estradiol LCMS` in the [Jünger '18 import](1_gocd2_import.html)). `r lcms <- rio::import("summaries/table_GOCD2_Estradiol LCMS.rds"); sprintf("Only %.0f%% of the %.0f samples with a value", 100 * (1 - lcms$censored / (lcms$n_days - lcms$missing)), lcms$n_days - lcms$missing)` were above the limit of quantitation (Stern et al., 2019, report 22% of all possible values), the rest were set to 1 pg/ml and treated as censored. We fitted the same models to this measure, but do not report them in these tables or in the article, because an assay that detects so few values cannot track the cycle.
 
 
 ## Literature survey of estradiol assays
