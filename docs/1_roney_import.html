@@ -1692,6 +1692,63 @@ is.na(estradiol) FALSE TRUE
            FALSE  1167   31
            TRUE     30 1399</code></pre>
 <div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># Days with an estradiol value but no progesterone value are coded as progesterone at or below the</span></span>
+<span><span class='co'># limit of detection (9.14 pg/ml). We take these to be non-detects that the laboratory left blank:</span></span>
+<span><span class='co'># they fall mostly in the follicular phase, and progesterone on the neighbouring days of the same</span></span>
+<span><span class='co'># cycle is low (check below). Days without either value stay missing.</span></span>
+<span><span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/arrange.html'>arrange</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>fc_day</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>mutate</span><span class='op'>(</span>neighbour_p4 <span class='op'>=</span> <span class='op'>(</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/lead-lag.html'>lag</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/lead-lag.html'>lead</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>/</span> <span class='fl'>2</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>mutate</span><span class='op'>(</span>group <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/case-and-replace-when.html'>case_when</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span> <span class='op'>&amp;</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span> <span class='op'>~</span> <span class='st'>"estradiol only (coded censored)"</span>,</span>
+<span>                           <span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span> <span class='op'>~</span> <span class='st'>"progesterone measured"</span>,</span>
+<span>                           <span class='cn'>TRUE</span> <span class='op'>~</span> <span class='st'>"neither"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>filter</span><span class='op'>(</span><span class='va'>group</span> <span class='op'>!=</span> <span class='st'>"neither"</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>group</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>summarise</span><span class='op'>(</span>days <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/context.html'>n</a></span><span class='op'>(</span><span class='op'>)</span>, </span>
+<span>            share_more_than_14_days_before_next_onset <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>bc_day</span> <span class='op'>&lt;</span> <span class='op'>-</span><span class='fl'>14</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>,</span>
+<span>            median_progesterone_neighbouring_days <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/median.html'>median</a></span><span class='op'>(</span><span class='va'>neighbour_p4</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>knitr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/knitr/man/kable.html'>kable</a></span><span class='op'>(</span>digits <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>group_by: 2 grouping variables (id, cycle)
+mutate (grouped): new variable &#39;neighbour_p4&#39; (double) with 444 unique values and 69% NA
+ungroup: no grouping variables remain
+mutate: new variable &#39;group&#39; (character) with 3 unique values and 0% NA
+filter: removed 1,399 rows (53%), 1,228 rows remaining
+group_by: one grouping variable (group)
+summarise: now 2 rows and 4 columns, ungrouped</code></pre>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 4%" />
+<col style="width: 35%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">group</th>
+<th style="text-align: right;">days</th>
+<th style="text-align: right;">share_more_than_14_days_before_next_onset</th>
+<th style="text-align: right;">median_progesterone_neighbouring_days</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">estradiol only (coded censored)</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">0.77</td>
+<td style="text-align: right;">29.3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">progesterone measured</td>
+<td style="text-align: right;">1197</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">40.0</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
 <span>  <span class='fu'>mutate</span><span class='op'>(</span></span>
 <span>    estradiol_cens <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;=</span> <span class='fl'>0.1</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,</span>
@@ -2780,7 +2837,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_fc
 [1] &quot;0.35 [0.30;0.39]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb107"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
