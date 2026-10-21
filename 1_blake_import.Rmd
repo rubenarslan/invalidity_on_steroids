@@ -19,6 +19,8 @@ Progesterone and estradiol samples were stored at −20◦C and analyzed by a pr
 
 ## Import
 
+Note on cycle phase: Blake et al.'s files record the cycle day of each session (counted forward from the last menstrual onset) and the participant's reported usual cycle length (`LengthRep`), but no observed next menstrual onset. Days counted backward from the next onset are therefore estimated as the forward day minus the reported usual cycle length. The same reported cycle length is used to exclude cycles shorter than 20 or longer than 35 days.
+
 ```{r}
 blake <- rio::import("https://osf.io/wsmxr/download", format = "sav")
 blake_long <- rio::import("https://osf.io/2d7xp/download", format = "sav") %>% left_join(rio::import("data/blake/Saliva long - for Ruben.sav"), by = c("SUBJECT" = "Subject", "Fertility" = "fertility"))
@@ -41,6 +43,8 @@ blake_long <- blake_long %>% left_join(blake %>% mutate(partner = if_else(RelSta
 blake_long <- blake_long %>% 
   mutate(date = if_else(Fertility == 1, date_fertile_session, date_nonfertile_session),
          day_rel_to_start = as.numeric(date - date_first),
+         # Blake et al.'s files have no observed next menstrual onset. The "backward-counted" day is
+         # the forward day minus the self-reported usual cycle length (LengthRep, "Length (reported)").
          bc_day = Day - LengthRep - 1,
          bc_day = if_else(bc_day < 0, bc_day, NA_real_)) %>% 
   group_by(SUBJECT) %>% 
