@@ -3014,25 +3014,21 @@ mutate (grouped): new variable &#39;lh_surge_date_2&#39; (Date) with 31 unique v
 </div>
 <pre><code>filter (grouped): no rows removed</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/n_distinct.html'>n_distinct</a></span><span class='op'>(</span><span class='va'>marc_without_cycle_phase</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span></span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/n_distinct.html'>n_distinct</a></span><span class='op'>(</span><span class='va'>marc_without_cycle_phase</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>Warning: Unknown or uninitialised column: `id`.</code></pre>
 <pre><code>[1] 0</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/n_distinct.html'>n_distinct</a></span><span class='op'>(</span><span class='va'>marc_with_cycle_phase</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span></span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/n_distinct.html'>n_distinct</a></span><span class='op'>(</span><span class='va'>marc_with_cycle_phase</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>Warning: Unknown or uninitialised column: `id`.</code></pre>
-<pre><code>[1] 0</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>marc_without_cycle_phase</span><span class='op'>$</span><span class='va'>id</span>, <span class='va'>marc_with_cycle_phase</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>sort</span></span></code></pre>
-</div>
-<pre><code>Warning: Unknown or uninitialised column: `id`.</code></pre>
-<pre><code>NULL</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fl'>102</span><span class='op'>-</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/n_distinct.html'>n_distinct</a></span><span class='op'>(</span><span class='va'>marc_with_cycle_phase</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span></span></code></pre>
-</div>
-<pre><code>Warning: Unknown or uninitialised column: `id`.</code></pre>
 <pre><code>[1] 102</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://generics.r-lib.org/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>marc_without_cycle_phase</span><span class='op'>$</span><span class='va'>ID</span>, <span class='va'>marc_with_cycle_phase</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='va'>sort</span></span></code></pre>
+</div>
+<pre><code>numeric(0)</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fl'>102</span><span class='op'>-</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/n_distinct.html'>n_distinct</a></span><span class='op'>(</span><span class='va'>marc_with_cycle_phase</span><span class='op'>$</span><span class='va'>ID</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>[1] 0</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># n_nonmissing(marc$lh_surge_date)</span></span>
 <span><span class='co'># n_nonmissing(marc$lh_surge_date_2)</span></span>
@@ -4470,7 +4466,7 @@ scale reduction factor on split chains (at convergence, Rhat = 1).
 $r_loo_lh
 [1] &quot;0.26 [0.18;0.32]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb616"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb612"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
