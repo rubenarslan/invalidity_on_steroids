@@ -30,7 +30,7 @@ menstrual_days = mons %>% distinct(Person, Date_session) %>%
   full_join(mons %>% mutate(Date_session = Menstrual_onset) %>% distinct(), by = c("Person", "Date_session")) %>%
   mutate(origin = if_else(Date_session != Menstrual_onset, "lab", "onset", "lab")) %>% 
   group_by(Person) %>% 
-  complete(Person, Date_session = full_seq(Date_session, period = 1)) %>% 
+  complete(Date_session = full_seq(Date_session, period = 1)) %>% 
   mutate(origin = if_else(is.na(origin), "interpolated", origin))
 
 

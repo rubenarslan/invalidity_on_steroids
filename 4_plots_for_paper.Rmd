@@ -11,6 +11,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE, error = T)
+set.seed(20221212)
 ```
 
 ```{r, fig.width = 5, fig.height = 15}
@@ -147,7 +148,7 @@ comp <- comp %>%
                                       paste0(Hormone,"__", name))) %>% 
     select(-Hormone) %>% 
     distinct() %>% 
-    pivot_wider(name, Dataset) %>% 
+    pivot_wider(id_cols = name, names_from = Dataset, values_from = value) %>% 
     rename(rowname = name)
 
 comp <- comp %>% 
@@ -1584,7 +1585,7 @@ comp <- comp %>%
                                       paste0(Hormone,"__", name))) %>% 
     select(-Hormone) %>% 
     distinct() %>% 
-    pivot_wider(name, Dataset) %>% 
+    pivot_wider(id_cols = name, names_from = Dataset, values_from = value) %>% 
     rename(rowname = name)
 
 comp <- comp %>% 

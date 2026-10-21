@@ -11,6 +11,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+set.seed(20221212)
 ```
 
 
@@ -123,7 +124,7 @@ summary_table <- function(Hormone) {
   comp <- comp %>% arrange(Sample)
 
   comp <- comp %>% 
-    pivot_wider(name, Sample) %>% 
+    pivot_wider(id_cols = name, names_from = Sample, values_from = value) %>% 
     rename(rowname = name)
 
   comp <- comp %>% 
@@ -301,7 +302,7 @@ comp_wide <- as_tibble(bind_rows(su_dfs, .id = "Sample")) %>%
 
 comp <- comp_wide %>% 
   pivot_longer(-Sample) %>% 
-  pivot_wider(name, Sample) %>% 
+  pivot_wider(id_cols = name, names_from = Sample, values_from = value) %>% 
   rename(rowname = name)
 
 colnames(comp) <- str_trim(str_replace(

@@ -20,6 +20,7 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -50,16 +51,17 @@ pre.numberSource code > span > a:first-child::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {   }
+  { color: #00769e; background-color: #f1f3f5; }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
+code span { color: #00769e; } /* Normal */
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { color: #657422; } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
-code span.cf { color: #007ba5; } /* ControlFlow */
+code span.cf { color: #00769e; } /* ControlFlow */
 code span.ch { color: #20794d; } /* Char */
 code span.cn { color: #8f5902; } /* Constant */
 code span.co { color: #5e5e5e; } /* Comment */
@@ -73,17 +75,18 @@ code span.fl { color: #ad0000; } /* Float */
 code span.fu { color: #4758ab; } /* Function */
 code span.im { } /* Import */
 code span.in { color: #5e5e5e; } /* Information */
-code span.kw { color: #007ba5; } /* Keyword */
+code span.kw { color: #00769e; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
-code span.ot { color: #007ba5; } /* Other */
+code span.ot { color: #00769e; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
   <title>Salivary and serum immunoassay comparison: Untitled</title>
@@ -177,6 +180,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   d-article table.gt_table td,
   d-article table.gt_table th {
     border-bottom: none;
+    font-size: 100%;
   }
 
   .html-widget {
@@ -217,9 +221,21 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     display: none !important;
   }
 
+  hr.section-separator {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin: 0px;
+  }
+
+
+  d-byline {
+    border-top: none;
+  }
+
   d-article {
     padding-top: 2.5rem;
     padding-bottom: 30px;
+    border-top: none;
   }
 
   d-appendix {
@@ -314,6 +330,11 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   d-article div.sourceCode pre {
     padding-left: 18px;
     font-size: 14px;
+  }
+
+  /* tweak for Pandoc numbered line within distill */
+  d-article pre.numberSource code > span {
+      left: -2em;
   }
 
   d-article pre {
@@ -418,10 +439,6 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     position: relative;
     margin-bottom: 2.5em;
     margin-top: 1.5em;
-  }
-
-  .figure img {
-    width: 100%;
   }
 
   .figure .caption {
@@ -1079,6 +1096,12 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // create d-title
     $('.d-title').changeElementType('d-title');
 
+    // separator
+    var separator = '<hr class="section-separator" style="clear: both"/>';
+    // prepend separator above appendix
+    $('.d-byline').before(separator);
+    $('.d-article').before(separator);
+
     // create d-byline
     var byline = $('<d-byline></d-byline>');
     $('.d-byline').replaceWith(byline);
@@ -1156,8 +1179,9 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     $('.distill-force-highlighting-css').parent().remove();
 
     // remove empty line numbers inserted by pandoc when using a
-    // custom syntax highlighting theme
-    $('code.sourceCode a:empty').remove();
+    // custom syntax highlighting theme, except when numbering line
+    // in code chunk
+    $('pre:not(.numberLines) code.sourceCode a:empty').remove();
 
     // load distill framework
     load_distill_framework();
@@ -1183,12 +1207,13 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
       // add orcid ids
       $('.authors-affiliations').find('.author').each(function(i, el) {
         var orcid_id = front_matter.authors[i].orcidID;
+        var author_name = front_matter.authors[i].author
         if (orcid_id) {
           var a = $('<a></a>');
           a.attr('href', 'https://orcid.org/' + orcid_id);
           var img = $('<img></img>');
           img.addClass('orcid-id');
-          img.attr('alt', 'ORCID ID');
+          img.attr('alt', author_name ? 'ORCID ID for ' + author_name : 'ORCID ID');
           img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
           a.append(img);
           $(this).append(a);
@@ -1253,7 +1278,22 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
       // hoverable references
       $('span.citation[data-cites]').each(function() {
-        var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+        const citeChild = $(this).children()[0]
+        // Do not process if @xyz has been used without escaping and without bibliography activated
+        // https://github.com/rstudio/distill/issues/466
+        if (citeChild === undefined) return true
+
+        if (citeChild.nodeName == "D-FOOTNOTE") {
+          var fn = citeChild
+          $(this).html(fn.shadowRoot.querySelector("sup"))
+          $(this).id = fn.id
+          fn.remove()
+        }
+        var refs = $(this).attr('data-cites').split(" ");
+        var refHtml = refs.map(function(ref) {
+          // Could use CSS.escape too here, we insure backward compatibility in navigator
+          return "<p>" + $('div[id="ref-' + ref + '"]').html() + "</p>";
+        }).join("\n");
         window.tippy(this, {
           allowHTML: true,
           content: refHtml,
@@ -1264,6 +1304,31 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
           placement: 'bottom-start'
         });
       });
+
+      // fix footnotes in tables (#411)
+      // replacing broken distill.pub feature
+      $('table d-footnote').each(function() {
+        // we replace internal showAtNode methode which is triggered when hovering a footnote
+        this.hoverBox.showAtNode = function(node) {
+          // ported from https://github.com/distillpub/template/pull/105/files
+          calcOffset = function(elem) {
+              let x = elem.offsetLeft;
+              let y = elem.offsetTop;
+              // Traverse upwards until an `absolute` element is found or `elem`
+              // becomes null.
+              while (elem = elem.offsetParent && elem.style.position != 'absolute') {
+                  x += elem.offsetLeft;
+                  y += elem.offsetTop;
+              }
+
+              return { left: x, top: y };
+          }
+          // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetTop
+          const bbox = node.getBoundingClientRect();
+          const offset = calcOffset(node);
+          this.show([offset.left + bbox.width, offset.top + bbox.height]);
+        }
+      })
 
       // clear polling timer
       clearInterval(tid);
@@ -1363,6 +1428,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // mark non-body figures created by knitr chunks as 100% width
     $('.layout-chunk').each(function(i, val) {
       var figures = $(this).find('img, .html-widget');
+      // ignore leaflet img layers (#106)
+      figures = figures.filter(':not(img[class*="leaflet"])')
       if ($(this).attr('data-layout') !== "l-body") {
         figures.css('width', '100%');
       } else {
@@ -1385,7 +1452,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // get rid of index.html references in header
     if (window.location.protocol !== "file:") {
       $('.distill-site-header a[href]').each(function(i,val) {
-        $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
+        $(this).attr('href', $(this).attr('href').replace(/^index[.]html/, "./"));
       });
     }
 
@@ -1424,8 +1491,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </script>
 
   <!--/radix_placeholder_distill-->
-  <script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
-  <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="site_libs/header-attrs-2.31/header-attrs.js"></script>
+  <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -1456,6 +1523,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 <div class="d-title">
 <h1>1_roney_import.knit</h1>
+
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
 
@@ -1465,50 +1533,54 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="d-article">
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/rio/man/import.html'>import</a></span><span class='op'>(</span><span class='st'>"data/roney/raw estradiol data.new.sav"</span><span class='op'>)</span>
-
-<span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>cycle_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estrogen</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='fu'>rio</span><span class='fu'>::</span><span class='fu'><a href='http://gesistsa.github.io/rio/reference/import.html'>import</a></span><span class='op'>(</span><span class='st'>"data/roney/raw estradiol data.new.sav"</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>cycle_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estrogen</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1429 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 1429 rows containing missing values (geom_point).</code></pre>
-<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-1.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
+&quot;cs&quot;)&#39;</code></pre>
+<pre><code>Warning: Removed 1429 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1429 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-1.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>cycle_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>cycle_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1430 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 1430 rows containing missing values (geom_point).</code></pre>
-<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-2.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
+&quot;cs&quot;)&#39;</code></pre>
+<pre><code>Warning: Removed 1430 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1430 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-2.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>cycle_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estrogen</span><span class='op'>/</span><span class='va'>Progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>cycle_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estrogen</span><span class='op'>/</span><span class='va'>Progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1460 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 1460 rows containing missing values (geom_point).</code></pre>
-<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-3.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
+&quot;cs&quot;)&#39;</code></pre>
+<pre><code>Warning: Removed 1460 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1460 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-3.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/mutate.html'>mutate</a></span><span class='op'>(</span>cycle_nr <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>carryover</span> <span class='op'>==</span> <span class='fl'>1</span>, <span class='va'>cycle</span> <span class='op'>+</span> <span class='va'>carryover</span>, <span class='va'>cycle</span>, <span class='va'>cycle</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>mutate</span><span class='op'>(</span>cycle_nr <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>carryover</span> <span class='op'>==</span> <span class='fl'>1</span>, <span class='va'>cycle</span> <span class='op'>+</span> <span class='va'>carryover</span>, <span class='va'>cycle</span>, <span class='va'>cycle</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>mutate: new variable &#39;cycle_nr&#39; (double) with 3 unique values and 0% NA</code></pre>
+<pre><code>mutate: new variable &#39;cycle_nr&#39; (double) with 3 unique values and 0%
+NA</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>cycle_nr</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>cycle_nr</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
    1    2    3 
 1387 1102  138 </code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>subject</span>, <span class='va'>cycle_nr</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/summarise.html'>summarise</a></span><span class='op'>(</span>length <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>cycle_day</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/r/stats/xtabs.html'>xtabs</a></span><span class='op'>(</span><span class='op'>~</span> <span class='va'>length</span> <span class='op'>+</span> <span class='va'>cycle_nr</span>, <span class='va'>.</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>subject</span>, <span class='va'>cycle_nr</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>summarise</span><span class='op'>(</span>length <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>cycle_day</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://rdrr.io/r/stats/xtabs.html'>xtabs</a></span><span class='op'>(</span><span class='op'>~</span> <span class='va'>length</span> <span class='op'>+</span> <span class='va'>cycle_nr</span>, <span class='va'>.</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>group_by: 2 grouping variables (subject, cycle_nr)</code></pre>
-<pre><code>summarise: now 138 rows and 3 columns, one group variable remaining (subject)</code></pre>
+<pre><code>group_by: 2 grouping variables (subject, cycle_nr)
+summarise: now 138 rows and 3 columns, one group variable remaining (subject)</code></pre>
 <pre><code>      cycle_nr
 length  1  2  3
     1   0  0  2
@@ -1546,21 +1618,19 @@ length  1  2  3
     39  1  0  0
     50  0  1  0</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>subject</span>, <span class='va'>cycle_nr</span><span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/mutate.html'>mutate</a></span><span class='op'>(</span>
-    max_cycle_day <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>cycle_day</span><span class='op'>)</span>,
-    max_cycle_day <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>max_cycle_day</span> <span class='op'>&lt;</span> <span class='fl'>20</span>, <span class='cn'>NA_real_</span>, <span class='va'>max_cycle_day</span><span class='op'>)</span>,
-    max_cycle_day <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>carryover</span> <span class='op'>==</span> <span class='fl'>1</span>, <span class='cn'>NA_real_</span>, <span class='va'>max_cycle_day</span>, <span class='va'>max_cycle_day</span><span class='op'>)</span>,
-    bc_day <span class='op'>=</span> <span class='va'>cycle_day</span><span class='op'>-</span> <span class='va'>max_cycle_day</span> <span class='op'>-</span> <span class='fl'>1</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>subject</span>, <span class='va'>cycle_nr</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>mutate</span><span class='op'>(</span></span>
+<span>    max_cycle_day <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>cycle_day</span><span class='op'>)</span>,</span>
+<span>    max_cycle_day <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>max_cycle_day</span> <span class='op'>&lt;</span> <span class='fl'>20</span>, <span class='cn'>NA_real_</span>, <span class='va'>max_cycle_day</span><span class='op'>)</span>,</span>
+<span>    max_cycle_day <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>carryover</span> <span class='op'>==</span> <span class='fl'>1</span>, <span class='cn'>NA_real_</span>, <span class='va'>max_cycle_day</span>, <span class='va'>max_cycle_day</span><span class='op'>)</span>,</span>
+<span>    bc_day <span class='op'>=</span> <span class='va'>cycle_day</span><span class='op'>-</span> <span class='va'>max_cycle_day</span> <span class='op'>-</span> <span class='fl'>1</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>group_by: 2 grouping variables (subject, cycle_nr)</code></pre>
-<pre><code>mutate (grouped): new variable &#39;max_cycle_day&#39; (double) with 22 unique values and 15% NA</code></pre>
-<pre><code>                  new variable &#39;bc_day&#39; (double) with 39 unique values and 15% NA</code></pre>
+<pre><code>group_by: 2 grouping variables (subject, cycle_nr)
+mutate (grouped): new variable &#39;max_cycle_day&#39; (double) with 22 unique values and 15% NA
+                  new variable &#39;bc_day&#39; (double) with 39 unique values and 15% NA</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>bc_day</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>bc_day</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 -38 -37 -36 -35 -34 -33 -32 -31 -30 -29 -28 -27 -26 -25 -24 -23 -22 
@@ -1570,149 +1640,148 @@ length  1  2  3
  -4  -3  -2  -1 
  83  84  82  86 </code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># convert from ng/ml to pg/ml</span>
-<span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/mutate.html'>mutate</a></span><span class='op'>(</span>Progesterone <span class='op'>=</span> <span class='fl'>1000</span> <span class='op'>*</span> <span class='va'>Progesterone</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># convert from ng/ml to pg/ml</span></span>
+<span><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>mutate</span><span class='op'>(</span>Progesterone <span class='op'>=</span> <span class='fl'>1000</span> <span class='op'>*</span> <span class='va'>Progesterone</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>mutate (grouped): changed 1,197 values (46%) of &#39;Progesterone&#39; (0 new NA)</code></pre>
+<pre><code>mutate (grouped): changed 1,197 values (46%) of &#39;Progesterone&#39; (0 new
+NAs)</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estrogen</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estrogen</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1481 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 1481 rows containing missing values (geom_point).</code></pre>
-<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-4.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
+&quot;cs&quot;)&#39;</code></pre>
+<pre><code>Warning: Removed 1481 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1481 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-4.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1485 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 1485 rows containing missing values (geom_point).</code></pre>
-<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-5.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
+&quot;cs&quot;)&#39;</code></pre>
+<pre><code>Warning: Removed 1485 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1485 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-5.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estrogen</span><span class='op'>/</span><span class='va'>Progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estrogen</span><span class='op'>/</span><span class='va'>Progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1511 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 1511 rows containing missing values (geom_point).</code></pre>
-<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-6.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
+&quot;cs&quot;)&#39;</code></pre>
+<pre><code>Warning: Removed 1511 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1511 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-6.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/select.html'>select</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='va'>subject</span>, cycle <span class='op'>=</span> <span class='va'>cycle_nr</span>, <span class='va'>bc_day</span>, fc_day <span class='op'>=</span> <span class='va'>cycle_day</span>, estradiol <span class='op'>=</span> <span class='va'>estrogen</span>, progesterone <span class='op'>=</span> <span class='va'>Progesterone</span>, cycle_length <span class='op'>=</span> <span class='va'>max_cycle_day</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/mutate.html'>mutate</a></span><span class='op'>(</span>lh_day <span class='op'>=</span> <span class='cn'>NA_real_</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>as_tibble</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>select</span><span class='op'>(</span>id <span class='op'>=</span> <span class='va'>subject</span>, cycle <span class='op'>=</span> <span class='va'>cycle_nr</span>, <span class='va'>bc_day</span>, fc_day <span class='op'>=</span> <span class='va'>cycle_day</span>, estradiol <span class='op'>=</span> <span class='va'>estrogen</span>, progesterone <span class='op'>=</span> <span class='va'>Progesterone</span>, cycle_length <span class='op'>=</span> <span class='va'>max_cycle_day</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>mutate</span><span class='op'>(</span>lh_day <span class='op'>=</span> <span class='cn'>NA_real_</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'><a href='https://tibble.tidyverse.org/reference/as_tibble.html'>as_tibble</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>select: renamed 5 variables (id, fc_day, estradiol, progesterone, cycle_length) and dropped 2 variables</code></pre>
-<pre><code>mutate (grouped): new variable &#39;lh_day&#39; (double) with one unique value and 100% NA</code></pre>
+<pre><code>select: renamed 5 variables (id, fc_day, estradiol, progesterone, cycle_length) and dropped 2 variables
+mutate (grouped): new variable &#39;lh_day&#39; (double) with one unique value and 100% NA</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/mutate.html'>mutate</a></span><span class='op'>(</span>fc_day <span class='op'>=</span> <span class='va'>fc_day</span> <span class='op'>-</span> <span class='fl'>1</span><span class='op'>)</span> <span class='co'># start at zero</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>mutate</span><span class='op'>(</span>fc_day <span class='op'>=</span> <span class='va'>fc_day</span> <span class='op'>-</span> <span class='fl'>1</span><span class='op'>)</span> <span class='co'># start at zero</span></span></code></pre>
 </div>
-<pre><code>mutate: changed 2,627 values (100%) of &#39;fc_day&#39; (0 new NA)</code></pre>
+<pre><code>mutate: changed 2,627 values (100%) of &#39;fc_day&#39; (0 new NAs)</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/xtabs.html'>xtabs</a></span><span class='op'>(</span><span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span>, <span class='va'>roney</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/stats/xtabs.html'>xtabs</a></span><span class='op'>(</span><span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span>, <span class='va'>roney</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>                is.na(progesterone)
 is.na(estradiol) FALSE TRUE
            FALSE  1167   31
            TRUE     30 1399</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/mutate.html'>mutate</a></span><span class='op'>(</span>
-    estradiol_cens <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;=</span> <span class='fl'>0.1</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
-    estradiol <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>estradiol_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>0.1</span>, <span class='va'>estradiol</span><span class='op'>)</span>
-  <span class='op'>)</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/mutate.html'>mutate</a></span><span class='op'>(</span>
-    progesterone_cens <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>progesterone</span> <span class='op'>&lt;=</span> <span class='fl'>9.14</span> <span class='op'>|</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span> <span class='op'>&amp;</span> <span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,
-    progesterone <span class='op'>=</span> <span class='fu'>if_else</span><span class='op'>(</span><span class='va'>progesterone_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>9.14</span>, <span class='va'>progesterone</span><span class='op'>)</span>
-  <span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>mutate</span><span class='op'>(</span></span>
+<span>    estradiol_cens <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;=</span> <span class='fl'>0.1</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,</span>
+<span>    estradiol <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>estradiol_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>0.1</span>, <span class='va'>estradiol</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> </span>
+<span>  <span class='fu'>mutate</span><span class='op'>(</span></span>
+<span>    progesterone_cens <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>progesterone</span> <span class='op'>&lt;=</span> <span class='fl'>9.14</span> <span class='op'>|</span> <span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span> <span class='op'>&amp;</span> <span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span>, <span class='st'>"left"</span>, <span class='st'>"none"</span><span class='op'>)</span>,</span>
+<span>    progesterone <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>progesterone_cens</span> <span class='op'>==</span> <span class='st'>"left"</span>, <span class='fl'>9.14</span>, <span class='va'>progesterone</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>mutate: changed 0 values (0%) of &#39;estradiol&#39; (0 new NA)</code></pre>
-<pre><code>        new variable &#39;estradiol_cens&#39; (character) with 2 unique values and 54% NA</code></pre>
-<pre><code>mutate: changed 33 values (1%) of &#39;progesterone&#39; (31 fewer NA)</code></pre>
-<pre><code>        new variable &#39;progesterone_cens&#39; (character) with 3 unique values and 53% NA</code></pre>
+<pre><code>mutate: changed 0 values (0%) of &#39;estradiol&#39; (0 new NAs)
+        new variable &#39;estradiol_cens&#39; (character) with 2 unique values and 54% NA
+mutate: changed 33 values (1%) of &#39;progesterone&#39; (31 fewer NAs)
+        new variable &#39;progesterone_cens&#39; (character) with 3 unique values and 53% NA</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>estradiol_cens</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>estradiol_cens</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 none 
 1198 </code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>progesterone_cens</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>progesterone_cens</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
 left none 
   33 1195 </code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># exclude women without any hormone data</span>
-<span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/filter.html'>filter</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/any.html'>any</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|</span> <span class='fu'><a href='https://rdrr.io/r/base/any.html'>any</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/ungroup.html'>ungroup</a></span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># exclude women without any hormone data</span></span>
+<span><span class='va'>roney</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>group_by</span><span class='op'>(</span><span class='va'>id</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/any.html'>any</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|</span> <span class='fu'><a href='https://rdrr.io/r/base/any.html'>any</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>progesterone</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>ungroup</span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>group_by: one grouping variable (id)</code></pre>
-<pre><code>filter (grouped): removed 260 rows (10%), 2,367 rows remaining</code></pre>
-<pre><code>ungroup: no grouping variables</code></pre>
+<pre><code>group_by: one grouping variable (id)
+filter (grouped): removed 260 rows (10%), 2,367 rows remaining (removed 9 groups, 43 groups remaining)
+ungroup: no grouping variables remain</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>[1] 2367</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>n_distinct</span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/n_distinct.html'>n_distinct</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>[1] 43</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span><span class='op'>(</span><span class='va'>roney</span>, <span class='st'>"roney.rds"</span><span class='op'>)</span>
-
-<span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>theme_bw</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span><span class='op'>(</span><span class='va'>roney</span>, <span class='st'>"roney.rds"</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1221 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 1221 rows containing missing values (geom_point).</code></pre>
-<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-7.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
+&quot;cs&quot;)&#39;</code></pre>
+<pre><code>Warning: Removed 1221 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 1221 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-7.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span><span class='op'>+</span> <span class='fu'>theme_bw</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>roney</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 1221 rows containing non-finite values (stat_smooth).
-
-Warning: Removed 1221 rows containing missing values (geom_point).</code></pre>
-<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-8.png" width="624" />
+<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
+&quot;cs&quot;)&#39;</code></pre>
+<pre><code>Warning: Removed 1221 rows containing non-finite outside the scale range
+(`stat_smooth()`).
+Removed 1221 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-8.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>ggplot</span><span class='op'>(</span><span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;</span> <span class='fu'><a href='https://rdrr.io/r/stats/median.html'>median</a></span><span class='op'>(</span><span class='va'>estradiol</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/IQR.html'>IQR</a></span><span class='op'>(</span><span class='va'>estradiol</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span> <span class='op'>*</span> <span class='fl'>3</span><span class='op'>)</span>, <span class='fu'>aes</span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_smooth</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>geom_point</span><span class='op'>(</span><span class='op'>)</span><span class='op'>+</span> <span class='fu'>theme_bw</span><span class='op'>(</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>filter</span><span class='op'>(</span><span class='va'>estradiol</span> <span class='op'>&lt;</span> <span class='fu'><a href='https://rdrr.io/r/stats/median.html'>median</a></span><span class='op'>(</span><span class='va'>estradiol</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/IQR.html'>IQR</a></span><span class='op'>(</span><span class='va'>estradiol</span>, na.rm <span class='op'>=</span> <span class='cn'>T</span><span class='op'>)</span> <span class='op'>*</span> <span class='fl'>3</span><span class='op'>)</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span><span class='va'>bc_day</span>, <span class='va'>estradiol</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span><span class='op'>(</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>filter: removed 1,173 rows (50%), 1,194 rows remaining</code></pre>
-<pre><code>`geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<pre><code>Warning: Removed 52 rows containing non-finite values (stat_smooth).</code></pre>
-<pre><code>Warning: Removed 52 rows containing missing values (geom_point).</code></pre>
-<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-9.png" width="624" />
+<pre><code>filter: removed 1,173 rows (50%), 1,194 rows remaining
+`geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs =
+&quot;cs&quot;)&#39;</code></pre>
+<pre><code>Warning: Removed 52 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 52 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<img src="1_roney_import_files/figure-html5/unnamed-chunk-1-9.png" alt="" width="624" />
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>bc_day</span>, na.rm <span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>bc_day</span>, na.rm <span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>[1] -38  -1</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>fc_day</span>, na.rm <span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>roney</span><span class='op'>$</span><span class='va'>fc_day</span>, na.rm <span class='op'>=</span><span class='cn'>T</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>[1]  0 49</code></pre>
 </div>
 <h2 id="export">Export</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"0_summary_functions.R"</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>Loading required package: Rcpp</code></pre>
-<pre><code>Loading &#39;brms&#39; package (version 2.16.2). Useful instructions
+<pre><code>Loading &#39;brms&#39; package (version 2.23.0). Useful instructions
 can be found by typing help(&#39;brms&#39;). A more detailed introduction
 to the package is available through vignette(&#39;brms_overview&#39;).</code></pre>
 <pre><code>
@@ -1720,72 +1789,81 @@ Attaching package: &#39;brms&#39;</code></pre>
 <pre><code>The following object is masked from &#39;package:stats&#39;:
 
     ar</code></pre>
+<pre><code>Warning: package &#39;gt&#39; was built under R version 4.5.2</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>export_anon</span><span class='op'>(</span><span class='st'>"roney2013"</span>, <span class='va'>roney</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>export_anon</span><span class='op'>(</span><span class='st'>"roney2013"</span>, <span class='va'>roney</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>select: columns reordered (id, cycle, cycle_length, fc_day, bc_day, …)</code></pre>
-<pre><code>ungroup: no grouping variables</code></pre>
-<pre><code>mutate: converted &#39;id&#39; from double to factor (0 new NA)</code></pre>
+<pre><code>select: columns reordered (id, cycle, cycle_length, fc_day, bc_day,
+…)</code></pre>
+<pre><code>ungroup: no grouping variables remain
+mutate: converted &#39;id&#39; from double to factor (0 new NA)</code></pre>
 </div>
 <h2 id="summarize">Summarize</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>cycle_length</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>progesterone</span>, hormone_cens <span class='op'>=</span> <span class='va'>progesterone_cens</span>, <span class='va'>cycle_length</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>select: renamed 2 variables (hormone, hormone_cens) and dropped 2 variables</code></pre>
+<pre><code>select: renamed 2 variables (hormone, hormone_cens) and dropped 2
+variables</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"Roney 2013"</span>, Hormone <span class='op'>=</span> <span class='st'>"Progesterone"</span>,
-      Citation <span class='op'>=</span> <span class='st'>"Roney, J. R., &amp; Simmons, Z. L. (2013). Hormonal predictors of sexual motivation in natural menstrual cycles. Hormones and Behavior, 63(4), 636–645. https://doi.org/10.1016/j.yhbeh.2013.02.013"</span>,
-      LOD <span class='op'>=</span> <span class='fl'>9.14</span>,
-      Method <span class='op'>=</span> <span class='st'>"Salivary radioimmunoassay (Siemens Health Diagnostics)"</span>,
-      CV_intra <span class='op'>=</span> <span class='fl'>4.57</span>,
-      CV_inter <span class='op'>=</span> <span class='fl'>7.36</span>,
-      Procedure <span class='op'>=</span> <span class='st'>[1290 chars quoted with '"']</span>,
-      Scheduling <span class='op'>=</span> <span class='st'>"Every day for up to two cycles. 'Here we collected daily saliva samples across 1–2 menstrual cycles from a sample of naturally cycling young women, as well as daily diary reports of both sexual behavior and self-reported sexual desire.'"</span>,
-        LH_test <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"Roney 2013"</span>, Hormone <span class='op'>=</span> <span class='st'>"Progesterone"</span>,</span>
+<span>      Citation <span class='op'>=</span> <span class='st'>"Roney, J. R., &amp; Simmons, Z. L. (2013). Hormonal predictors of sexual motivation in natural menstrual cycles. Hormones and Behavior, 63(4), 636–645. https://doi.org/10.1016/j.yhbeh.2013.02.013"</span>,</span>
+<span>      LOD <span class='op'>=</span> <span class='fl'>9.14</span>,</span>
+<span>      Method <span class='op'>=</span> <span class='st'>"Salivary radioimmunoassay (Siemens Health Diagnostics)"</span>,</span>
+<span>      CV_intra <span class='op'>=</span> <span class='fl'>4.57</span>,</span>
+<span>      CV_inter <span class='op'>=</span> <span class='fl'>7.36</span>,</span>
+<span>      Procedure <span class='op'>=</span> <span class='st'>"Women were also instructed to collect a saliva sample each morn- ing. They were asked to do so at least 30 min after any eating or drinking, ideally upon first waking. Collection was via passive drool (a few minutes after rinsing with clean water) into pre-labeled poly- propylene vials. Women stored these vials in home freezers and then delivered them weekly to our research lab, at which time they were given a new batch of vials. Saliva samples were then stored at − 80 C until being shipped for assay. Saliva samples were shipped on dry ice to the Endocrine Core Laboratory at the California Regional Primate Research Center, Davis, CA. Samples were centrifuged at 3000 rpm for 20 min. to separate the aqueous component from other particles. Concentrations of progester- one were estimated in duplicate using commercial radioimmunoassay kits (Siemens Health Diagnostics, Inc., Los Angeles, CA). Assay proce- dures were modified to accommodate overall lower levels of progester- one in human saliva relative to plasma as follows: 1) standards were diluted to concentrations ranging from 0.05 to 4.0 ng/mL; and 2) sample volume was increased to 200 μl. The progesterone assay has a least detectable dose of 0.00914 ng/ml; intra- and inter-assay CVs were 4.57% and 7.36%, respectively."</span>,</span>
+<span>      Scheduling <span class='op'>=</span> <span class='st'>"Every day for up to two cycles. 'Here we collected daily saliva samples across 1–2 menstrual cycles from a sample of naturally cycling young women, as well as daily diary reports of both sexual behavior and self-reported sexual desire.'"</span>,</span>
+<span>        LH_test <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>select: dropped 6 variables (bc_day, fc_day, lh_day, hormone, hormone_cens, …)</code></pre>
-<pre><code>group_by: 2 grouping variables (id, cycle)</code></pre>
-<pre><code>summarise: now 122 rows and 3 columns, one group variable remaining (id)</code></pre>
-<pre><code>ungroup: no grouping variables</code></pre>
-<pre><code>filter: removed 1,246 rows (53%), 1,121 rows remaining</code></pre>
-<pre><code>group_by: 2 grouping variables (id, cycle)</code></pre>
-<pre><code>mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 811 unique values and 0% NA</code></pre>
-<pre><code>                  new variable &#39;log_hormone_diff&#39; (double) with 829 unique values and 0% NA</code></pre>
-<pre><code>ungroup: no grouping variables</code></pre>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
-<pre><code>left_join: added 26 columns (prc_stirn_bc, prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, …)</code></pre>
-<pre><code>           &gt; rows only in x      56</code></pre>
-<pre><code>           &gt; rows only in y  (    9)</code></pre>
-<pre><code>           &gt; matched rows     1,065</code></pre>
-<pre><code>           &gt;                 =======</code></pre>
-<pre><code>           &gt; rows total       1,121</code></pre>
-<pre><code>left_join: added 26 columns (prc_stirn_fc, prc_wcx_fc, est_estradiol_fc, est_estradiol_fc_se, est_estradiol_fc_low, …)</code></pre>
-<pre><code>           &gt; rows only in x       0</code></pre>
-<pre><code>           &gt; rows only in y  (    6)</code></pre>
-<pre><code>           &gt; matched rows     1,121</code></pre>
-<pre><code>           &gt;                 =======</code></pre>
-<pre><code>           &gt; rows total       1,121</code></pre>
-<pre><code>left_join: added 22 columns (conception_risk_lh, fertile_lh, est_estradiol_lh, est_estradiol_lh_se, est_estradiol_lh_low, …)</code></pre>
-<pre><code>           &gt; rows only in x   1,121</code></pre>
-<pre><code>           &gt; rows only in y  (   31)</code></pre>
-<pre><code>           &gt; matched rows         0</code></pre>
-<pre><code>           &gt;                 =======</code></pre>
-<pre><code>           &gt; rows total       1,121</code></pre>
-<pre><code>group_by: one grouping variable (id)</code></pre>
-<pre><code>filter (grouped): removed 150 rows (13%), 971 rows remaining</code></pre>
-<pre><code>group_by: one grouping variable (id)</code></pre>
-<pre><code>filter (grouped): no rows removed</code></pre>
+<pre><code>select: dropped 6 variables (bc_day, fc_day, lh_day, hormone, hormone_cens, …)
+group_by: 2 grouping variables (id, cycle)
+summarise: now 122 rows and 3 columns, one group variable remaining (id)
+ungroup: no grouping variables remain
+filter: removed 1,246 rows (53%), 1,121 rows remaining
+group_by: 2 grouping variables (id, cycle)
+mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 811 unique values and 0% NA
+                  new variable &#39;log_hormone_diff&#39; (double) with 829 unique values and 0% NA
+ungroup: no grouping variables remain
+Joining with `by = join_by(bc_day)`
+left_join: added 26 columns (prc_stirn_bc, prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, …)
+           &gt; rows only in df          56
+           &gt; rows only in bc_days (    9)
+           &gt; matched rows          1,065
+           &gt;                      =======
+           &gt; rows total            1,121
+left_join: added 26 columns (prc_stirn_fc, prc_wcx_fc, est_estradiol_fc, est_estradiol_fc_se, est_estradiol_fc_low, …)
+           &gt; rows only in df           0
+           &gt; rows only in fc_days (    6)
+           &gt; matched rows          1,121
+           &gt;                      =======
+           &gt; rows total            1,121
+left_join: added 22 columns (conception_risk_lh, fertile_lh, est_estradiol_lh, est_estradiol_lh_se, est_estradiol_lh_low, …)
+           &gt; rows only in x        1,121
+           &gt; rows only in lh_days (   31)
+           &gt; matched rows              0
+           &gt;                      =======
+           &gt; rows total            1,121
+group_by: one grouping variable (id)
+filter (grouped): removed 150 rows (13%), 971 rows remaining (removed 10 groups, 32 groups remaining)
+group_by: one grouping variable (id)
+filter (grouped): no rows removed
+Loading required namespace: rstan</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.
-
 Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
-<pre><code>Warning: Results may not be meaningful for censored models.
-
-Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
+ℹ Please use tidy evaluation idioms with `aes()`.
+ℹ See also `vignette(&quot;ggplot2-in-packages&quot;)` for more information.
+This warning is displayed once per session.
+Call `lifecycle::last_lifecycle_warnings()` to see where this warning
+was generated.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>$Dataset
 [1] &quot;Roney 2013&quot;
 
@@ -1820,9 +1898,10 @@ $LH_test
 [1] &quot;&quot;
 
 $distribution</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 1139 rows containing non-finite values (stat_bin).</code></pre>
-<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-1.png" width="624" /></p>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>Warning: Removed 1139 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-1.png" alt="" width="624" /></p>
 <pre><code>
 $mean
 [1] 53.74088
@@ -1901,39 +1980,39 @@ $var_resid
 
 $bc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 1065) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sbc_day_1)     2.07      0.73     1.05     3.86 1.00     1767
+sds(sbc_day_1)     2.07      0.72     1.01     3.81 1.00     1610
                Tail_ESS
-sds(sbc_day_1)     2624
+sds(sbc_day_1)     2130
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 41) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.20      0.06     0.05     0.31 1.00      572
+sd(Intercept)     0.20      0.07     0.04     0.32 1.01      541
               Tail_ESS
-sd(Intercept)      855
+sd(Intercept)      457
 
 ~id:cycle (Number of levels: 71) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.25      0.04     0.17     0.34 1.00      869
+sd(Intercept)     0.25      0.04     0.17     0.34 1.01      855
               Tail_ESS
-sd(Intercept)     1775
+sd(Intercept)     1864
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.76      0.05     3.66     3.85 1.00     3589     2769
-sbc_day_1    -4.59      2.27    -9.25    -0.31 1.00     3179     2602
+Intercept     3.75      0.05     3.66     3.85 1.00     3966     2892
+sbc_day_1    -4.50      2.20    -8.97    -0.33 1.00     3768     3366
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.52      0.01     0.49     0.54 1.00     5648     3349
+sigma     0.52      0.01     0.49     0.54 1.00     5629     2656
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1973,48 +2052,50 @@ $r_diff_bc_imputed_rr
 [1] &quot; 0.53 [ 0.48; 0.57]&quot;
 
 $imputed_bc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 58 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 58 rows containing missing values (geom_point).</code></pre>
-<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-2.png" width="624" /></p>
+<pre><code>Warning: Removed 58 rows containing missing values or values outside the scale
+range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 58 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-2.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
 [1] &quot; 1.56&quot;
 
 $fc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 1121) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     1.75      0.59     0.96     3.25 1.00     1803
+sds(sfc_day_1)     1.76      0.58     0.98     3.23 1.00     1760
                Tail_ESS
-sds(sfc_day_1)     2458
+sds(sfc_day_1)     2537
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 42) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.18      0.06     0.04     0.28 1.00      484
+sd(Intercept)     0.17      0.06     0.03     0.28 1.00      349
               Tail_ESS
-sd(Intercept)      398
+sd(Intercept)      320
 
 ~id:cycle (Number of levels: 90) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.25      0.04     0.17     0.33 1.00      744
+sd(Intercept)     0.25      0.04     0.18     0.34 1.00      553
               Tail_ESS
-sd(Intercept)     1557
+sd(Intercept)     1067
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     3.77      0.04     3.68     3.85 1.00     2905     2756
-sfc_day_1    -3.64      2.18    -8.27     0.53 1.00     2586     2479
+Intercept     3.77      0.04     3.68     3.86 1.00     2708     2901
+sfc_day_1    -3.59      2.19    -8.14     0.50 1.00     2678     2570
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.52      0.01     0.49     0.54 1.00     5091     2823
+sigma     0.52      0.01     0.49     0.54 1.00     5376     2787
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2054,67 +2135,72 @@ $r_diff_fc_imputed_rr
 [1] &quot; 0.57 [ 0.53; 0.61]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 4 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
-<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-3.png" width="624" /></p>
+<pre><code>Warning: Removed 4 rows containing missing values or values outside the scale
+range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 4 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-3.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
 [1] &quot; 1.36&quot;</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>estradiol</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_cens</span>, <span class='va'>cycle_length</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, hormone <span class='op'>=</span> <span class='va'>estradiol</span>, hormone_cens <span class='op'>=</span> <span class='va'>estradiol_cens</span>, <span class='va'>cycle_length</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>select: renamed 2 variables (hormone, hormone_cens) and dropped 2 variables</code></pre>
+<pre><code>select: renamed 2 variables (hormone, hormone_cens) and dropped 2
+variables</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"Roney 2013"</span>, Hormone <span class='op'>=</span> <span class='st'>"Estradiol"</span>,
-      Citation <span class='op'>=</span> <span class='st'>"Roney, J. R., &amp; Simmons, Z. L. (2013). Hormonal predictors of sexual motivation in natural menstrual cycles. Hormones and Behavior, 63(4), 636–645. https://doi.org/10.1016/j.yhbeh.2013.02.013"</span>,
-      LOD <span class='op'>=</span> <span class='fl'>0.1</span>,
-      LOQ <span class='op'>=</span> <span class='fl'>1</span>,
-      CV_intra <span class='op'>=</span> <span class='fl'>4.52</span>,
-      CV_inter <span class='op'>=</span> <span class='fl'>8.15</span>,
-      Method <span class='op'>=</span> <span class='st'>"Salivary immunoassay (Salimetrics)"</span>,
-      Procedure <span class='op'>=</span> <span class='st'>[1191 chars quoted with '"']</span>,
-      Scheduling <span class='op'>=</span> <span class='st'>"Every day for up to two cycles. 'Here we collected daily saliva samples across 1–2 menstrual cycles from a sample of naturally cycling young women, as well as daily diary reports of both sexual behavior and self-reported sexual desire.'"</span>,
-        LH_test <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>summarise_hormone</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"Roney 2013"</span>, Hormone <span class='op'>=</span> <span class='st'>"Estradiol"</span>,</span>
+<span>      Citation <span class='op'>=</span> <span class='st'>"Roney, J. R., &amp; Simmons, Z. L. (2013). Hormonal predictors of sexual motivation in natural menstrual cycles. Hormones and Behavior, 63(4), 636–645. https://doi.org/10.1016/j.yhbeh.2013.02.013"</span>,</span>
+<span>      LOD <span class='op'>=</span> <span class='fl'>0.1</span>,</span>
+<span>      LOQ <span class='op'>=</span> <span class='fl'>1</span>,</span>
+<span>      CV_intra <span class='op'>=</span> <span class='fl'>4.52</span>,</span>
+<span>      CV_inter <span class='op'>=</span> <span class='fl'>8.15</span>,</span>
+<span>      Method <span class='op'>=</span> <span class='st'>"Salivary immunoassay (Salimetrics)"</span>,</span>
+<span>      Procedure <span class='op'>=</span> <span class='st'>"Women were also instructed to collect a saliva sample each morn- ing. They were asked to do so at least 30 min after any eating or drinking, ideally upon first waking. Collection was via passive drool (a few minutes after rinsing with clean water) into pre-labeled poly- propylene vials. Women stored these vials in home freezers and then delivered them weekly to our research lab, at which time they were given a new batch of vials. Saliva samples were then stored at − 80 C until being shipped for assay. Saliva samples were shipped on dry ice to the Endocrine Core Laboratory at the California Regional Primate Research Center, Davis, CA. Samples were centrifuged at 3000 rpm for 20 min. to separate the aqueous component from other particles. Concentrations of progester- one were estimated in duplicate using commercial radioimmunoassay kits (Siemens Health Diagnostics, Inc., Los Angeles, CA). Estradiol concentrations were estimated in duplicate using the high sensitivity salivary 17β-estradiol enzyme immunoassay kit (Salimetrics LLC, State College, PA). The estradiol assay has a least detectable dose of 0.1 pg/ml; intra- and inter-assay CVs were 4.52% and 8.15%, respectively."</span>,</span>
+<span>      Scheduling <span class='op'>=</span> <span class='st'>"Every day for up to two cycles. 'Here we collected daily saliva samples across 1–2 menstrual cycles from a sample of naturally cycling young women, as well as daily diary reports of both sexual behavior and self-reported sexual desire.'"</span>,</span>
+<span>        LH_test <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>select: dropped 6 variables (bc_day, fc_day, lh_day, hormone, hormone_cens, …)</code></pre>
-<pre><code>group_by: 2 grouping variables (id, cycle)</code></pre>
-<pre><code>summarise: now 122 rows and 3 columns, one group variable remaining (id)</code></pre>
-<pre><code>ungroup: no grouping variables</code></pre>
-<pre><code>filter: removed 1,276 rows (54%), 1,091 rows remaining</code></pre>
-<pre><code>group_by: 2 grouping variables (id, cycle)</code></pre>
-<pre><code>mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,078 unique values and 0% NA</code></pre>
-<pre><code>                  new variable &#39;log_hormone_diff&#39; (double) with 1,077 unique values and 0% NA</code></pre>
-<pre><code>ungroup: no grouping variables</code></pre>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
-<pre><code>left_join: added 26 columns (prc_stirn_bc, prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, …)</code></pre>
-<pre><code>           &gt; rows only in x      52</code></pre>
-<pre><code>           &gt; rows only in y  (    9)</code></pre>
-<pre><code>           &gt; matched rows     1,039</code></pre>
-<pre><code>           &gt;                 =======</code></pre>
-<pre><code>           &gt; rows total       1,091</code></pre>
-<pre><code>left_join: added 26 columns (prc_stirn_fc, prc_wcx_fc, est_estradiol_fc, est_estradiol_fc_se, est_estradiol_fc_low, …)</code></pre>
-<pre><code>           &gt; rows only in x       0</code></pre>
-<pre><code>           &gt; rows only in y  (    6)</code></pre>
-<pre><code>           &gt; matched rows     1,091</code></pre>
-<pre><code>           &gt;                 =======</code></pre>
-<pre><code>           &gt; rows total       1,091</code></pre>
-<pre><code>left_join: added 22 columns (conception_risk_lh, fertile_lh, est_estradiol_lh, est_estradiol_lh_se, est_estradiol_lh_low, …)</code></pre>
-<pre><code>           &gt; rows only in x   1,091</code></pre>
-<pre><code>           &gt; rows only in y  (   31)</code></pre>
-<pre><code>           &gt; matched rows         0</code></pre>
-<pre><code>           &gt;                 =======</code></pre>
-<pre><code>           &gt; rows total       1,091</code></pre>
-<pre><code>group_by: one grouping variable (id)</code></pre>
-<pre><code>filter (grouped): removed 149 rows (14%), 942 rows remaining</code></pre>
-<pre><code>group_by: one grouping variable (id)</code></pre>
-<pre><code>filter (grouped): no rows removed</code></pre>
+<pre><code>select: dropped 6 variables (bc_day, fc_day, lh_day, hormone, hormone_cens, …)
+group_by: 2 grouping variables (id, cycle)
+summarise: now 122 rows and 3 columns, one group variable remaining (id)
+ungroup: no grouping variables remain
+filter: removed 1,276 rows (54%), 1,091 rows remaining
+group_by: 2 grouping variables (id, cycle)
+mutate (grouped): new variable &#39;hormone_diff&#39; (double) with 1,078 unique values and 0% NA
+                  new variable &#39;log_hormone_diff&#39; (double) with 1,077 unique values and 0% NA
+ungroup: no grouping variables remain
+Joining with `by = join_by(bc_day)`
+left_join: added 26 columns (prc_stirn_bc, prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, …)
+           &gt; rows only in df          52
+           &gt; rows only in bc_days (    9)
+           &gt; matched rows          1,039
+           &gt;                      =======
+           &gt; rows total            1,091
+left_join: added 26 columns (prc_stirn_fc, prc_wcx_fc, est_estradiol_fc, est_estradiol_fc_se, est_estradiol_fc_low, …)
+           &gt; rows only in df           0
+           &gt; rows only in fc_days (    6)
+           &gt; matched rows          1,091
+           &gt;                      =======
+           &gt; rows total            1,091
+left_join: added 22 columns (conception_risk_lh, fertile_lh, est_estradiol_lh, est_estradiol_lh_se, est_estradiol_lh_low, …)
+           &gt; rows only in x        1,091
+           &gt; rows only in lh_days (   31)
+           &gt; matched rows              0
+           &gt;                      =======
+           &gt; rows total            1,091
+group_by: one grouping variable (id)
+filter (grouped): removed 149 rows (14%), 942 rows remaining (removed 10 groups, 32 groups remaining)
+group_by: one grouping variable (id)
+filter (grouped): no rows removed</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
+<pre><code>Recomputing &#39;bayes_R2&#39;</code></pre>
+<pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning: Results may not be meaningful for censored models.</code></pre>
 <pre><code>Warning in sqrt(r2[, &quot;Q2.5&quot;]): NaNs produced</code></pre>
 <pre><code>$Dataset
@@ -2151,9 +2237,10 @@ $LH_test
 [1] &quot;&quot;
 
 $distribution</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>Warning: Removed 1169 rows containing non-finite values (stat_bin).</code></pre>
-<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-4.png" width="624" /></p>
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>Warning: Removed 1169 rows containing non-finite outside the scale range
+(`stat_bin()`).</code></pre>
+<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-4.png" alt="" width="624" /></p>
 <pre><code>
 $mean
 [1] 3.103111
@@ -2232,46 +2319,46 @@ $var_resid
 
 $bc_day_model
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(bc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 1039) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sbc_day_1)     0.71      0.34     0.27     1.53 1.00     2048
+sds(sbc_day_1)     0.72      0.35     0.27     1.59 1.00     1836
                Tail_ESS
-sds(sbc_day_1)     2769
+sds(sbc_day_1)     2169
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 41) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.18      0.04     0.11     0.26 1.00     1286
+sd(Intercept)     0.18      0.04     0.11     0.26 1.00     1149
               Tail_ESS
-sd(Intercept)     1218
+sd(Intercept)     1232
 
 ~id:cycle (Number of levels: 71) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.16      0.03     0.11     0.22 1.00     1084
+sd(Intercept)     0.16      0.03     0.11     0.22 1.01     1184
               Tail_ESS
-sd(Intercept)     1534
+sd(Intercept)     1839
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     1.04      0.04     0.97     1.12 1.00     2892     2667
-sbc_day_1    -0.81      0.97    -2.87     1.11 1.00     4186     2999
+Intercept     1.04      0.04     0.97     1.12 1.00     2309     2467
+sbc_day_1    -0.81      1.01    -2.86     1.19 1.00     3052     2700
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.34      0.01     0.32     0.35 1.00     7947     3005
+sigma     0.34      0.01     0.32     0.36 1.00     7026     3064
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_bc
-[1] &quot;0.22 [0.17;0.27]&quot;
+[1] &quot;0.22 [0.17;0.26]&quot;
 
 $rmse_bc
 [1] &quot;0.54 [0.51;0.56]&quot;
@@ -2304,55 +2391,60 @@ $r_diff_bc_imputed_rr
 [1] &quot; 0.21 [ 0.14; 0.28]&quot;
 
 $imputed_bc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 54 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 54 rows containing missing values (geom_point).</code></pre>
-<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-5.png" width="624" /></p>
+<pre><code>Warning: Removed 54 rows containing missing values or values outside the scale
+range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 54 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-5.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_bc_imputed
 [1] &quot; 0.61&quot;
 
-$fc_day_model
- Family: gaussian 
-  Links: mu = identity; sigma = identity 
+$fc_day_model</code></pre>
+<pre><code>Warning: There were 1 divergent transitions after warmup. Increasing
+adapt_delta above 0.99 may help. See
+http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup</code></pre>
+<pre><code> Family: gaussian 
+  Links: mu = identity 
 Formula: log(hormone) | cens(hormone_cens) ~ s(fc_day) + (1 | id) + (1 | id:cycle) 
    Data: df (Number of observations: 1091) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sds(sfc_day_1)     0.55      0.30     0.19     1.31 1.00     1729
+sds(sfc_day_1)     0.55      0.30     0.19     1.32 1.00     1929
                Tail_ESS
-sds(sfc_day_1)     2649
+sds(sfc_day_1)     2824
 
-Group-Level Effects: 
+Multilevel Hyperparameters:
 ~id (Number of levels: 42) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.18      0.03     0.12     0.25 1.00     1475
+sd(Intercept)     0.18      0.03     0.12     0.26 1.00     1514
               Tail_ESS
-sd(Intercept)     2005
+sd(Intercept)     1861
 
 ~id:cycle (Number of levels: 88) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-sd(Intercept)     0.16      0.03     0.12     0.22 1.00     1374
+sd(Intercept)     0.16      0.03     0.12     0.22 1.00     1234
               Tail_ESS
-sd(Intercept)     2425
+sd(Intercept)     2104
 
-Population-Level Effects: 
+Regression Coefficients:
           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     1.04      0.04     0.97     1.11 1.00     3242     3016
-sfc_day_1    -0.23      0.93    -2.26     1.57 1.00     4170     2727
+Intercept     1.04      0.04     0.97     1.11 1.00     3229     3008
+sfc_day_1    -0.23      0.90    -2.10     1.60 1.00     3870     2610
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.34      0.01     0.32     0.35 1.00     7479     2920
+sigma     0.34      0.01     0.32     0.35 1.00     5811     2314
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_fc
-[1] &quot;0.22 [0.17;0.26]&quot;
+[1] &quot;0.22 [0.16;0.26]&quot;
 
 $rmse_fc
 [1] &quot;0.53 [0.51;0.56]&quot;
@@ -2385,47 +2477,47 @@ $r_diff_fc_imputed_rr
 [1] &quot; 0.23 [ 0.17; 0.29]&quot;
 
 $imputed_fc_vs_measured_graph</code></pre>
-<pre><code>Warning: Removed 4 rows containing missing values (geom_smooth).</code></pre>
-<pre><code>Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
-<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-6.png" width="624" /></p>
+<pre><code>Warning: Removed 4 rows containing missing values or values outside the scale
+range (`geom_smooth()`).</code></pre>
+<pre><code>Warning: Removed 4 rows containing missing values or values outside the scale
+range (`geom_point()`).</code></pre>
+<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-6.png" alt="" width="624" /></p>
 <pre><code>
 $rmse_fc_imputed
 [1] &quot; 0.59&quot;</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'>%&gt;%</span> <span class='fu'><a href='https://rdrr.io/pkg/tidylog/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span>, <span class='va'>cycle_length</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>df</span> <span class='op'>&lt;-</span> <span class='va'>roney</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='fu'>select</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>cycle</span>, <span class='va'>bc_day</span>, <span class='va'>fc_day</span>, <span class='va'>lh_day</span>, <span class='va'>estradiol</span>, <span class='va'>progesterone</span>, <span class='va'>cycle_length</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>select: dropped 2 variables (estradiol_cens, progesterone_cens)</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>summarise_hormones</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"Roney 2013"</span><span class='op'>)</span>
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'>summarise_hormones</span><span class='op'>(</span>df <span class='op'>=</span> <span class='va'>df</span>, Dataset <span class='op'>=</span> <span class='st'>"Roney 2013"</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>filter: removed 1,276 rows (54%), 1,091 rows remaining</code></pre>
-<pre><code>select: dropped 25 variables (prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, est_estradiol_bc_high, …)</code></pre>
-<pre><code>Joining, by = &quot;bc_day&quot;</code></pre>
-<pre><code>left_join: added one column (prc_stirn_bc)</code></pre>
-<pre><code>           &gt; rows only in x      52</code></pre>
-<pre><code>           &gt; rows only in y  (    9)</code></pre>
-<pre><code>           &gt; matched rows     1,039</code></pre>
-<pre><code>           &gt;                 =======</code></pre>
-<pre><code>           &gt; rows total       1,091</code></pre>
-<pre><code>select: dropped 25 variables (prc_wcx_fc, est_estradiol_fc, est_estradiol_fc_se, est_estradiol_fc_low, est_estradiol_fc_high, …)</code></pre>
-<pre><code>left_join: added one column (prc_stirn_fc)</code></pre>
-<pre><code>           &gt; rows only in x       0</code></pre>
-<pre><code>           &gt; rows only in y  (    6)</code></pre>
-<pre><code>           &gt; matched rows     1,091</code></pre>
-<pre><code>           &gt;                 =======</code></pre>
-<pre><code>           &gt; rows total       1,091</code></pre>
-<pre><code>left_join: added 22 columns (conception_risk_lh, fertile_lh, est_estradiol_lh, est_estradiol_lh_se, est_estradiol_lh_low, …)</code></pre>
-<pre><code>           &gt; rows only in x   1,091</code></pre>
-<pre><code>           &gt; rows only in y  (   31)</code></pre>
-<pre><code>           &gt; matched rows         0</code></pre>
-<pre><code>           &gt;                 =======</code></pre>
-<pre><code>           &gt; rows total       1,091</code></pre>
-<pre><code>group_by: one grouping variable (id)</code></pre>
-<pre><code>filter (grouped): removed 149 rows (14%), 942 rows remaining</code></pre>
-<pre><code>group_by: one grouping variable (id)</code></pre>
-<pre><code>filter (grouped): no rows removed</code></pre>
+<pre><code>filter: removed 1,276 rows (54%), 1,091 rows remaining
+select: dropped 25 variables (prc_wcx_bc, est_estradiol_bc, est_estradiol_bc_se, est_estradiol_bc_low, est_estradiol_bc_high, …)
+Joining with `by = join_by(bc_day)`
+left_join: added one column (prc_stirn_bc)
+           &gt; rows only in df          52
+           &gt; rows only in bc_days (    9)
+           &gt; matched rows          1,039
+           &gt;                      =======
+           &gt; rows total            1,091
+select: dropped 25 variables (prc_wcx_fc, est_estradiol_fc, est_estradiol_fc_se, est_estradiol_fc_low, est_estradiol_fc_high, …)
+left_join: added one column (prc_stirn_fc)
+           &gt; rows only in df           0
+           &gt; rows only in fc_days (    6)
+           &gt; matched rows          1,091
+           &gt;                      =======
+           &gt; rows total            1,091
+left_join: added 22 columns (conception_risk_lh, fertile_lh, est_estradiol_lh, est_estradiol_lh_se, est_estradiol_lh_low, …)
+           &gt; rows only in x        1,091
+           &gt; rows only in lh_days (   31)
+           &gt; matched rows              0
+           &gt;                      =======
+           &gt; rows total            1,091
+group_by: one grouping variable (id)
+filter (grouped): removed 149 rows (14%), 942 rows remaining (removed 10 groups, 32 groups remaining)
+group_by: one grouping variable (id)
+filter (grouped): no rows removed</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
 <pre><code>Warning: Rows containing NAs were excluded from the model.</code></pre>
 <pre><code>$Dataset
@@ -2438,8 +2530,9 @@ $Method
 [1] &quot;Salivary Immunoassay&quot;
 
 $scatterplot</code></pre>
-<pre><code>Warning: Removed 1169 rows containing missing values (geom_point).</code></pre>
-<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-7.png" width="624" /></p>
+<pre><code>Warning: Removed 1169 rows containing missing values or values outside the
+scale range (`geom_point()`).</code></pre>
+<p><img src="1_roney_import_files/figure-html5/unnamed-chunk-3-7.png" alt="" width="624" /></p>
 <pre><code>
 $n_women
 [1] 43
@@ -2479,13 +2572,13 @@ $r_bc_log_ratio
 
 $m_bc_prob_rat
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: prc_stirn_bc ~ log(estradiol) + log(ratio) 
    Data: df (Number of observations: 1039) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Population-Level Effects: 
+Regression Coefficients:
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
 Intercept        0.65      0.03     0.58     0.72 1.00     2793
 logestradiol    -0.11      0.02    -0.14    -0.08 1.00     3057
@@ -2495,7 +2588,7 @@ Intercept        2630
 logestradiol     2600
 logratio         2887
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 sigma     0.19      0.00     0.19     0.20 1.00     3015     2685
 
@@ -2508,31 +2601,31 @@ $r_erat_bc
 
 $m_bc_prob
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: prc_stirn_bc ~ s(log(estradiol), log(progesterone)) 
    Data: df (Number of observations: 1039) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                                     Estimate Est.Error l-95% CI
 sds(slogestradiollogprogesterone_1)     0.11      0.04     0.05
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.21 1.00     1367     2196
+sds(slogestradiollogprogesterone_1)     0.21 1.00     1203     2367
 
-Population-Level Effects: 
+Regression Coefficients:
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.24      0.01     0.23     0.25
-slogestradiollogprogesterone_1     0.05      0.21    -0.38     0.42
-slogestradiollogprogesterone_2    -0.64      0.22    -1.07    -0.23
+slogestradiollogprogesterone_1     0.02      0.20    -0.35     0.44
+slogestradiollogprogesterone_2    -0.64      0.22    -1.08    -0.18
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00     8464     2687
-slogestradiollogprogesterone_1 1.00     2247     2319
-slogestradiollogprogesterone_2 1.00     2954     2638
+Intercept                      1.00     5939     2986
+slogestradiollogprogesterone_1 1.00     2139     2402
+slogestradiollogprogesterone_2 1.00     2439     1924
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.19      0.00     0.18     0.20 1.00     5987     2765
+sigma     0.19      0.00     0.18     0.20 1.00     5161     3009
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2549,13 +2642,13 @@ $r_fc_log_ratio
 
 $m_fc_prob_rat
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: prc_stirn_fc ~ log(estradiol) + log(ratio) 
    Data: df (Number of observations: 1091) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Population-Level Effects: 
+Regression Coefficients:
              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
 Intercept        0.61      0.03     0.54     0.68 1.00     2722
 logestradiol    -0.07      0.02    -0.10    -0.04 1.00     3247
@@ -2565,7 +2658,7 @@ Intercept        2480
 logestradiol     3061
 logratio         2824
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 sigma     0.20      0.00     0.19     0.20 1.00     3317     2340
 
@@ -2578,40 +2671,40 @@ $r_erat_fc
 
 $m_fc_prob
  Family: gaussian 
-  Links: mu = identity; sigma = identity 
+  Links: mu = identity 
 Formula: prc_stirn_fc ~ s(log(estradiol), log(progesterone)) 
    Data: df (Number of observations: 1091) 
-  Draws: 4 chains, each with iter = 1000; warmup = 0; thin = 1;
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
          total post-warmup draws = 4000
 
-Smooth Terms: 
+Smoothing Spline Hyperparameters:
                                     Estimate Est.Error l-95% CI
 sds(slogestradiollogprogesterone_1)     0.10      0.03     0.05
                                     u-95% CI Rhat Bulk_ESS Tail_ESS
-sds(slogestradiollogprogesterone_1)     0.18 1.00     1516     2575
+sds(slogestradiollogprogesterone_1)     0.18 1.00     1726     2628
 
-Population-Level Effects: 
+Regression Coefficients:
                                Estimate Est.Error l-95% CI u-95% CI
 Intercept                          0.25      0.01     0.24     0.26
-slogestradiollogprogesterone_1    -0.58      0.18    -0.94    -0.25
-slogestradiollogprogesterone_2    -0.12      0.23    -0.53     0.34
+slogestradiollogprogesterone_1    -0.58      0.20    -0.97    -0.17
+slogestradiollogprogesterone_2     0.19      0.21    -0.18     0.65
                                Rhat Bulk_ESS Tail_ESS
-Intercept                      1.00    11154     2636
-slogestradiollogprogesterone_1 1.00     3108     2691
-slogestradiollogprogesterone_2 1.00     2278     2654
+Intercept                      1.00     9956     3040
+slogestradiollogprogesterone_1 1.00     3796     3218
+slogestradiollogprogesterone_2 1.00     2372     2385
 
-Family Specific Parameters: 
+Further Distributional Parameters:
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma     0.19      0.00     0.18     0.20 1.00     7980     2819
+sigma     0.19      0.00     0.18     0.20 1.00     7865     2970
 
 Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 
 $r_loo_fc
-[1] &quot;0.35 [0.30;0.40]&quot;</code></pre>
+[1] &quot;0.35 [0.30;0.39]&quot;</code></pre>
 </div>
-<div class="sourceCode" id="cb190"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

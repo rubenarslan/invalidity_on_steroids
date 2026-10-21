@@ -176,6 +176,8 @@ summarise_hormone <- function(df,
   # df$hormone
   # df$hormone_cens
   
+  # fixed seed: refits, posterior predictions and the Bayesian bootstrap in loo_R2 are reproducible
+  set.seed(20221212)
   results <- list()
   results$Dataset <- Dataset
   results$Citation <- Citation
@@ -579,6 +581,7 @@ summarise_hormones <- function(df, Dataset, Method = "Salivary Immunoassay") {
   # df$estradiol
   # df$progesterone
   
+  set.seed(20221212)
   results <- list()
   results$Dataset <- Dataset
   results$Hormone <- "Estradiol & Progesterone"
